@@ -1,49 +1,18 @@
 import React from 'react';
-
 export default function StageTimingTable({ stageTimes }) {
-  if (!stageTimes || Object.keys(stageTimes).length === 0) {
-    return (
-      <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
-        Not enough stage transition data to show timing.
-      </p>
-    );
-  }
-
+  if (!stageTimes || !Object.keys(stageTimes).length) return <p style={{ fontSize:13, color:'#999', fontStyle:'italic' }}>Not enough stage transition data yet.</p>;
   const rows = Object.values(stageTimes);
-
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-        <thead>
-          <tr style={{ borderBottom: '1px solid var(--color-border-tertiary)' }}>
-            {['Transition', 'Median Days', 'Mean Days', 'Sample'].map(h => (
-              <th key={h} style={{
-                textAlign: 'left',
-                padding: '8px 12px',
-                fontSize: 12,
-                fontWeight: 500,
-                color: 'var(--color-text-secondary)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
+    <div style={{ overflowX:'auto' }}>
+      <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+        <thead><tr style={{ borderBottom:'1px solid #F3F4F6' }}>{['Transition','Median','Mean','Sample'].map(h=><th key={h} style={{ textAlign:'left', padding:'7px 10px', fontSize:11, fontWeight:600, color:'#999', textTransform:'uppercase', letterSpacing:'.05em' }}>{h}</th>)}</tr></thead>
         <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} style={{ borderBottom: '1px solid var(--color-border-tertiary)' }}>
-              <td style={{ padding: '10px 12px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                {row.from} → {row.to}
-              </td>
-              <td style={{ padding: '10px 12px', color: row.medianDays > 30 ? '#DC2626' : row.medianDays > 14 ? '#D97706' : '#059669' }}>
-                {row.medianDays}d
-              </td>
-              <td style={{ padding: '10px 12px', color: 'var(--color-text-secondary)' }}>
-                {row.meanDays}d
-              </td>
-              <td style={{ padding: '10px 12px', color: 'var(--color-text-secondary)' }}>
-                {row.sampleSize}
-              </td>
+          {rows.map((r,i)=>(
+            <tr key={i} style={{ borderBottom:'1px solid #F9FAFB' }}>
+              <td style={{ padding:'9px 10px', fontWeight:500, color:'#222' }}>{r.from} → {r.to}</td>
+              <td style={{ padding:'9px 10px', color:r.medianDays>30?'#EF4444':r.medianDays>14?'#F59E0B':'#059669', fontWeight:600 }}>{r.medianDays}d</td>
+              <td style={{ padding:'9px 10px', color:'#999' }}>{r.meanDays}d</td>
+              <td style={{ padding:'9px 10px', color:'#999' }}>{r.sampleSize}</td>
             </tr>
           ))}
         </tbody>

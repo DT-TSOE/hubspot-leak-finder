@@ -1,143 +1,90 @@
-/**
- * Behavioral Analysis Service
- * Compares won vs lost contacts to surface behavioral differences.
- */
-
-const MIN_SAMPLE = 5;
+const MIN_SAMPLE = 3;
 
 function analyzeBySource(contacts, deals) {
-  // Map deal outcomes to contacts
-  const contactOutcomes = {};
-
+  const outcomes = {};
   for (const deal of deals) {
     if (!deal._contactIds) continue;
-    const isWon = deal.properties.hs_is_closed_won === 'true';
-    const isClosed = deal.properties.hs_is_closed === 'true';
+    const isWon = deal.properties.dealstage === 'closedwon';
+    const isClosed = isWon || deal.properties.dealstage === 'closedlost';
     if (!isClosed) continue;
-
     for (const cId of deal._contactIds) {
-      if (!contactOutcomes[cId]) contactOutcomes[cId] = { won: false, lost: false };
-      if (isWon) contactOutcomes[cId].won = true;
-      else contactOutcomes[cId].lost = true;
+      if (!outcomes[cId]) outcomes[cId] = { won: false, lost: false };
+      if (isWon) outcomes[cId].won = true; else outcomes[cId].lost = true;
     }
   }
 
-  // Group by source
   const sourceStats = {};
-
-  for (const contact of contacts) {
-    const outcome = contactOutcomes[contact.id];
-    if (!outcome) continue;
-    const source = contact.properties.hs_analytics_source || 'Unknown';
-
-    if (!sourceStats[source]) {
-      sourceStats[source] = { won: 0, lost: 0, total: 0 };
-    }
+  for (const c of contacts) {
+    const o = outcomes[c.id];
+    if (!o) continue;
+    const source = c.properties.hs_analytics_source || 'Unknown';
+    if (!sourceStats[source]) sourceStats[source] = { won: 0, lost: 0, total: 0 };
     sourceStats[source].total++;
-    if (outcome.won) sourceStats[source].won++;
-    if (outcome.lost && !outcome.won) sourceStats[source].lost++;
+    if (o.won) sourceStats[source].won++;
+    if (o.lost && !o.won) sourceStats[source].lost++;
   }
 
-  // Calculate win rates per source
-  const sourceResults = Object.entries(sourceStats)
-    .filter(([, s]) => s.total >= MIN_SAMPLE)
-    .map(([source, s]) => ({
-      source,
-      won: s.won,
-      lost: s.lost,
-      total: s.total,
-      winRate: Math.round((s.won / s.total) * 1000) / 10
-    }))
-    .sort((a, b) => b.winRate - a.winRate);
-
-  return sourceResults;
+  return Object.entries(sourceStats)
+    .filter(([,s]) => s.total >= MIN_SAMPLE)
+    .map(([source, s]) => ({ source, won: s.won, lost: s.lost, total: s.total, winRate: Math.round((s.won/s.total)*1000)/10 }))
+    .sort((a,b) => b.winRate - a.winRate);
 }
 
 function analyzeActivityLevels(contacts, deals) {
-  // Map outcomes
-  const contactOutcomes = {};
+  const outcomes = {};
   for (const deal of deals) {
     if (!deal._contactIds) continue;
-    const isWon = deal.properties.hs_is_closed_won === 'true';
-    const isClosed = deal.properties.hs_is_closed === 'true';
+    const isWon = deal.properties.dealstage === 'closedwon';
+    const isClosed = isWon || deal.properties.dealstage === 'closedlost';
     if (!isClosed) continue;
     for (const cId of deal._contactIds) {
-      if (!contactOutcomes[cId]) contactOutcomes[cId] = 'lost';
-      if (isWon) contactOutcomes[cId] = 'won';
+      if (!outcomes[cId]) outcomes[cId] = 'lost';
+      if (isWon) outcomes[cId] = 'won';
     }
   }
-
-  const wonTouches = [];
-  const lostTouches = [];
-
-  for (const contact of contacts) {
-    const outcome = contactOutcomes[contact.id];
-    if (!outcome) continue;
-    const touches = parseInt(contact.properties.num_contacted_notes || '0', 10);
-    if (outcome === 'won') wonTouches.push(touches);
-    else lostTouches.push(touches);
+  const wonT = [], lostT = [];
+  for (const c of contacts) {
+    const o = outcomes[c.id];
+    if (!o) continue;
+    const t = parseInt(c.properties.num_contacted_notes || '0', 10);
+    if (o === 'won') wonT.push(t); else lostT.push(t);
   }
-
-  function median(arr) {
-    if (!arr.length) return 0;
-    const s = [...arr].sort((a, b) => a - b);
-    const m = Math.floor(s.length / 2);
-    return s.length % 2 !== 0 ? s[m] : (s[m - 1] + s[m]) / 2;
-  }
-
+  const med = arr => { if (!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2!==0?s[m]:(s[m-1]+s[m])/2; };
   return {
-    wonMedianTouches: wonTouches.length >= MIN_SAMPLE ? Math.round(median(wonTouches) * 10) / 10 : null,
-    lostMedianTouches: lostTouches.length >= MIN_SAMPLE ? Math.round(median(lostTouches) * 10) / 10 : null,
-    wonSampleSize: wonTouches.length,
-    lostSampleSize: lostTouches.length
+    wonMedianTouches: wonT.length >= MIN_SAMPLE ? Math.round(med(wonT)*10)/10 : null,
+    lostMedianTouches: lostT.length >= MIN_SAMPLE ? Math.round(med(lostT)*10)/10 : null,
+    wonSampleSize: wonT.length, lostSampleSize: lostT.length
   };
 }
 
 function analyzeSpeedToLead(contacts, deals) {
-  // Speed to lead: time from createdate to first contact
-  const contactOutcomes = {};
+  const outcomes = {};
   for (const deal of deals) {
     if (!deal._contactIds) continue;
-    const isWon = deal.properties.hs_is_closed_won === 'true';
-    const isClosed = deal.properties.hs_is_closed === 'true';
+    const isWon = deal.properties.dealstage === 'closedwon';
+    const isClosed = isWon || deal.properties.dealstage === 'closedlost';
     if (!isClosed) continue;
     for (const cId of deal._contactIds) {
-      if (!contactOutcomes[cId]) contactOutcomes[cId] = 'lost';
-      if (isWon) contactOutcomes[cId] = 'won';
+      if (!outcomes[cId]) outcomes[cId] = 'lost';
+      if (isWon) outcomes[cId] = 'won';
     }
   }
-
-  const wonSpeeds = [];
-  const lostSpeeds = [];
-
-  for (const contact of contacts) {
-    const outcome = contactOutcomes[contact.id];
-    if (!outcome) continue;
-    const created = new Date(contact.properties.createdate);
-    const lastContacted = contact.properties.notes_last_contacted
-      ? new Date(contact.properties.notes_last_contacted)
-      : null;
-
-    if (!lastContacted || isNaN(created)) continue;
-    const hoursToContact = (lastContacted - created) / (1000 * 60 * 60);
-    if (hoursToContact < 0 || hoursToContact > 30 * 24) continue; // ignore outliers
-
-    if (outcome === 'won') wonSpeeds.push(hoursToContact);
-    else lostSpeeds.push(hoursToContact);
+  const wonS = [], lostS = [];
+  for (const c of contacts) {
+    const o = outcomes[c.id];
+    if (!o) continue;
+    const created = new Date(c.properties.createdate);
+    const lc = c.properties.notes_last_contacted ? new Date(c.properties.notes_last_contacted) : null;
+    if (!lc || isNaN(created)) continue;
+    const hours = (lc - created) / 3600000;
+    if (hours < 0 || hours > 720) continue;
+    if (o === 'won') wonS.push(hours); else lostS.push(hours);
   }
-
-  function median(arr) {
-    if (!arr.length) return null;
-    const s = [...arr].sort((a, b) => a - b);
-    const m = Math.floor(s.length / 2);
-    return s.length % 2 !== 0 ? s[m] : (s[m - 1] + s[m]) / 2;
-  }
-
+  const med = arr => { if (!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2!==0?s[m]:(s[m-1]+s[m])/2; };
   return {
-    wonMedianHours: wonSpeeds.length >= MIN_SAMPLE ? Math.round(median(wonSpeeds) * 10) / 10 : null,
-    lostMedianHours: lostSpeeds.length >= MIN_SAMPLE ? Math.round(median(lostSpeeds) * 10) / 10 : null,
-    wonSampleSize: wonSpeeds.length,
-    lostSampleSize: lostSpeeds.length
+    wonMedianHours: wonS.length >= MIN_SAMPLE ? Math.round(med(wonS)*10)/10 : null,
+    lostMedianHours: lostS.length >= MIN_SAMPLE ? Math.round(med(lostS)*10)/10 : null,
+    wonSampleSize: wonS.length, lostSampleSize: lostS.length
   };
 }
 
