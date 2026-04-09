@@ -43,6 +43,22 @@ class HubSpotService {
       return (r.data.results || []).map(r => r.id);
     } catch { return []; }
   }
+
+  async getBatchDealAssociations(dealIds) {
+    const map = {};
+    for (let i = 0; i < dealIds.length; i += 100) {
+      const batch = dealIds.slice(i, i + 100);
+      try {
+        const r = await this.client.post('/crm/v3/associations/deals/contacts/batch/read', {
+          inputs: batch.map(id => ({ id }))
+        });
+        for (const result of (r.data.results || [])) {
+          map[result.from.id] = (result.to || []).map(t => t.id);
+        }
+      } catch { /* leave missing ones as empty */ }
+    }
+    return map;
+  }
 }
 
 module.exports = HubSpotService;
