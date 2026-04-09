@@ -15,7 +15,14 @@ router.get('/', requireAuth, async (req, res) => {
       const cutoff = Date.now() - parseInt(days)*86400000;
       filtered = contacts.filter(c => new Date(c.properties.createdate).getTime() >= cutoff);
     }
-    const dealsWithContacts = await Promise.all(deals.slice(0,200).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) })));
+    const dealsToProcess = deals.slice(0, 200);
+    const dealsWithContacts = [];
+    for (let i = 0; i < dealsToProcess.length; i += 5) {
+      const batch = dealsToProcess.slice(i, i + 5);
+      const results = await Promise.all(batch.map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) })));
+      dealsWithContacts.push(...results);
+      if (i + 5 < dealsToProcess.length) await new Promise(r => setTimeout(r, 300));
+    }
     res.json({
       funnel: analyzeFunnel(filtered),
       behavioral: { bySource: analyzeBySource(filtered, dealsWithContacts), activityLevels: analyzeActivityLevels(filtered, dealsWithContacts), speedToLead: analyzeSpeedToLead(filtered, dealsWithContacts) },
