@@ -29,10 +29,11 @@ app.use('/api/leads', require('./routes/leads'));
 app.use('/api/revenue', require('./routes/revenue'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/export', require('./routes/export'));
+app.use('/api/alerts', require('./routes/alerts'));
 app.use('/ga4', require('./routes/ga4'));
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', env: isProd ? 'production' : 'development' }));
 app.use((err, req, res, next) => { console.error(err.stack); res.status(500).json({ error: 'Something went wrong.' }); });
 
-app.listen(PORT, () => console.log(`PipeChamp backend running on http://localhost:${PORT} [${isProd?'production':'development'}]`));
+app.listen(PORT, () => console.log(`PipeChamp backend running on http://localhost:${PORT} [${isProd ? 'production' : 'development'}]`));
 module.exports = app;

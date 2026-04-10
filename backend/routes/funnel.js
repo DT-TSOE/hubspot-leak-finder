@@ -15,9 +15,7 @@ router.get('/', requireAuth, async (req, res) => {
       const cutoff = Date.now() - parseInt(days)*86400000;
       filtered = contacts.filter(c => new Date(c.properties.createdate).getTime() >= cutoff);
     }
-    const dealsToProcess = deals.slice(0, 200);
-    const assocMap = await hs.getBatchDealAssociations(dealsToProcess.map(d => d.id));
-    const dealsWithContacts = dealsToProcess.map(d => ({ ...d, _contactIds: assocMap[d.id] || [] }));
+    const dealsWithContacts = await Promise.all(deals.slice(0,200).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) })));
     res.json({
       funnel: analyzeFunnel(filtered),
       behavioral: { bySource: analyzeBySource(filtered, dealsWithContacts), activityLevels: analyzeActivityLevels(filtered, dealsWithContacts), speedToLead: analyzeSpeedToLead(filtered, dealsWithContacts) },
