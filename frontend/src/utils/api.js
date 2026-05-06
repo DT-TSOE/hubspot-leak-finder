@@ -29,4 +29,10 @@ export const api = {
   exportFunnelCSV: () => apiDownload('/api/export/funnel-csv'),
   exportInsightsText: () => apiDownload('/api/export/insights-text'),
   ga4Status: () => apiFetch('/ga4/status'),
+  // v8 reports
+  getGmDashboard: () => apiFetch('/api/reports/gm-dashboard'),
+  getMetricTiles: () => apiFetch('/api/reports/metric-tiles'),
+  getSourceQuality: (property) => apiFetch(`/api/reports/source-quality${property?`?property=${property}`:''}`),
+  getStageAging: () => apiFetch('/api/reports/stage-aging'),
+  getSpeedToLead: () => apiFetch('/api/reports/speed-to-lead'),
 };
