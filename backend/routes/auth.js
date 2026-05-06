@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-const SCOPES = ['crm.objects.contacts.read','crm.objects.deals.read'].join(' ');
+const SCOPES = ['crm.objects.contacts.read','crm.objects.contacts.write','crm.objects.deals.read'].join(' ');
 
 router.get('/connect', (req, res) => {
   const params = new URLSearchParams({ client_id:process.env.HUBSPOT_CLIENT_ID, redirect_uri:process.env.HUBSPOT_REDIRECT_URI, scope:SCOPES, response_type:'code' });
