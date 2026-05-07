@@ -159,7 +159,7 @@ export default function DashboardPage({ onDisconnect }) {
           <PlanBadge onUpgrade={() => setShowUpgrade(true)} />
           <NotificationBell />
 
-          {!ga4Connected && <a href="/ga4/connect" style={{ fontSize:11, color:'#3B82F6', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}><span style={{ width:6, height:6, borderRadius:'50%', background:'#ccc', display:'inline-block' }} />Connect GA4</a>}
+          {!ga4Connected && <a href={`${process.env.REACT_APP_API_URL || ''}/ga4/connect`} style={{ fontSize:11, color:'#3B82F6', textDecoration:'none', display:'flex', alignItems:'center', gap:4 }}><span style={{ width:6, height:6, borderRadius:'50%', background:'#ccc', display:'inline-block' }} />Connect GA4</a>}
           {ga4Connected && <span style={{ fontSize:11, color:'#059669', display:'flex', alignItems:'center', gap:4 }}><span style={{ width:6, height:6, borderRadius:'50%', background:'#059669', display:'inline-block' }} />GA4</span>}
 
           <select value={days ?? ''} onChange={e => setDays(e.target.value ? parseInt(e.target.value) : null)}
