@@ -15,7 +15,7 @@ export default function ConnectPage() {
               <span key={f} style={{ fontSize:11, padding:'4px 12px', borderRadius:20, background:'#F7F8FA', color:'#555', border:'1px solid #E2E5EA' }}>{f}</span>
             ))}
           </div>
-          <a href={`${process.env.REACT_APP_API_URL || ''}/auth/connect`} style={{ display:'block', background:'#FF7A59', color:'#fff', padding:'14px', borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14, marginBottom:10 }}
+          <a href="/auth/connect" style={{ display:'block', background:'#FF7A59', color:'#fff', padding:'14px', borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14, marginBottom:10 }}
             onMouseOver={e=>e.currentTarget.style.opacity='.9'} onMouseOut={e=>e.currentTarget.style.opacity='1'}>
             Connect HubSpot
           </a>

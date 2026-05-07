@@ -1,6 +1,8 @@
 /**
  * PipeChamp Plan Management
- * v8 — added new feature gates
+ * Controls feature access based on user plan
+ * Billing not yet implemented — plan stored in localStorage for now
+ * Replace with real subscription check when Stripe is added
  */
 
 export const PLANS = {
@@ -10,11 +12,6 @@ export const PLANS = {
     features: {
       funnel: true,
       basicMetrics: true,
-      gmDashboard: false,
-      metricTiles: false,
-      sourceQuality: false,
-      stageAging: false,
-      speedToLead: false,
       insights: false,
       insightLimit: 0,
       laJefa: false,
@@ -24,7 +21,6 @@ export const PLANS = {
       exports: false,
       dateFilter: false,
       insightFilter: false,
-      alerts: false,
     }
   },
   starter: {
@@ -33,13 +29,8 @@ export const PLANS = {
     features: {
       funnel: true,
       basicMetrics: true,
-      gmDashboard: true,
-      metricTiles: true,
-      sourceQuality: true,
-      stageAging: true,
-      speedToLead: true,
       insights: true,
-      insightLimit: 10,
+      insightLimit: 5,
       laJefa: false,
       leadRisk: true,
       revenue: false,
@@ -47,7 +38,6 @@ export const PLANS = {
       exports: false,
       dateFilter: true,
       insightFilter: false,
-      alerts: true,
     }
   },
   pro: {
@@ -56,11 +46,6 @@ export const PLANS = {
     features: {
       funnel: true,
       basicMetrics: true,
-      gmDashboard: true,
-      metricTiles: true,
-      sourceQuality: true,
-      stageAging: true,
-      speedToLead: true,
       insights: true,
       insightLimit: Infinity,
       laJefa: true,
@@ -70,7 +55,6 @@ export const PLANS = {
       exports: true,
       dateFilter: true,
       insightFilter: true,
-      alerts: true,
     }
   }
 };
