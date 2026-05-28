@@ -8,10 +8,23 @@ import RevenueTab from '../components/RevenueTab';
 import LaJefaChat from '../components/LaJefaChat';
 import UpgradePrompt from '../components/UpgradePrompt';
 import NotificationBell from '../components/NotificationBell';
+import GmDashboard from '../components/GmDashboard';
+import SourceQuality from '../components/SourceQuality';
+import StageAging from '../components/StageAging';
+import SpeedToLead from '../components/SpeedToLead';
 import { api } from '../utils/api';
 import { canAccess, getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 
-const TABS = ['Funnel', 'Insights', 'Revenue', 'Behavioral', 'Lead Risk'];
+const TABS = [
+  { id: 'home', label: 'Home', feature: 'gmDashboard' },
+  { id: 'funnel', label: 'Funnel', feature: 'funnel' },
+  { id: 'insights', label: 'Insights', feature: 'insights' },
+  { id: 'sources', label: 'Sources', feature: 'sourceQuality' },
+  { id: 'speed', label: 'Speed-to-Lead', feature: 'speedToLead' },
+  { id: 'aging', label: 'Stage Aging', feature: 'stageAging' },
+  { id: 'leads', label: 'Lead Risk', feature: 'leadRisk' },
+  { id: 'revenue', label: 'Revenue', feature: 'revenue' },
+];
 const DATE_OPTS = [
   { label: 'All time', value: null },
   { label: 'Last 30 days', value: 30 },
@@ -92,7 +105,7 @@ function InsightFilters({ activeType, activeSeverity, onTypeChange, onSeverityCh
 }
 
 export default function DashboardPage({ onDisconnect }) {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState('home');
   const [days, setDays] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -137,8 +150,8 @@ export default function DashboardPage({ onDisconnect }) {
   useEffect(() => { loadMain(days); }, [days, loadMain]);
   useEffect(() => { api.ga4Status().then(s => setGa4Connected(s.connected)).catch(() => {}); }, []);
   useEffect(() => {
-    if (tab === 4 && features.leadRisk) loadLeads();
-    if (tab === 2 && features.revenue) loadRevenue();
+    if (tab === 'leads' && features.leadRisk) loadLeads();
+    if (tab === 'revenue' && features.revenue) loadRevenue();
   }, [tab, features, loadLeads, loadRevenue]);
 
   const handleExport = async (type) => {
@@ -249,12 +262,12 @@ export default function DashboardPage({ onDisconnect }) {
 
       {/* Tabs */}
       <div style={{ background:'#fff', borderBottom:'1px solid #E2E5EA', padding:'0 20px', display:'flex' }}>
-        {TABS.map((t, i) => (
-          <button key={t} onClick={() => setTab(i)} style={{ padding:'11px 14px', border:'none', background:'transparent', fontSize:13, cursor:'pointer', color:tab === i ? '#111' : '#888', borderBottom:tab === i ? '2px solid #111' : '2px solid transparent', fontWeight:tab === i ? 600 : 400, marginBottom:-1, display:'flex', alignItems:'center', gap:5 }}>
-            {t}
-            {t === 'Lead Risk' && highRisk > 0 && <span style={{ fontSize:9, background:'#FEE2E2', color:'#DC2626', padding:'1px 5px', borderRadius:8, fontWeight:700 }}>{highRisk}</span>}
-            {t === 'Insights' && allInsights.length > 0 && <span style={{ fontSize:9, background:'#F3F4F6', color:'#555', padding:'1px 5px', borderRadius:8 }}>{allInsights.length}</span>}
-            {!features[t.toLowerCase().replace(' ', '')] && t !== 'Funnel' && t !== 'Insights' && <span style={{ fontSize:9 }}>🔒</span>}
+        {TABS.map((t) => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding:'11px 14px', border:'none', background:'transparent', fontSize:13, cursor:'pointer', color:tab === t.id ? '#111' : '#888', borderBottom:tab === t.id ? '2px solid #111' : '2px solid transparent', fontWeight:tab === t.id ? 600 : 400, marginBottom:-1, display:'flex', alignItems:'center', gap:5 }}>
+            {t.label}
+            {t.id === 'leads' && highRisk > 0 && <span style={{ fontSize:9, background:'#FEE2E2', color:'#DC2626', padding:'1px 5px', borderRadius:8, fontWeight:700 }}>{highRisk}</span>}
+            {t.id === 'insights' && allInsights.length > 0 && <span style={{ fontSize:9, background:'#F3F4F6', color:'#555', padding:'1px 5px', borderRadius:8 }}>{allInsights.length}</span>}
+            {!features[t.feature] && t.id !== 'funnel' && t.id !== 'insights' && t.id !== 'home' && <span style={{ fontSize:9 }}>🔒</span>}
           </button>
         ))}
       </div>
@@ -265,8 +278,11 @@ export default function DashboardPage({ onDisconnect }) {
 
         {!loading && !error && funnelData && (
           <>
+            {/* HOME TAB */}
+            {tab === 'home' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={setTab} />}
+
             {/* FUNNEL TAB */}
-            {tab === 0 && (() => {
+            {tab === 'funnel' && (() => {
               const { funnel } = funnelData;
               const total = funnel.funnelStages[0]?.count || 0;
               const customers = funnel.funnelStages[funnel.funnelStages.length - 1]?.count || 0;
@@ -292,7 +308,7 @@ export default function DashboardPage({ onDisconnect }) {
             })()}
 
             {/* INSIGHTS TAB */}
-            {tab === 1 && (() => {
+            {tab === 'insights' && (() => {
               if (!features.insights) {
                 return (
                   <div style={{ marginTop:20 }}>
@@ -357,30 +373,36 @@ export default function DashboardPage({ onDisconnect }) {
               </>;
             })()}
 
+            {/* SOURCES TAB */}
+            {tab === 'sources' && (
+              features.sourceQuality
+                ? <SourceQuality funnelData={funnelData} />
+                : <div style={{ marginTop:20 }}><UpgradePrompt feature="sourceQuality" requiredPlan="starter">Unlock source quality analysis</UpgradePrompt></div>
+            )}
+
+            {/* SPEED-TO-LEAD TAB */}
+            {tab === 'speed' && (
+              features.speedToLead
+                ? <SpeedToLead funnelData={funnelData} />
+                : <div style={{ marginTop:20 }}><UpgradePrompt feature="speedToLead" requiredPlan="starter">Unlock speed-to-lead analysis</UpgradePrompt></div>
+            )}
+
+            {/* STAGE AGING TAB */}
+            {tab === 'aging' && (
+              features.stageAging
+                ? <StageAging funnelData={funnelData} />
+                : <div style={{ marginTop:20 }}><UpgradePrompt feature="stageAging" requiredPlan="starter">Unlock stage aging analysis</UpgradePrompt></div>
+            )}
+
             {/* REVENUE TAB */}
-            {tab === 2 && (
+            {tab === 'revenue' && (
               features.revenue
                 ? <RevenueTab data={revenueData} loading={revenueLoading} />
                 : <div style={{ marginTop:20 }}><UpgradePrompt feature="revenue" requiredPlan="pro">Unlock revenue & LTV analysis</UpgradePrompt></div>
             )}
 
-            {/* BEHAVIORAL TAB */}
-            {tab === 3 && (() => {
-              if (!features.behavioral) return <div style={{ marginTop:20 }}><UpgradePrompt feature="behavioral" requiredPlan="starter">Unlock behavioral analysis</UpgradePrompt></div>;
-              const { behavioral } = funnelData;
-              return <>
-                <Card title="Win rate by lead source"><SourceTable sources={behavioral.bySource} /></Card>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
-                  <Metric label="Median touches (won)" value={behavioral.activityLevels.wonMedianTouches ?? 'N/A'} color="#059669" />
-                  <Metric label="Median touches (lost)" value={behavioral.activityLevels.lostMedianTouches ?? 'N/A'} color="#EF4444" />
-                  <Metric label="Speed to lead (won)" value={fmtH(behavioral.speedToLead.wonMedianHours)} color="#059669" />
-                  <Metric label="Speed to lead (lost)" value={fmtH(behavioral.speedToLead.lostMedianHours)} color="#EF4444" />
-                </div>
-              </>;
-            })()}
-
             {/* LEAD RISK TAB */}
-            {tab === 4 && (() => {
+            {tab === 'leads' && (() => {
               if (!features.leadRisk) return <div style={{ marginTop:20 }}><UpgradePrompt feature="leadRisk" requiredPlan="starter">Unlock lead risk scoring</UpgradePrompt></div>;
               if (leadsLoading) return <div style={{ textAlign:'center', padding:'3rem', color:'#888', fontSize:13 }}>Scoring leads…</div>;
               const high = leadsData?.leads?.filter(l => l.risk === 'high').length || 0;
