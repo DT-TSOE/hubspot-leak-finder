@@ -13,6 +13,7 @@ import StageAging from '../components/StageAging';
 import SpeedToLead from '../components/SpeedToLead';
 import PipelineReport from '../components/PipelineReport';
 import Integrations from '../components/Integrations';
+import TourOverlay from '../components/TourOverlay';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 
@@ -489,6 +490,8 @@ export default function DashboardPage({ onDisconnect }) {
             <span style={{ fontSize: 10, background: '#4CAF50', color: '#fff', borderRadius: 4, padding: '1px 6px' }}>Pro</span>
           </button>
       )}
+
+      <TourOverlay />
     </div>
   );
 }
