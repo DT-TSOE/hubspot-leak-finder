@@ -11,8 +11,10 @@ import NotificationBell from '../components/NotificationBell';
 import GmDashboard from '../components/GmDashboard';
 import StageAging from '../components/StageAging';
 import SpeedToLead from '../components/SpeedToLead';
+import PipelineReport from '../components/PipelineReport';
+import Integrations from '../components/Integrations';
 import { api } from '../utils/api';
-import { canAccess, getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
+import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 
 const SIDEBAR_W = 220;
 
@@ -25,7 +27,7 @@ const NAV = [
       { id: 'lead-sources',  label: 'Lead Sources',  feature: 'sourceQuality' },
       { id: 'lead-response', label: 'Lead Response', feature: 'speedToLead' },
       { id: 'revenue',       label: 'Revenue',       feature: 'revenue' },
-      { id: 'reports',       label: 'Reports',       feature: null },
+      { id: 'exports',       label: 'Exports',       feature: null },
     ]
   },
   {
@@ -38,12 +40,13 @@ const NAV = [
 
 const ALL_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', standalone: true },
+  { id: 'integrations', label: 'Integrations' },
   ...NAV.filter(n => n.type === 'group').flatMap(g => g.items),
 ];
 
 const DATE_FILTER_SECTIONS = new Set(['pipeline', 'insights']);
 
-function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connected, insightCount, atRiskCount }) {
+function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connected, insightCount, atRiskCount, healthScore }) {
   const colors = { free: { bg: '#F3F4F6', text: '#555' }, starter: { bg: '#EFF6FF', text: '#1D4ED8' }, pro: { bg: '#ECFDF5', text: '#059669' } };
   const pc = colors[plan] || colors.free;
   const features = getPlanFeatures();
@@ -81,8 +84,16 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
-        {/* Dashboard standalone */}
-        <NavItem item={{ id: 'dashboard', label: 'Dashboard' }} />
+        {/* Dashboard — with live health score badge */}
+        <button onClick={() => onSection('dashboard')}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
+          <span style={{ fontSize: 13, color: section === 'dashboard' ? '#111' : '#555', fontWeight: section === 'dashboard' ? 700 : 500 }}>Dashboard</span>
+          {healthScore && (
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 10, background: healthScore.score >= 70 ? '#ECFDF5' : healthScore.score >= 50 ? '#FFFBEB' : '#FEF2F2', color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626' }}>
+              {healthScore.score}
+            </span>
+          )}
+        </button>
 
         <div style={{ margin: '8px 0 4px', borderTop: '1px solid #F3F4F6' }} />
 
@@ -96,16 +107,12 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
 
       {/* Bottom */}
       <div style={{ padding: '12px 14px', borderTop: '1px solid #F3F4F6' }}>
-        {!ga4Connected && (
-          <a href="/ga4/connect" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#3B82F6', textDecoration: 'none', marginBottom: 10 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ccc', display: 'inline-block' }} />Connect GA4
-          </a>
-        )}
-        {ga4Connected && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#059669', marginBottom: 10 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#059669', display: 'inline-block' }} />GA4 Connected
-          </div>
-        )}
+        <button onClick={() => onSection('integrations')}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
+          <span style={{ fontSize: 14 }}>⚡</span>
+          <span style={{ fontSize: 12, color: section === 'integrations' ? '#111' : '#666', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
+          {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', display: 'inline-block', flexShrink: 0 }} />}
+        </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: pc.bg, color: pc.text, textTransform: 'uppercase', letterSpacing: '.05em' }}>
             {PLANS[plan]?.name || 'Free'}
@@ -214,6 +221,7 @@ export default function DashboardPage({ onDisconnect }) {
   const [exporting, setExporting] = useState(null);
   const [ga4Connected, setGa4Connected] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [healthScore, setHealthScore] = useState(null);
   const [insightTypeFilter, setInsightTypeFilter] = useState(null);
   const [insightSevFilter, setInsightSevFilter] = useState(null);
 
@@ -310,7 +318,7 @@ export default function DashboardPage({ onDisconnect }) {
         </div>
       )}
 
-      <Sidebar section={section} onSection={setSection} plan={plan} onUpgrade={() => setShowUpgrade(true)} onDisconnect={handleDisconnect} ga4Connected={ga4Connected} insightCount={allInsights.length} atRiskCount={highRiskLeads} />
+      <Sidebar section={section} onSection={setSection} plan={plan} onUpgrade={() => setShowUpgrade(true)} onDisconnect={handleDisconnect} ga4Connected={ga4Connected} insightCount={allInsights.length} atRiskCount={highRiskLeads} healthScore={healthScore} />
 
       <div style={{ marginLeft: SIDEBAR_W, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <TopBar section={section} days={days} onDays={handleDays} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
@@ -325,7 +333,7 @@ export default function DashboardPage({ onDisconnect }) {
           )}
 
           {/* DASHBOARD */}
-          {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={setSection} />}
+          {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={setSection} onScoreLoad={setHealthScore} />}
 
           {!loading && !error && funnelData && (
 
@@ -394,38 +402,12 @@ export default function DashboardPage({ onDisconnect }) {
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="revenue" requiredPlan="pro">Unlock Revenue & LTV analysis</UpgradePrompt></div>
               )}
 
-              {/* REPORTS */}
-              {section === 'reports' && (
-                <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
-                    {[
-                      { label: 'Funnel CSV', desc: 'Lifecycle stage breakdown with conversion rates', type: 'funnel', icon: '📊' },
-                      { label: 'Lead Scores CSV', desc: 'All leads scored by risk of going cold', type: 'leads', icon: '🎯' },
-                      { label: 'Insights TXT', desc: 'Full pipeline digest for sharing', type: 'digest', icon: '📋' },
-                    ].map(r => (
-                      <div key={r.type} style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '16px' }}>
-                        <div style={{ fontSize: 22, marginBottom: 8 }}>{r.icon}</div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 4 }}>{r.label}</div>
-                        <div style={{ fontSize: 11, color: '#888', marginBottom: 14, lineHeight: 1.5 }}>{r.desc}</div>
-                        <button onClick={() => handleExport(r.type)} disabled={!!exporting}
-                          style={{ width: '100%', padding: '8px', borderRadius: 7, border: '1px solid #E2E5EA', background: features.exports ? '#111' : '#F3F4F6', color: features.exports ? '#fff' : '#aaa', fontSize: 12, fontWeight: 600, cursor: features.exports ? 'pointer' : 'not-allowed' }}>
-                          {exporting === r.type ? 'Exporting…' : features.exports ? '⬇ Download' : '🔒 Pro'}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '20px 24px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-                      <span style={{ fontSize: 22 }}>📬</span>
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>Weekly Pipeline Digest</div>
-                        <div style={{ fontSize: 11, color: '#888' }}>Pipeline health score, top opportunities, and key metrics — delivered every Monday.</div>
-                      </div>
-                      <span style={{ marginLeft: 'auto', fontSize: 11, background: '#FEF3C7', color: '#92400E', padding: '3px 10px', borderRadius: 10, fontWeight: 600, whiteSpace: 'nowrap' }}>Coming Soon</span>
-                    </div>
-                  </div>
-                </div>
+              {/* EXPORTS — scrollable pipeline report + download/email */}
+              {section === 'exports' && (
+                <PipelineReport funnelData={funnelData} insightsData={insightsData} />
               )}
+
+              {/* placeholder — integrations rendered outside funnelData gate below */}
 
               {/* INSIGHTS */}
               {section === 'insights' && (() => {
@@ -481,6 +463,15 @@ export default function DashboardPage({ onDisconnect }) {
           )}
         </main>
       </div>
+
+      {/* INTEGRATIONS — outside funnelData gate so it always renders */}
+      {section === 'integrations' && (
+        <div style={{ marginLeft: SIDEBAR_W, flex: 1 }}>
+          <div style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px' }}>
+            <Integrations />
+          </div>
+        </div>
+      )}
 
       {/* Floating PipeCoach button on all sections except ask-coach */}
       {section !== 'ask-coach' && (

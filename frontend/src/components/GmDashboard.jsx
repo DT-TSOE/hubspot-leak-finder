@@ -47,7 +47,7 @@ function MetricCard({ label, value, sub }) {
   );
 }
 
-export default function GmDashboard() {
+export default function GmDashboard({ onScoreLoad }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,10 +55,18 @@ export default function GmDashboard() {
   useEffect(() => {
     let mounted = true;
     api.getGmDashboard()
-      .then(d => { if (mounted) { setData(d); setLoading(false); } })
+      .then(d => {
+        if (mounted) {
+          setData(d);
+          setLoading(false);
+          if (onScoreLoad && d.pipelineHealthScore?.score != null) {
+            onScoreLoad(d.pipelineHealthScore);
+          }
+        }
+      })
       .catch(e => { if (mounted) { setError(e.message); setLoading(false); } });
     return () => { mounted = false; };
-  }, []);
+  }, [onScoreLoad]);
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Building your pipeline health report…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
