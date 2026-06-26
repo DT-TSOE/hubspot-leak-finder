@@ -121,7 +121,7 @@ router.get('/source-quality', requireAuth, async (req, res) => {
       bestWinRate: byWinRate[0] || null,
       fastestCycle: byCycle[0] || null,
       bestConversion: byConversion[0] || null,
-      worstHighVolume: sources.filter(s => s.contacts >= 10).sort((a, b) => a.conversionRate - b.conversionRate)[0] || null,
+      worstHighVolume: sources.filter(s => s.contacts >= 10 && s.deals >= 2).sort((a, b) => a.winRate - b.winRate)[0] || null,
       worstWinRate: byWinRate[byWinRate.length - 1] || null,
     });
   } catch (err) {

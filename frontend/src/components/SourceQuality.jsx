@@ -67,7 +67,7 @@ export default function SourceQuality() {
           <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 14px' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>High volume, low conversion</div>
             <div style={{ fontSize: 16, fontWeight: 700, color: '#111', marginBottom: 2 }}>{data.worstHighVolume.source}</div>
-            <div style={{ fontSize: 12, color: '#666' }}>{data.worstHighVolume.contacts} contacts, only {data.worstHighVolume.conversionRate}% become customers</div>
+            <div style={{ fontSize: 12, color: '#666' }}>{data.worstHighVolume.contacts} contacts, only {data.worstHighVolume.winRate}% win rate</div>
           </div>
         )}
         {data.fastestCycle && (
