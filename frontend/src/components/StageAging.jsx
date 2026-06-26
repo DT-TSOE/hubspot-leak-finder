@@ -68,7 +68,7 @@ function RevenueAtRiskChart({ stageBreakdown, selectedStage, onSelectStage }) {
         <BarChart data={data} layout="vertical" margin={{ left: 0, right: 20, top: 4, bottom: 4 }} onClick={handleClick} style={{ cursor: 'pointer' }}>
           <XAxis type="number" hide />
           <YAxis type="category" dataKey="name" width={88} tick={{ fontSize: 12, fill: '#555' }} axisLine={false} tickLine={false} />
-          <Tooltip content={<CustomTooltip />} cursor={false} />
+          <Tooltip content={<CustomTooltip />} cursor={false} wrapperStyle={{ pointerEvents: 'none' }} />
           <Bar dataKey="value" radius={[0, 5, 5, 0]} maxBarSize={26}>
             {data.map((d, i) => (
               <Cell

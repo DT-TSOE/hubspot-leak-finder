@@ -49,7 +49,7 @@ function MetricCard({ label, value, sub }) {
   );
 }
 
-export default function GmDashboard({ onScoreLoad }) {
+export default function GmDashboard({ onScoreLoad, onTabChange }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -160,30 +160,43 @@ export default function GmDashboard({ onScoreLoad }) {
         </div>
       )}
 
-      {/* Score breakdown + key metrics side by side */}
+      {/* What to improve + key metrics side by side */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
 
-        {/* Health dimensions visual */}
-        {score?.dimensions && (
-          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 12 }}>Score Breakdown</div>
-            {Object.entries(score.dimensions).map(([key, dim]) => {
-              const labels = { conversion: 'Conversion', speed: 'Speed to Lead', activity: 'Activity', winRate: 'Win Rate', flow: 'Pipeline Flow' };
-              const color = dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444';
-              return (
-                <div key={key} style={{ marginBottom: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 12, color: '#555' }}>{labels[key] || key}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color }}>{dim.score}</span>
+        {/* Weakest areas in plain English */}
+        {score?.dimensions && (() => {
+          const DIM_LABELS = {
+            conversion: { label: 'Lead Conversion', desc: 'How many leads make it through each stage of your funnel' },
+            speed:      { label: 'Response Time',   desc: 'How fast your team contacts new leads after they come in' },
+            activity:   { label: 'Outreach Activity', desc: 'How many active contacts have actually been worked vs sitting untouched' },
+            winRate:    { label: 'Deal Win Rate',   desc: 'Percentage of deals you\'re closing vs losing' },
+            flow:       { label: 'Pipeline Flow',   desc: 'How smoothly deals move through stages without getting stuck' },
+          };
+          const sorted = Object.entries(score.dimensions).sort(([,a],[,b]) => a.score - b.score);
+          const weakest = sorted.slice(0, 2);
+          const hasIssues = weakest.some(([,d]) => d.score < 70);
+          return (
+            <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 12 }}>
+                {hasIssues ? 'Where to focus' : 'All areas healthy'}
+              </div>
+              {weakest.map(([key, dim]) => {
+                const info = DIM_LABELS[key] || { label: key, desc: '' };
+                const color = dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444';
+                const status = dim.score >= 70 ? '✓ Good' : dim.score >= 50 ? '⚠ Needs work' : '✗ Critical';
+                return (
+                  <div key={key} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{info.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color, background: `${color}15`, padding: '2px 8px', borderRadius: 8 }}>{status}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: '#888', lineHeight: 1.5 }}>{dim.detail || info.desc}</div>
                   </div>
-                  <div style={{ height: 6, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${dim.score}%`, background: color, borderRadius: 3, transition: 'width .8s ease' }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Key metrics */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignContent: 'start' }}>
@@ -197,30 +210,34 @@ export default function GmDashboard({ onScoreLoad }) {
       {(data.uncontactedCount > 0 || data.stuckCount > 0) && (
         <div style={{ display: 'grid', gridTemplateColumns: data.uncontactedCount > 0 && data.stuckCount > 0 ? '1fr 1fr' : '1fr', gap: 10 }}>
           {data.uncontactedCount > 0 && (
-            <div style={{ background: '#fff', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={() => onTabChange?.('lead-response')}
+              style={{ background: '#fff', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', cursor: 'pointer', textAlign: 'left' }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
                 <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
                   onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🚨'; }} />
               </div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Uncontacted leads</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} waiting</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Respond within 1h — closes 7× better</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} new leads, no outreach yet</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Responding within 1 hour closes 7× better — tap to see who</div>
               </div>
-            </div>
+              <span style={{ fontSize: 16, color: '#DC2626' }}>→</span>
+            </button>
           )}
           {data.stuckCount > 0 && (
-            <div style={{ background: '#fff', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={() => onTabChange?.('at-risk')}
+              style={{ background: '#fff', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', cursor: 'pointer', textAlign: 'left' }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
                 <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
                   onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='⚠️'; }} />
               </div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Stuck records</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.stuckCount} past threshold</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Move them forward or close as lost</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.stuckCount} contacts & deals haven't moved</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>They've been in the same stage too long — tap to see who</div>
               </div>
-            </div>
+              <span style={{ fontSize: 16, color: '#D97706' }}>→</span>
+            </button>
           )}
         </div>
       )}
