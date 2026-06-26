@@ -78,7 +78,7 @@ function calculatePipelineHealthScore(contacts, deals) {
 
 function countStuckRecords(contacts, deals) {
   const now = Date.now();
-  const thresholds = { lead: 1, marketingqualifiedlead: 3, salesqualifiedlead: 7, opportunity: 14 };
+  const thresholds = { lead: 7, marketingqualifiedlead: 14, salesqualifiedlead: 14, opportunity: 21 };
   const stageProps = {
     lead: 'hs_lifecyclestage_lead_date',
     marketingqualifiedlead: 'hs_lifecyclestage_marketingqualifiedlead_date',
@@ -101,7 +101,8 @@ function countStuckRecords(contacts, deals) {
 
 function findStuckRecords(contacts, deals) {
   const now = Date.now();
-  const thresholds = { lead: 1, marketingqualifiedlead: 3, salesqualifiedlead: 7, opportunity: 14 };
+  // Thresholds in days — realistic for a small business (not a high-velocity SDR team)
+  const thresholds = { lead: 7, marketingqualifiedlead: 14, salesqualifiedlead: 14, opportunity: 21 };
   const stageProps = {
     lead: 'hs_lifecyclestage_lead_date',
     marketingqualifiedlead: 'hs_lifecyclestage_marketingqualifiedlead_date',
@@ -149,9 +150,9 @@ function findStuckRecords(contacts, deals) {
     if (['closedwon', 'closedlost'].includes(stage)) continue;
     const created = new Date(d.properties.createdate).getTime();
     const daysOpen = Math.floor((now - created) / 86400000);
-    if (daysOpen < 14) continue;
+    if (daysOpen < 21) continue;
     const amount = parseFloat(d.properties.amount || '0');
-    const urgency = daysOpen > 60 ? 'critical' : daysOpen > 30 ? 'high' : 'medium';
+    const urgency = daysOpen > 90 ? 'critical' : daysOpen > 45 ? 'high' : 'medium';
     stuck.push({
       id: d.id,
       type: 'deal',

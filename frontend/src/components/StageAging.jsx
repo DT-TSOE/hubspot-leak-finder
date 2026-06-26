@@ -9,6 +9,29 @@ const URGENCY = {
 
 const fmt = n => n != null ? '$' + Math.round(n).toLocaleString() : '—';
 
+const STAGE_LABELS = {
+  // Lifecycle stages
+  subscriber: 'Subscriber', lead: 'Lead', marketingqualifiedlead: 'MQL',
+  salesqualifiedlead: 'SQL', opportunity: 'Opportunity', customer: 'Customer',
+  evangelist: 'Evangelist', other: 'Other',
+  // Default HubSpot deal stages
+  appointmentscheduled: 'Appointment Scheduled', qualifiedtobuy: 'Qualified to Buy',
+  presentationscheduled: 'Presentation Scheduled', decisionmakerboughtin: 'Decision Maker Bought-In',
+  contractsent: 'Contract Sent', closedwon: 'Closed Won', closedlost: 'Closed Lost',
+};
+
+function fmtStage(stage) {
+  if (!stage) return 'Unknown';
+  const key = stage.toLowerCase().replace(/[\s_-]+/g, '');
+  if (STAGE_LABELS[key]) return STAGE_LABELS[key];
+  // camelCase → words, then title-case
+  return stage
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
+    .trim();
+}
+
 export default function StageAging() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,7 +86,7 @@ export default function StageAging() {
           <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Stuck by stage</div>
           {data.stageBreakdown.map(s => (
             <div key={s.stage} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom: '1px solid #F9FAFB' }}>
-              <span style={{ fontSize:13, color:'#111', fontWeight:500 }}>{s.stage}</span>
+              <span style={{ fontSize:13, color:'#111', fontWeight:500 }}>{fmtStage(s.stage)}</span>
               <div style={{ display:'flex', alignItems:'center', gap:14 }}>
                 <span style={{ fontSize:12, color:'#666' }}>{s.count} stuck</span>
                 <span style={{ fontSize:12, color:'#999' }}>·</span>
@@ -95,7 +118,7 @@ export default function StageAging() {
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>{r.name}</div>
                 <div style={{ fontSize:11, color:'#666' }}>
-                  {r.stage} · {r.daysInStage} days in stage ({r.overFactor}× threshold)
+                  {fmtStage(r.stage)} · {r.daysInStage}d in stage · target {r.threshold}d
                   {r.revenueAtRisk && ` · ${fmt(r.revenueAtRisk)} at risk`}
                 </div>
                 <div style={{ fontSize:11, color:u.text, marginTop:3 }}>{r.action}</div>

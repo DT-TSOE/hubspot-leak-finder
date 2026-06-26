@@ -86,12 +86,19 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
       <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
         {/* Dashboard — with live health score badge */}
         <button onClick={() => onSection('dashboard')}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
-          <span style={{ fontSize: 13, color: section === 'dashboard' ? '#111' : '#555', fontWeight: section === 'dashboard' ? 700 : 500 }}>Dashboard</span>
-          {healthScore && (
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 10, background: healthScore.score >= 70 ? '#ECFDF5' : healthScore.score >= 50 ? '#FFFBEB' : '#FEF2F2', color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626' }}>
-              {healthScore.score}
-            </span>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
+          <span style={{ fontSize: 14, color: section === 'dashboard' ? '#111' : '#333', fontWeight: 700 }}>Dashboard</span>
+          {healthScore ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <span style={{ fontSize: 16, fontWeight: 800, lineHeight: 1, color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626' }}>
+                {healthScore.score}
+              </span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626', letterSpacing: '.03em' }}>
+                Grade {healthScore.grade}
+              </span>
+            </div>
+          ) : (
+            <span style={{ width: 28, height: 28, borderRadius: 6, background: '#F3F4F6' }} />
           )}
         </button>
 
