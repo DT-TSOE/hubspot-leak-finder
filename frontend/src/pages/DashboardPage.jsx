@@ -33,7 +33,7 @@ const NAV = [
   {
     type: 'group', label: 'Playbook', items: [
       { id: 'insights',   label: 'Insights',   feature: 'insights', dateFilter: true },
-      { id: 'ask-coach',  label: 'Ask Coach',  feature: 'pipeCoach' },
+      { id: 'ask-coach',  label: 'Ask PipeCoach',  feature: 'pipeCoach' },
     ]
   },
 ];
