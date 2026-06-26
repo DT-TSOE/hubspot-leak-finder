@@ -1,7 +1,7 @@
 /**
  * Activity Analysis Service
  * Fetches calls, emails, meetings, notes, and deal loss reasons
- * to give La Jefa full context on what's happening in the pipeline
+ * to give PipeCoach full context on what's happening in the pipeline
  */
 
 const axios = require('axios');

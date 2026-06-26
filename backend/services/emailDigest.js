@@ -70,10 +70,10 @@ function buildEmailHTML(digest, appUrl = 'https://hubspot-leak-finder.vercel.app
         <div style="font-size:18px;font-weight:700;color:#111;margin-bottom:4px;letter-spacing:-.3px;">
           ${digest.urgent.length > 0 ? `${digest.urgent.length} item${digest.urgent.length > 1 ? 's' : ''} need immediate attention` : `${digest.warnings.length} item${digest.warnings.length > 1 ? 's' : ''} to watch today`}
         </div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px;">La Jefa has been watching your pipeline overnight.</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px;">PipeCoach has been watching your pipeline overnight.</div>
       ` : `
         <div style="font-size:18px;font-weight:700;color:#111;margin-bottom:4px;">Good morning 👋</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px;">La Jefa checked your pipeline overnight.</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px;">PipeCoach checked your pipeline overnight.</div>
       `}
 
       ${healthyHTML}
@@ -86,7 +86,7 @@ function buildEmailHTML(digest, appUrl = 'https://hubspot-leak-finder.vercel.app
           Open PipeChamp →
         </a>
         <div style="margin-top:10px;font-size:11px;color:#aaa;">
-          Ask La Jefa what to do about any of these alerts.
+          Ask PipeCoach what to do about any of these alerts.
         </div>
       </div>
     </div>
