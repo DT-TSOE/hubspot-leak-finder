@@ -26,6 +26,8 @@ router.get('/gm-dashboard', requireAuth, async (req, res) => {
     const stuckRecords = health.findStuckRecords(contacts, deals);
     const uncontacted = health.findUncontactedLeads(contacts);
     const fixThisFirst = health.buildFixThisFirst(contacts, deals, healthScore);
+    const topOpportunities = health.buildTopOpportunities(contacts, deals, healthScore, uncontacted, stuckRecords, biggestLeak);
+    const totalRevenueAtRisk = stuckRecords.reduce((s, r) => s + (r.revenueAtRisk || 0), 0);
 
     const sourceQuality = calc.calculateSourceQuality(contacts, deals);
     const worstSource = sourceQuality.length > 0
@@ -34,6 +36,7 @@ router.get('/gm-dashboard', requireAuth, async (req, res) => {
 
     res.json({
       pipelineHealthScore: healthScore,
+      totalRevenueAtRisk: Math.round(totalRevenueAtRisk),
       metricCards: [
         { id: 'health', label: 'Pipeline Health', value: healthScore.score !== null ? `${healthScore.score}/100` : 'N/A', sub: healthScore.grade ? `Grade ${healthScore.grade}` : null, trend: null },
         { id: 'biggest_leak', label: 'Biggest Leak', value: biggestLeak ? `${biggestLeak.from}→${biggestLeak.to}` : 'N/A', sub: biggestLeak ? `${biggestLeak.dropoffPct}% drop-off` : null },
@@ -48,6 +51,7 @@ router.get('/gm-dashboard', requireAuth, async (req, res) => {
       uncontactedCount: uncontacted.length,
       stuckCount: stuckRecords.length,
       fixThisFirst,
+      topOpportunities,
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {

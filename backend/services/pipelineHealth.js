@@ -285,9 +285,82 @@ function buildFixThisFirst(contacts, deals, healthScore) {
   return fixes[dim] || null;
 }
 
+function buildTopOpportunities(contacts, deals, healthScore, uncontacted, stuckRecords, biggestLeak) {
+  const items = [];
+  const fmt$ = n => '$' + Math.round(n).toLocaleString();
+
+  // 1. Uncontacted leads — most time-sensitive
+  if (uncontacted.length > 0) {
+    const critical = uncontacted.filter(u => u.urgency === 'critical').length;
+    items.push({
+      urgency: critical > 0 ? 'critical' : 'high',
+      title: `${uncontacted.length} lead${uncontacted.length !== 1 ? 's' : ''} haven't been contacted`,
+      action: critical > 0 ? `${critical} have been waiting over 24 hours. Responding within 1 hour closes 7× better.` : 'Follow up before these leads go cold.',
+      metric: `${uncontacted.length} waiting`,
+      type: 'uncontacted',
+      coachMessage: `I have ${uncontacted.length} uncontacted leads (${critical} over 24 hours old). What's the fastest way to reach out and track this in HubSpot?`,
+    });
+  }
+
+  // 2. Stuck deals with revenue at risk
+  const stuckDeals = stuckRecords.filter(r => r.type === 'deal' && r.revenueAtRisk > 0);
+  const totalDealRisk = stuckDeals.reduce((s, d) => s + (d.revenueAtRisk || 0), 0);
+  if (stuckDeals.length > 0 && totalDealRisk > 0) {
+    items.push({
+      urgency: stuckDeals.some(d => d.urgency === 'critical') ? 'critical' : 'high',
+      title: `${fmt$(totalDealRisk)} in deals hasn't moved in weeks`,
+      action: `${stuckDeals.length} open deal${stuckDeals.length !== 1 ? 's' : ''} past their expected close stage. Push them forward or close as lost.`,
+      metric: `${fmt$(totalDealRisk)} at risk`,
+      type: 'stuck_deals',
+      coachMessage: `I have ${stuckDeals.length} stalled deals worth ${fmt$(totalDealRisk)}. What's the best approach to re-engage these or close them out in HubSpot?`,
+    });
+  }
+
+  // 3. Biggest funnel leak
+  if (biggestLeak && biggestLeak.dropoffPct > 30) {
+    items.push({
+      urgency: biggestLeak.dropoffPct > 55 ? 'high' : 'medium',
+      title: `${biggestLeak.dropoffPct}% drop-off from ${biggestLeak.from} → ${biggestLeak.to}`,
+      action: 'This is your biggest conversion gap. Fixing it has the highest revenue impact of anything on this list.',
+      metric: `${biggestLeak.dropoffPct}% drop-off`,
+      type: 'funnel',
+      coachMessage: `My biggest funnel leak is ${biggestLeak.dropoffPct}% drop-off from ${biggestLeak.from} to ${biggestLeak.to}. What specifically should I do to improve this conversion in HubSpot?`,
+    });
+  }
+
+  // 4. Speed to lead
+  const speedDim = healthScore?.dimensions?.speed;
+  if (speedDim && speedDim.score < 60 && items.length < 4) {
+    items.push({
+      urgency: speedDim.score < 30 ? 'high' : 'medium',
+      title: 'Response time is too slow — leads are going cold',
+      action: speedDim.detail || 'Set up automated task assignment so every new lead gets a response within 1 hour.',
+      metric: `Speed score: ${speedDim.score}/100`,
+      type: 'speed',
+      coachMessage: `My speed-to-lead score is ${speedDim.score}/100. ${speedDim.detail || ''} How do I automate faster responses in HubSpot?`,
+    });
+  }
+
+  // 5. Activity gap
+  const activityDim = healthScore?.dimensions?.activity;
+  if (activityDim && activityDim.score < 60 && items.length < 5) {
+    items.push({
+      urgency: activityDim.score < 30 ? 'high' : 'medium',
+      title: 'Too many contacts have no activity logged',
+      action: activityDim.detail || 'Create a "No-touch leads" saved view and assign a daily owner to clear it.',
+      metric: `Activity score: ${activityDim.score}/100`,
+      type: 'activity',
+      coachMessage: `My activity score is ${activityDim.score}/100. ${activityDim.detail || ''} What's the fastest way to fix this in HubSpot?`,
+    });
+  }
+
+  return items.slice(0, 5);
+}
+
 module.exports = {
   calculatePipelineHealthScore,
   findStuckRecords,
   findUncontactedLeads,
   buildFixThisFirst,
+  buildTopOpportunities,
 };
