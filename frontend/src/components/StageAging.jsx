@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 
 const URGENCY = {
@@ -7,16 +8,15 @@ const URGENCY = {
   medium: { bg:'#FFFBEB', border:'#FDE68A', text:'#92400E', label:'Medium' },
 };
 
-const fmt = n => n != null ? '$' + Math.round(n).toLocaleString() : '—';
+const fmt = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
+const fmtK = n => n >= 1000 ? `$${(n/1000).toFixed(0)}k` : `$${n}`;
 
 const STAGE_LABELS = {
-  // Lifecycle stages
   subscriber: 'Subscriber', lead: 'Lead', marketingqualifiedlead: 'MQL',
   salesqualifiedlead: 'SQL', opportunity: 'Opportunity', customer: 'Customer',
   evangelist: 'Evangelist', other: 'Other',
-  // Default HubSpot deal stages
-  appointmentscheduled: 'Appointment Scheduled', qualifiedtobuy: 'Qualified to Buy',
-  presentationscheduled: 'Presentation Scheduled', decisionmakerboughtin: 'Decision Maker Bought-In',
+  appointmentscheduled: 'Appt Scheduled', qualifiedtobuy: 'Qualified to Buy',
+  presentationscheduled: 'Presentation', decisionmakerboughtin: 'Decision Maker',
   contractsent: 'Contract Sent', closedwon: 'Closed Won', closedlost: 'Closed Lost',
 };
 
@@ -24,12 +24,49 @@ function fmtStage(stage) {
   if (!stage) return 'Unknown';
   const key = stage.toLowerCase().replace(/[\s_-]+/g, '');
   if (STAGE_LABELS[key]) return STAGE_LABELS[key];
-  // camelCase → words, then title-case
-  return stage
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase())
-    .trim();
+  return stage.replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim();
+}
+
+const BAR_COLORS = ['#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16'];
+
+function RevenueAtRiskChart({ stageBreakdown }) {
+  const data = stageBreakdown
+    .filter(s => s.revenueAtRisk > 0)
+    .sort((a, b) => b.revenueAtRisk - a.revenueAtRisk)
+    .map(s => ({ name: fmtStage(s.stage), value: s.revenueAtRisk, count: s.count }));
+
+  if (!data.length) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#aaa', fontSize: 12 }}>
+        <div style={{ fontSize: 24, marginBottom: 8 }}>💚</div>
+        No revenue at risk by stage
+      </div>
+    );
+  }
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+        <div style={{ fontWeight: 700, color: '#111', marginBottom: 2 }}>{payload[0].payload.name}</div>
+        <div style={{ color: '#DC2626', fontWeight: 700 }}>${payload[0].value.toLocaleString()} at risk</div>
+        <div style={{ color: '#888' }}>{payload[0].payload.count} records stuck</div>
+      </div>
+    );
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={data.length * 44 + 20}>
+      <BarChart data={data} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+        <XAxis type="number" hide tickFormatter={fmtK} />
+        <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 12, fill: '#555' }} axisLine={false} tickLine={false} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F7F8FA' }} />
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={28}>
+          {data.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
 }
 
 export default function StageAging() {
@@ -74,27 +111,41 @@ export default function StageAging() {
           <div style={{ fontSize:10, color:'#D97706', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>High</div>
           <div style={{ fontSize:22, fontWeight:700, color:'#D97706' }}>{data.high}</div>
         </div>
-        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Revenue at Risk</div>
-          <div style={{ fontSize:22, fontWeight:700, color:'#111' }}>{fmt(data.totalRevenueAtRisk)}</div>
+        <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'12px 14px' }}>
+          <div style={{ fontSize:10, color:'#DC2626', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Revenue at Risk</div>
+          <div style={{ fontSize:22, fontWeight:700, color:'#DC2626' }}>{fmt(data.totalRevenueAtRisk)}</div>
         </div>
       </div>
 
-      {/* Stage breakdown */}
+      {/* Stage breakdown table + Revenue at Risk chart — side by side */}
       {data.stageBreakdown?.length > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Stuck by stage</div>
-          {data.stageBreakdown.map(s => (
-            <div key={s.stage} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom: '1px solid #F9FAFB' }}>
-              <span style={{ fontSize:13, color:'#111', fontWeight:500 }}>{fmtStage(s.stage)}</span>
-              <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-                <span style={{ fontSize:12, color:'#666' }}>{s.count} stuck</span>
-                <span style={{ fontSize:12, color:'#999' }}>·</span>
-                <span style={{ fontSize:12, color:'#666' }}>{s.avgDays}d avg</span>
-                {s.revenueAtRisk > 0 && <><span style={{ fontSize:12, color:'#999' }}>·</span><span style={{ fontSize:12, color:'#DC2626', fontWeight:600 }}>{fmt(s.revenueAtRisk)}</span></>}
-              </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '55% 1fr', gap: 12, marginBottom: 12 }}>
+
+          {/* Left: Stuck by stage table */}
+          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Stuck by stage</div>
+            {/* Table header */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '0 0 8px', borderBottom: '1px solid #F3F4F6', marginBottom: 4 }}>
+              {['Stage', 'Records', 'Avg Days', 'Revenue at Risk'].map(h => (
+                <span key={h} style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: h === 'Stage' ? 'left' : 'right' }}>{h}</span>
+              ))}
             </div>
-          ))}
+            {/* Rows */}
+            {data.stageBreakdown.map((s, i) => (
+              <div key={s.stage} style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '8px 0', borderBottom: i < data.stageBreakdown.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, color: '#111', fontWeight: 500 }}>{fmtStage(s.stage)}</span>
+                <span style={{ fontSize: 13, color: '#333', textAlign: 'right', fontWeight: 500 }}>{s.count}</span>
+                <span style={{ fontSize: 13, color: s.avgDays > 30 ? '#F59E0B' : '#666', textAlign: 'right', fontWeight: s.avgDays > 30 ? 600 : 400 }}>{s.avgDays}d</span>
+                <span style={{ fontSize: 13, color: s.revenueAtRisk > 0 ? '#DC2626' : '#999', textAlign: 'right', fontWeight: s.revenueAtRisk > 0 ? 700 : 400 }}>{fmt(s.revenueAtRisk)}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Right: Revenue at Risk chart */}
+          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Revenue at risk by stage</div>
+            <RevenueAtRiskChart stageBreakdown={data.stageBreakdown} />
+          </div>
         </div>
       )}
 
@@ -108,23 +159,29 @@ export default function StageAging() {
         ))}
       </div>
 
-      {/* Stuck records table */}
+      {/* Stuck records list */}
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, overflow:'hidden' }}>
+        {/* List header */}
+        <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr auto', gap: 12, padding: '8px 14px', background: '#F7F8FA', borderBottom: '1px solid #F3F4F6' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Priority</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Contact / Deal</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Action</span>
+        </div>
         {filtered.slice(0, 50).map((r, i) => {
           const u = URGENCY[r.urgency] || URGENCY.medium;
           return (
-            <div key={r.id} style={{ display:'flex', gap:12, padding:'12px 14px', borderBottom: i < filtered.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems:'center' }}>
-              <span style={{ fontSize:9, fontWeight:700, padding:'2px 7px', borderRadius:10, background:u.bg, color:u.text, border:`1px solid ${u.border}`, textTransform:'uppercase', letterSpacing:'.04em', flexShrink:0, minWidth:60, textAlign:'center' }}>{u.label}</span>
+            <div key={r.id} style={{ display:'flex', gap:12, padding:'12px 14px', borderBottom: i < Math.min(filtered.length, 50) - 1 ? '1px solid #F9FAFB' : 'none', alignItems:'flex-start' }}>
+              <span style={{ fontSize:9, fontWeight:700, padding:'3px 7px', borderRadius:10, background:u.bg, color:u.text, border:`1px solid ${u.border}`, textTransform:'uppercase', letterSpacing:'.04em', flexShrink:0, minWidth:60, textAlign:'center', marginTop:2 }}>{u.label}</span>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>{r.name}</div>
                 <div style={{ fontSize:11, color:'#666' }}>
                   {fmtStage(r.stage)} · {r.daysInStage}d in stage · target {r.threshold}d
-                  {r.revenueAtRisk && ` · ${fmt(r.revenueAtRisk)} at risk`}
+                  {r.revenueAtRisk ? <span style={{ color:'#DC2626', fontWeight:600 }}> · {fmt(r.revenueAtRisk)} at risk</span> : null}
                 </div>
-                <div style={{ fontSize:11, color:u.text, marginTop:3 }}>{r.action}</div>
+                <div style={{ fontSize:11, color:u.text, marginTop:3, lineHeight:1.5 }}>{r.action}</div>
               </div>
               <a href={r.hubspotUrl} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0 }}>
+                style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap', marginTop:2 }}>
                 Open in HubSpot →
               </a>
             </div>
@@ -133,6 +190,11 @@ export default function StageAging() {
         {filtered.length > 50 && (
           <div style={{ padding:'10px 14px', textAlign:'center', fontSize:11, color:'#999', borderTop:'1px solid #F3F4F6' }}>
             Showing 50 of {filtered.length} records
+          </div>
+        )}
+        {filtered.length === 0 && (
+          <div style={{ padding: '24px', textAlign: 'center', fontSize: 13, color: '#888' }}>
+            No {filter} records found.
           </div>
         )}
       </div>
