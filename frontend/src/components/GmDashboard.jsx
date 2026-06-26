@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 
+const fmtSource = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
+
 const URGENCY_COLORS = {
   critical: { bg: '#FEF2F2', border: '#FECACA', text: '#DC2626', dot: '#EF4444' },
   high: { bg: '#FEF3C7', border: '#FDE68A', text: '#D97706', dot: '#F59E0B' },
@@ -143,7 +145,7 @@ export default function GmDashboard({ onScoreLoad }) {
       {/* Metric cards grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
         {data.metricCards.map(card => (
-          <MetricCard key={card.id} label={card.label} value={card.value} sub={card.sub} />
+          <MetricCard key={card.id} label={card.label} value={['top_revenue_source','worst_source'].includes(card.id) ? fmtSource(card.value) : card.value} sub={card.sub} />
         ))}
       </div>
 

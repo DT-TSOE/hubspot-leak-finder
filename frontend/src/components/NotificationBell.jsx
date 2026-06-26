@@ -125,7 +125,7 @@ export default function NotificationBell() {
               <div style={{ padding:'24px 16px', textAlign:'center' }}>
                 <div style={{ fontSize:24, marginBottom:8 }}>✅</div>
                 <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:4 }}>Pipeline looks healthy</div>
-                <div style={{ fontSize:12, color:'#888' }}>No urgent issues right now. La Jefa is watching.</div>
+                <div style={{ fontSize:12, color:'#888' }}>No urgent issues right now. PipeCoach is watching.</div>
               </div>
             )}
 

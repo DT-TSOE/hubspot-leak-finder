@@ -6,6 +6,9 @@
  * - Filterable by type and severity
  */
 
+const IRREGULAR_PLURALS = { 'MQL': 'MQLs', 'SQL': 'SQLs', 'Opportunity': 'Opportunities', 'Customer': 'Customers', 'Lead': 'Leads' };
+const plural = w => IRREGULAR_PLURALS[w] || (w.endsWith('s') ? w : `${w}s`);
+
 const MIN_SAMPLE = 3;
 
 function generateInsights(funnelData, sourceData, activityData, speedData, ltvData, activityComparison) {
@@ -24,7 +27,7 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           subtype: 'conversion',
           severity,
           priority: severity === 'high' ? 1 : severity === 'medium' ? 2 : 3,
-          title: `${stage.dropOffRate}% of ${prev.label}s never become ${stage.label}s`,
+          title: `${stage.dropOffRate}% of ${plural(prev.label)} never become ${plural(stage.label)}`,
           dataPoint: `${stage.dropOff.toLocaleString()} contacts drop off here. Only ${stage.conversionRate}% convert — your ${prev.label}→${stage.label} transition is bleeding revenue.`,
           action: getFunnelAction(stage.stage, prev.label, stage.label, stage.conversionRate),
           metric: { label: 'Drop-off Rate', value: `${stage.dropOffRate}%` },

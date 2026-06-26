@@ -3,6 +3,7 @@ import { api } from '../utils/api';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
 const fmtPct = n => n != null ? `${n}%` : '—';
+const fmtSource = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
 
 function ReportSection({ title, children }) {
   return (
@@ -193,8 +194,8 @@ export default function PipelineReport({ funnelData, insightsData }) {
             <MetricRow items={[
               { label: 'Total Contacts', value: funnelData?.summary?.totalContacts?.toLocaleString() || '—' },
               { label: 'Total Deals', value: funnelData?.summary?.totalDeals?.toLocaleString() || '—' },
-              { label: 'Top Revenue Source', value: getMetric('top_revenue_source')?.value || '—', color: '#059669' },
-              { label: 'Worst Conversion Source', value: getMetric('worst_source')?.value || '—', alert: true },
+              { label: 'Top Revenue Source', value: fmtSource(getMetric('top_revenue_source')?.value) || '—', color: '#059669' },
+              { label: 'Worst Conversion Source', value: fmtSource(getMetric('worst_source')?.value) || '—', alert: true },
             ]} />
           </ReportSection>
 
@@ -266,7 +267,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
                 <tbody>
                   {sources.map((s, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #F7F8FA' }}>
-                      <td style={{ padding: '8px 12px', fontWeight: 500, color: '#111' }}>{s.source}</td>
+                      <td style={{ padding: '8px 12px', fontWeight: 500, color: '#111' }}>{fmtSource(s.source)}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{s.contacts}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{s.deals}</td>
                       <td style={{ padding: '8px 12px', color: '#059669', fontWeight: 600 }}>{s.won}</td>
