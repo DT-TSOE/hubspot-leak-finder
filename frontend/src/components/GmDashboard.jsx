@@ -126,8 +126,8 @@ export default function GmDashboard({ onScoreLoad }) {
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, marginBottom: 14, overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px 10px', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-              <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-                onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='⚠'; }} />
+              <img src="/el-pipeador.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🎯'; }} />
             </div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Top Opportunities</div>
             <div style={{ fontSize: 11, color: '#888', marginLeft: 2 }}>— ranked by impact</div>
@@ -152,7 +152,7 @@ export default function GmDashboard({ onScoreLoad }) {
                     <img src="/pipecoach.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
                       onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:9px">PC</span>'; }} />
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>Ask Coach</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>Ask PipeCoach</span>
                 </button>
               </div>
             );
@@ -160,12 +160,70 @@ export default function GmDashboard({ onScoreLoad }) {
         </div>
       )}
 
-      {/* Key metrics — 4 most important */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-        {data.metricCards.filter(c => ['win_rate','sales_cycle','speed','biggest_leak'].includes(c.id)).map(card => (
-          <MetricCard key={card.id} label={card.label} value={card.value} sub={card.sub} />
-        ))}
+      {/* Score breakdown + key metrics side by side */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+
+        {/* Health dimensions visual */}
+        {score?.dimensions && (
+          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 12 }}>Score Breakdown</div>
+            {Object.entries(score.dimensions).map(([key, dim]) => {
+              const labels = { conversion: 'Conversion', speed: 'Speed to Lead', activity: 'Activity', winRate: 'Win Rate', flow: 'Pipeline Flow' };
+              const color = dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444';
+              return (
+                <div key={key} style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, color: '#555' }}>{labels[key] || key}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color }}>{dim.score}</span>
+                  </div>
+                  <div style={{ height: 6, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${dim.score}%`, background: color, borderRadius: 3, transition: 'width .8s ease' }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Key metrics */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignContent: 'start' }}>
+          {data.metricCards.filter(c => ['win_rate','sales_cycle','speed','biggest_leak'].includes(c.id)).map(card => (
+            <MetricCard key={card.id} label={card.label} value={card.value} sub={card.sub} />
+          ))}
+        </div>
       </div>
+
+      {/* Uncontacted + stuck callouts */}
+      {(data.uncontactedCount > 0 || data.stuckCount > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: data.uncontactedCount > 0 && data.stuckCount > 0 ? '1fr 1fr' : '1fr', gap: 10 }}>
+          {data.uncontactedCount > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🚨'; }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Uncontacted leads</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} waiting</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Respond within 1h — closes 7× better</div>
+              </div>
+            </div>
+          )}
+          {data.stuckCount > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='⚠️'; }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Stuck records</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.stuckCount} past threshold</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Move them forward or close as lost</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
