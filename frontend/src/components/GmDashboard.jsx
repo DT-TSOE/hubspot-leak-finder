@@ -108,35 +108,32 @@ export default function GmDashboard({ onScoreLoad }) {
         </div>
       </div>
 
-      {/* Fix This First card */}
+      {/* Top Priority card */}
       {data.fixThisFirst && (
         <div style={{ background: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)', borderRadius: 12, padding: '20px 24px', marginBottom: 14, color: '#fff' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(76, 175, 80, .2)', border: '2px solid #4CAF50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🤼</div>
+            <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', border: '2px solid #4CAF50', flexShrink: 0 }}>
+              <img src="/el-pipeador.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                onError={e => { e.target.style.display='none'; e.target.parentElement.style.display='flex'; e.target.parentElement.style.alignItems='center'; e.target.parentElement.style.justifyContent='center'; e.target.parentElement.innerHTML='<span style="font-size:20px">🤼</span>'; }} />
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#4CAF50', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>
-                Fix this first
+                Top Priority
               </div>
               <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 6, letterSpacing: '-0.2px' }}>{data.fixThisFirst.title}</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', marginBottom: 14, lineHeight: 1.5 }}>{data.fixThisFirst.action}</div>
-              <details style={{ cursor: 'pointer' }}>
-                <summary style={{ fontSize: 12, color: '#4CAF50', fontWeight: 600, listStyle: 'none', userSelect: 'none' }}>
-                  ▸ Show me the steps in HubSpot
-                </summary>
-                <div style={{ marginTop: 12, padding: 14, background: 'rgba(0,0,0,.3)', borderRadius: 8, border: '1px solid rgba(255,255,255,.1)' }}>
-                  {data.fixThisFirst.steps?.map((step, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 12, alignItems: 'flex-start' }}>
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(76, 175, 80, .2)', border: '1px solid #4CAF50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#4CAF50', flexShrink: 0, marginTop: 1 }}>{i+1}</div>
-                      <span style={{ color: 'rgba(255,255,255,.85)', lineHeight: 1.5 }}>{step}</span>
-                    </div>
-                  ))}
-                  {data.fixThisFirst.starterSafe && (
-                    <div style={{ marginTop: 8, padding: 8, background: 'rgba(76, 175, 80, .1)', borderRadius: 6, fontSize: 11, color: '#4CAF50' }}>
-                      ✓ Works on HubSpot Starter — no Pro upgrade required
-                    </div>
-                  )}
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', marginBottom: 16, lineHeight: 1.5 }}>{data.fixThisFirst.action}</div>
+              <button
+                onClick={() => {
+                  const msg = `My top priority is: "${data.fixThisFirst.title}". ${data.fixThisFirst.action} Give me step-by-step instructions to fix this in HubSpot.`;
+                  window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: msg } }));
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(76,175,80,.15)', border: '1px solid #4CAF50', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', color: '#4CAF50', fontSize: 12, fontWeight: 700 }}>
+                <div style={{ width: 20, height: 20, borderRadius: 5, overflow: 'hidden', border: '1px solid #4CAF50', flexShrink: 0 }}>
+                  <img src="/pipecoach.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                    onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='PC'; }} />
                 </div>
-              </details>
+                Ask PipeCoach how to fix this →
+              </button>
             </div>
           </div>
         </div>
