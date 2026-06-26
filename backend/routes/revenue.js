@@ -6,9 +6,8 @@ const { analyzeLTV } = require('../services/ltvAnalysis');
 
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const hs = new HubSpotService(req.session.tokens.access_token);
-    const [contacts, deals] = await Promise.all([hs.getContacts(), hs.getDeals()]);
-    const dealsWithContacts = await Promise.all(deals.slice(0,300).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) })));
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
+    const { contacts, dealsWithContacts } = await hs.getCachedData();
     res.json(analyzeLTV(contacts, dealsWithContacts));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

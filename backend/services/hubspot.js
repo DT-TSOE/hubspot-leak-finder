@@ -1,9 +1,14 @@
 const axios = require('axios');
 const BASE_URL = 'https://api.hubapi.com';
 
+// Session-level cache: { [sessionId]: { contacts, deals, dealsWithContacts, expiresAt } }
+const _cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 class HubSpotService {
-  constructor(accessToken) {
+  constructor(accessToken, sessionId) {
     this.client = axios.create({ baseURL: BASE_URL, headers: { Authorization: `Bearer ${accessToken}` } });
+    this.sessionId = sessionId || null;
   }
 
   async paginate(url, params = {}) {
@@ -37,11 +42,55 @@ class HubSpotService {
   isDealClosedWon(d) { return (d.properties.dealstage || '') === 'closedwon'; }
   isDealClosed(d) { const s = d.properties.dealstage || ''; return s === 'closedwon' || s === 'closedlost'; }
 
+  // Batch fetch associations for up to 200 deals in 2 API calls instead of 200
+  async getDealAssociationsBatch(dealIds) {
+    const map = {};
+    const chunks = [];
+    for (let i = 0; i < dealIds.length; i += 100) chunks.push(dealIds.slice(i, i + 100));
+    await Promise.all(chunks.map(async (chunk) => {
+      try {
+        const r = await this.client.post('/crm/v3/associations/deals/contacts/batch/read', {
+          inputs: chunk.map(id => ({ id: String(id) }))
+        });
+        for (const item of (r.data.results || [])) {
+          map[item.from.id] = (item.to || []).map(t => t.id);
+        }
+      } catch { /* missing associations return empty */ }
+    }));
+    return map;
+  }
+
+  // Legacy single-deal fallback (kept for compatibility)
   async getDealAssociations(dealId) {
     try {
       const r = await this.client.get(`/crm/v3/objects/deals/${dealId}/associations/contacts`);
       return (r.data.results || []).map(r => r.id);
     } catch { return []; }
+  }
+
+  // Cached data loader — shared across all routes in the same session
+  async getCachedData() {
+    const key = this.sessionId || 'no-session';
+    const cached = _cache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.data;
+
+    const [contacts, deals] = await Promise.all([this.getContacts(), this.getDeals()]);
+    const sampleDeals = deals.slice(0, 200);
+    const assocMap = await this.getDealAssociationsBatch(sampleDeals.map(d => d.id));
+    const dealsWithContacts = sampleDeals.map(d => ({ ...d, _contactIds: assocMap[d.id] || [] }));
+
+    const data = { contacts, deals, dealsWithContacts };
+    _cache.set(key, { data, expiresAt: Date.now() + CACHE_TTL });
+
+    // Prune stale entries
+    for (const [k, v] of _cache.entries()) {
+      if (v.expiresAt < Date.now()) _cache.delete(k);
+    }
+    return data;
+  }
+
+  static invalidateCache(sessionId) {
+    if (sessionId) _cache.delete(sessionId);
   }
 }
 

@@ -10,20 +10,16 @@ const ActivityAnalyzer = require('../services/activityAnalysis');
 
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const hs = new HubSpotService(req.session.tokens.access_token);
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const analyzer = new ActivityAnalyzer(req.session.tokens.access_token);
     const { days } = req.query;
 
-    const [contacts, deals] = await Promise.all([hs.getContacts(), hs.getDeals()]);
+    const { contacts, deals, dealsWithContacts } = await hs.getCachedData();
     let filtered = contacts;
     if (days && !isNaN(parseInt(days))) {
       const cutoff = Date.now() - parseInt(days) * 86400000;
       filtered = contacts.filter(c => new Date(c.properties.createdate).getTime() >= cutoff);
     }
-
-    const dealsWithContacts = await Promise.all(
-      deals.slice(0, 200).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) }))
-    );
 
     const funnelData = analyzeFunnel(filtered);
     const sourceData = analyzeBySource(filtered, dealsWithContacts);
@@ -31,7 +27,6 @@ router.get('/', requireAuth, async (req, res) => {
     const speedData = analyzeSpeedToLead(filtered, dealsWithContacts);
     const ltvData = analyzeLTV(contacts, dealsWithContacts);
 
-    // Activity comparison (calls, emails, meetings)
     let activityComparison = null;
     try {
       const wonDeals = deals.filter(d => d.properties.dealstage === 'closedwon');
@@ -50,7 +45,6 @@ router.get('/', requireAuth, async (req, res) => {
     }
 
     const insights = generateInsights(funnelData, sourceData, activityLevels, speedData, ltvData, activityComparison);
-
     res.json({ insights, total: insights.length, generatedAt: new Date().toISOString() });
   } catch (err) {
     res.status(500).json({ error: err.message });

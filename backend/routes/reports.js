@@ -6,11 +6,8 @@ const calc = require('../services/metricCalculations');
 const health = require('../services/pipelineHealth');
 
 async function loadData(req) {
-  const hs = new HubSpotService(req.session.tokens.access_token);
-  const [contacts, deals] = await Promise.all([hs.getContacts(), hs.getDeals()]);
-  const dealsWithContacts = await Promise.all(
-    deals.slice(0, 200).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) }))
-  );
+  const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
+  const { contacts, dealsWithContacts } = await hs.getCachedData();
   return { contacts, deals: dealsWithContacts };
 }
 

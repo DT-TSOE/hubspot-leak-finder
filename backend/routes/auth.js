@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const HubSpotService = require('../services/hubspot');
 
 const SCOPES = ['crm.objects.contacts.read','crm.objects.contacts.write','crm.objects.deals.read'].join(' ');
 
@@ -26,6 +27,10 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/status', (req, res) => res.json({ connected: !!req.session.tokens }));
-router.post('/disconnect', (req, res) => { req.session.destroy(); res.json({ success: true }); });
+router.post('/disconnect', (req, res) => {
+  HubSpotService.invalidateCache(req.session.id);
+  req.session.destroy();
+  res.json({ success: true });
+});
 
 module.exports = router;

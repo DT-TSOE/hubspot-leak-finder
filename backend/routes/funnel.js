@@ -7,15 +7,14 @@ const { analyzeBySource, analyzeActivityLevels, analyzeSpeedToLead } = require('
 
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const hs = new HubSpotService(req.session.tokens.access_token);
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { days } = req.query;
-    const [contacts, deals] = await Promise.all([hs.getContacts(), hs.getDeals()]);
+    const { contacts, deals, dealsWithContacts } = await hs.getCachedData();
     let filtered = contacts;
     if (days && !isNaN(parseInt(days))) {
-      const cutoff = Date.now() - parseInt(days)*86400000;
+      const cutoff = Date.now() - parseInt(days) * 86400000;
       filtered = contacts.filter(c => new Date(c.properties.createdate).getTime() >= cutoff);
     }
-    const dealsWithContacts = await Promise.all(deals.slice(0,200).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) })));
     res.json({
       funnel: analyzeFunnel(filtered),
       behavioral: { bySource: analyzeBySource(filtered, dealsWithContacts), activityLevels: analyzeActivityLevels(filtered, dealsWithContacts), speedToLead: analyzeSpeedToLead(filtered, dealsWithContacts) },
@@ -23,7 +22,7 @@ router.get('/', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: 'Failed to analyze funnel', details: err.response?.data?.message || err.message });
+    res.status(500).json({ error: err.response?.data?.message || err.message });
   }
 });
 

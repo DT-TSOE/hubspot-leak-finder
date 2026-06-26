@@ -9,8 +9,8 @@ const { scoreLeads } = require('../services/leadScoring');
 
 router.get('/leads-csv', requireAuth, async (req, res) => {
   try {
-    const hs = new HubSpotService(req.session.tokens.access_token);
-    const contacts = await hs.getContacts();
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
+    const { contacts } = await hs.getCachedData();
     const scored = scoreLeads(contacts);
     const headers = ['Name','Email','Stage','Risk Score','Risk Level','Days in Stage','Touches','Days Since Contact','Flags'];
     const rows = scored.map(l => [`"${l.name}"`,`"${l.email}"`,l.stage,l.score,l.risk,l.daysInStage,l.touches,l.daysSinceContact??'Never',`"${l.flags.join('; ')}"`]);
@@ -23,8 +23,8 @@ router.get('/leads-csv', requireAuth, async (req, res) => {
 
 router.get('/funnel-csv', requireAuth, async (req, res) => {
   try {
-    const hs = new HubSpotService(req.session.tokens.access_token);
-    const contacts = await hs.getContacts();
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
+    const { contacts } = await hs.getCachedData();
     const funnel = analyzeFunnel(contacts);
     const headers = ['Stage','Contacts','Conversion Rate (%)','Drop-Off','Drop-Off Rate (%)'];
     const rows = funnel.funnelStages.map(s => [s.label,s.count,s.conversionRate,s.dropOff,s.dropOffRate]);
@@ -37,9 +37,8 @@ router.get('/funnel-csv', requireAuth, async (req, res) => {
 
 router.get('/insights-text', requireAuth, async (req, res) => {
   try {
-    const hs = new HubSpotService(req.session.tokens.access_token);
-    const [contacts, deals] = await Promise.all([hs.getContacts(), hs.getDeals()]);
-    const dealsWithContacts = await Promise.all(deals.slice(0,200).map(async d => ({ ...d, _contactIds: await hs.getDealAssociations(d.id) })));
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
+    const { contacts, deals, dealsWithContacts } = await hs.getCachedData();
     const funnelData = analyzeFunnel(contacts);
     const insights = generateInsights(funnelData, analyzeBySource(contacts,dealsWithContacts), analyzeActivityLevels(contacts,dealsWithContacts), analyzeSpeedToLead(contacts,dealsWithContacts));
     const date = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
