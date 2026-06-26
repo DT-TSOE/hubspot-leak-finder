@@ -29,43 +29,58 @@ function fmtStage(stage) {
 
 const BAR_COLORS = ['#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16'];
 
-function RevenueAtRiskChart({ stageBreakdown }) {
+function CustomTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  return (
+    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 8, padding: '8px 12px', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,.08)', pointerEvents: 'none' }}>
+      <div style={{ fontWeight: 700, color: '#111', marginBottom: 3 }}>{d.name}</div>
+      <div style={{ color: '#DC2626', fontWeight: 700 }}>${d.value.toLocaleString()} at risk</div>
+      <div style={{ color: '#888', marginTop: 1 }}>{d.count} records stuck</div>
+      <div style={{ color: '#3B82F6', marginTop: 4, fontSize: 11 }}>Click to filter list ↓</div>
+    </div>
+  );
+}
+
+function RevenueAtRiskChart({ stageBreakdown, selectedStage, onSelectStage }) {
   const data = stageBreakdown
     .filter(s => s.revenueAtRisk > 0)
     .sort((a, b) => b.revenueAtRisk - a.revenueAtRisk)
-    .map(s => ({ name: fmtStage(s.stage), value: s.revenueAtRisk, count: s.count }));
+    .map(s => ({ name: fmtStage(s.stage), rawStage: s.stage, value: s.revenueAtRisk, count: s.count }));
 
   if (!data.length) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#aaa', fontSize: 12 }}>
-        <div style={{ fontSize: 24, marginBottom: 8 }}>💚</div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 100, color: '#aaa', fontSize: 12 }}>
         No revenue at risk by stage
       </div>
     );
   }
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-        <div style={{ fontWeight: 700, color: '#111', marginBottom: 2 }}>{payload[0].payload.name}</div>
-        <div style={{ color: '#DC2626', fontWeight: 700 }}>${payload[0].value.toLocaleString()} at risk</div>
-        <div style={{ color: '#888' }}>{payload[0].payload.count} records stuck</div>
-      </div>
-    );
+  const handleClick = (entry) => {
+    if (!entry?.activePayload?.length) return;
+    const stage = entry.activePayload[0].payload.rawStage;
+    onSelectStage(selectedStage === stage ? null : stage);
   };
 
   return (
-    <ResponsiveContainer width="100%" height={data.length * 44 + 20}>
-      <BarChart data={data} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
-        <XAxis type="number" hide tickFormatter={fmtK} />
-        <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 12, fill: '#555' }} axisLine={false} tickLine={false} />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F7F8FA' }} />
-        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={28}>
-          {data.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: Math.max(data.length * 48 + 16, 80) }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ left: 0, right: 20, top: 4, bottom: 4 }} onClick={handleClick} style={{ cursor: 'pointer' }}>
+          <XAxis type="number" hide />
+          <YAxis type="category" dataKey="name" width={88} tick={{ fontSize: 12, fill: '#555' }} axisLine={false} tickLine={false} />
+          <Tooltip content={<CustomTooltip />} cursor={false} />
+          <Bar dataKey="value" radius={[0, 5, 5, 0]} maxBarSize={26}>
+            {data.map((d, i) => (
+              <Cell
+                key={i}
+                fill={BAR_COLORS[i % BAR_COLORS.length]}
+                opacity={selectedStage && selectedStage !== d.rawStage ? 0.3 : 1}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -74,6 +89,7 @@ export default function StageAging() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [selectedStage, setSelectedStage] = useState(null);
 
   useEffect(() => {
     api.getStageAging()
@@ -93,7 +109,10 @@ export default function StageAging() {
     );
   }
 
-  const filtered = filter === 'all' ? data.stuckRecords : data.stuckRecords.filter(r => r.urgency === filter);
+  const byUrgency = filter === 'all' ? data.stuckRecords : data.stuckRecords.filter(r => r.urgency === filter);
+  const filtered = selectedStage
+    ? byUrgency.filter(r => (r.stageRaw || r.stage?.toLowerCase().replace(/\s/g, '')) === selectedStage)
+    : byUrgency;
 
   return (
     <div>
@@ -117,23 +136,22 @@ export default function StageAging() {
         </div>
       </div>
 
-      {/* Stage breakdown table + Revenue at Risk chart — side by side */}
+      {/* Stage breakdown table + Revenue at Risk chart side by side */}
       {data.stageBreakdown?.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: '55% 1fr', gap: 12, marginBottom: 12 }}>
-
-          {/* Left: Stuck by stage table */}
+          {/* Left: table */}
           <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Stuck by stage</div>
-            {/* Table header */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '0 0 8px', borderBottom: '1px solid #F3F4F6', marginBottom: 4 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, paddingBottom: 8, borderBottom: '1px solid #F3F4F6', marginBottom: 4 }}>
               {['Stage', 'Records', 'Avg Days', 'Revenue at Risk'].map(h => (
                 <span key={h} style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: h === 'Stage' ? 'left' : 'right' }}>{h}</span>
               ))}
             </div>
-            {/* Rows */}
             {data.stageBreakdown.map((s, i) => (
-              <div key={s.stage} style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '8px 0', borderBottom: i < data.stageBreakdown.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center' }}>
-                <span style={{ fontSize: 13, color: '#111', fontWeight: 500 }}>{fmtStage(s.stage)}</span>
+              <div key={s.stage}
+                onClick={() => setSelectedStage(selectedStage === s.stage ? null : s.stage)}
+                style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '8px 6px', borderBottom: i < data.stageBreakdown.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center', cursor: 'pointer', borderRadius: 6, background: selectedStage === s.stage ? '#F7F8FA' : 'transparent' }}>
+                <span style={{ fontSize: 13, color: '#111', fontWeight: selectedStage === s.stage ? 700 : 500 }}>{fmtStage(s.stage)}</span>
                 <span style={{ fontSize: 13, color: '#333', textAlign: 'right', fontWeight: 500 }}>{s.count}</span>
                 <span style={{ fontSize: 13, color: s.avgDays > 30 ? '#F59E0B' : '#666', textAlign: 'right', fontWeight: s.avgDays > 30 ? 600 : 400 }}>{s.avgDays}d</span>
                 <span style={{ fontSize: 13, color: s.revenueAtRisk > 0 ? '#DC2626' : '#999', textAlign: 'right', fontWeight: s.revenueAtRisk > 0 ? 700 : 400 }}>{fmt(s.revenueAtRisk)}</span>
@@ -141,31 +159,43 @@ export default function StageAging() {
             ))}
           </div>
 
-          {/* Right: Revenue at Risk chart */}
+          {/* Right: chart */}
           <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Revenue at risk by stage</div>
-            <RevenueAtRiskChart stageBreakdown={data.stageBreakdown} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>Revenue at risk by stage</div>
+              {selectedStage && (
+                <button onClick={() => setSelectedStage(null)} style={{ fontSize: 10, color: '#3B82F6', background: '#EFF6FF', border: 'none', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }}>
+                  Clear filter ✕
+                </button>
+              )}
+            </div>
+            <RevenueAtRiskChart stageBreakdown={data.stageBreakdown} selectedStage={selectedStage} onSelectStage={setSelectedStage} />
           </div>
         </div>
       )}
 
-      {/* Filter */}
-      <div style={{ display:'flex', gap:6, marginBottom:10 }}>
+      {/* Filters */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
         {[{k:'all',l:`All (${data.total})`},{k:'critical',l:`Critical (${data.critical})`},{k:'high',l:`High (${data.high})`},{k:'medium',l:`Medium (${data.medium})`}].map(f => (
           <button key={f.k} onClick={() => setFilter(f.k)}
             style={{ fontSize:11, padding:'4px 11px', borderRadius:14, border:`1px solid ${filter===f.k?'#111':'#E2E5EA'}`, background:filter===f.k?'#111':'#fff', color:filter===f.k?'#fff':'#666', cursor:'pointer', fontWeight:500 }}>
             {f.l}
           </button>
         ))}
+        {selectedStage && (
+          <span style={{ fontSize: 11, color: '#3B82F6', marginLeft: 4 }}>
+            Filtered to: <strong>{fmtStage(selectedStage)}</strong>
+            <button onClick={() => setSelectedStage(null)} style={{ marginLeft: 6, fontSize: 10, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+          </span>
+        )}
       </div>
 
-      {/* Stuck records list */}
+      {/* Records list */}
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, overflow:'hidden' }}>
-        {/* List header */}
         <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr auto', gap: 12, padding: '8px 14px', background: '#F7F8FA', borderBottom: '1px solid #F3F4F6' }}>
           <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Priority</span>
           <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Contact / Deal</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Action</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>HubSpot</span>
         </div>
         {filtered.slice(0, 50).map((r, i) => {
           const u = URGENCY[r.urgency] || URGENCY.medium;
@@ -182,19 +212,19 @@ export default function StageAging() {
               </div>
               <a href={r.hubspotUrl} target="_blank" rel="noopener noreferrer"
                 style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap', marginTop:2 }}>
-                Open in HubSpot →
+                Open →
               </a>
             </div>
           );
         })}
+        {filtered.length === 0 && (
+          <div style={{ padding: '24px', textAlign: 'center', fontSize: 13, color: '#888' }}>
+            No records for this filter. {selectedStage && <button onClick={() => setSelectedStage(null)} style={{ color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>Clear stage filter</button>}
+          </div>
+        )}
         {filtered.length > 50 && (
           <div style={{ padding:'10px 14px', textAlign:'center', fontSize:11, color:'#999', borderTop:'1px solid #F3F4F6' }}>
             Showing 50 of {filtered.length} records
-          </div>
-        )}
-        {filtered.length === 0 && (
-          <div style={{ padding: '24px', textAlign: 'center', fontSize: 13, color: '#888' }}>
-            No {filter} records found.
           </div>
         )}
       </div>

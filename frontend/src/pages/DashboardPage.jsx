@@ -28,7 +28,7 @@ const NAV = [
       { id: 'lead-sources',  label: 'Lead Sources',  feature: 'sourceQuality' },
       { id: 'lead-response', label: 'Lead Response', feature: 'speedToLead' },
       { id: 'revenue',       label: 'Revenue',       feature: 'revenue' },
-      { id: 'exports',       label: 'Exports',       feature: null },
+      { id: 'exports',       label: 'Report',        feature: null },
     ]
   },
   {

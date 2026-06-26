@@ -6,6 +6,11 @@ const SEV = {
   low:    { bg:'#F0FDF4', border:'#BBF7D0', badge:'#059669', badgeBg:'#DCFCE7', label:'Low priority' },
 };
 
+function openPipeCoach(insight) {
+  const message = `I'm looking at this pipeline issue: "${insight.title}". The data shows: ${insight.dataPoint} What are the step-by-step actions I should take in HubSpot to fix this?`;
+  window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message } }));
+}
+
 export default function InsightCard({ insight }) {
   const [exp, setExp] = useState(false);
   const sev = SEV[insight.severity] || SEV.low;
@@ -26,35 +31,30 @@ export default function InsightCard({ insight }) {
 
       {exp && (
         <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${sev.border}` }}>
-          {/* Supporting data */}
           <div style={{ marginBottom:12 }}>
             <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', color:'#999', marginBottom:4 }}>What the data shows</div>
             <p style={{ margin:0, fontSize:13, color:'#333', lineHeight:1.6 }}>{insight.dataPoint}</p>
           </div>
 
-          {/* Recommended action */}
-          <div style={{ background:'rgba(255,255,255,.8)', borderRadius:8, padding:'11px 13px', border:`1px solid ${sev.border}`, marginBottom: insight.hubspotSteps?.length ? 10 : 0 }}>
+          <div style={{ background:'rgba(255,255,255,.8)', borderRadius:8, padding:'11px 13px', border:`1px solid ${sev.border}`, marginBottom:10 }}>
             <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', color:sev.badge, marginBottom:4 }}>Recommended action</div>
             <p style={{ margin:0, fontSize:13, color:'#333', lineHeight:1.6 }}>{insight.action}</p>
           </div>
 
-          {/* HubSpot step-by-step */}
-          {insight.hubspotSteps?.length > 0 && (
-            <div style={{ background:'#fff', borderRadius:8, padding:'11px 13px', border:'1px solid #E2E5EA' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-                <div style={{ width:18, height:18, borderRadius:4, background:'#FF7A59', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  <span style={{ fontSize:10, color:'#fff', fontWeight:700 }}>HS</span>
-                </div>
-                <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', color:'#FF7A59' }}>Steps in HubSpot</div>
-              </div>
-              {insight.hubspotSteps.map((step, i) => (
-                <div key={i} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'flex-start' }}>
-                  <div style={{ width:18, height:18, borderRadius:'50%', background:'#F3F4F6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#555', flexShrink:0, marginTop:1 }}>{i+1}</div>
-                  <span style={{ fontSize:12, color:'#444', lineHeight:1.55 }}>{step}</span>
-                </div>
-              ))}
+          {/* PipeCoach CTA — replaces static HubSpot steps */}
+          <button
+            onClick={e => { e.stopPropagation(); openPipeCoach(insight); }}
+            style={{ width:'100%', display:'flex', alignItems:'center', gap:10, background:'#111', border:'none', borderRadius:8, padding:'11px 14px', cursor:'pointer', textAlign:'left' }}>
+            <div style={{ width:28, height:28, borderRadius:7, overflow:'hidden', border:'2px solid #4CAF50', flexShrink:0 }}>
+              <img src="/pipecoach.png" alt="PipeCoach" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
+                onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:14px;display:flex;align-items:center;justify-content:center;height:100%;color:#fff">PC</span>'; }} />
             </div>
-          )}
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#4CAF50', letterSpacing:'.04em', marginBottom:1 }}>ASK PIPECOACH</div>
+              <div style={{ fontSize:12, color:'rgba(255,255,255,.75)' }}>Get step-by-step HubSpot instructions for this issue</div>
+            </div>
+            <span style={{ color:'#4CAF50', fontSize:16 }}>→</span>
+          </button>
         </div>
       )}
     </div>

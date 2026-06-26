@@ -11,7 +11,7 @@ function ChatMessages({ messages, loading, error, bottomRef }) {
       {messages.map((msg, i) => (
         <div key={i} style={{ display:'flex', gap:6, alignItems:'flex-end', flexDirection:msg.role==='user'?'row-reverse':'row' }}>
           <div style={{ width:26, height:26, borderRadius:7, overflow:'hidden', border:`1.5px solid ${msg.role==='user'?'#E2E5EA':'#4CAF50'}`, background:msg.role==='user'?'#F3F4F6':'#0F1A0F', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#555' }}>
-            <img src={msg.role==='user'?'/el-pipeador.png':'/la-jefa.png'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML=msg.role==='user'?'U':'PC';}} />
+            <img src={msg.role==='user'?'/el-pipeador.png':'/pipecoach.png'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML=msg.role==='user'?'U':'PC';}} />
           </div>
           <div style={{ maxWidth:'78%' }}>
             {msg.role==='assistant' && <div style={{ fontSize:9, fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:1, marginBottom:2 }}>{COACH_NAME}</div>}
@@ -59,8 +59,26 @@ export default function LaJefaChat({ inline = false }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [pendingMessage, setPendingMessage] = useState(null);
   const bottomRef = useRef(null);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [messages]);
+
+  // Listen for context-triggered opens from insight cards etc.
+  useEffect(() => {
+    const handler = (e) => {
+      setOpen(true);
+      if (e.detail?.message) setPendingMessage(e.detail.message);
+    };
+    window.addEventListener('pipecoach:open', handler);
+    return () => window.removeEventListener('pipecoach:open', handler);
+  }, []);
+
+  useEffect(() => {
+    if (open && pendingMessage) {
+      const t = setTimeout(() => { send(pendingMessage); setPendingMessage(null); }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [open, pendingMessage]);
 
   const send = async (text) => {
     const msg = text || input.trim();
@@ -83,7 +101,7 @@ export default function LaJefaChat({ inline = false }) {
         <style>{`@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}`}</style>
         <div style={{ padding:'14px 18px', borderBottom:'1px solid #E2E5EA', display:'flex', alignItems:'center', gap:10 }}>
           <div style={{ width:40, height:40, borderRadius:10, overflow:'hidden', border:'2px solid #4CAF50', flexShrink:0 }}>
-            <img src="/la-jefa.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:20px;display:flex;align-items:center;justify-content:center;height:100%">🤼</span>';}} />
+            <img src="/pipecoach.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:20px;display:flex;align-items:center;justify-content:center;height:100%">🤼</span>';}} />
           </div>
           <div>
             <div style={{ fontSize:15, fontWeight:700, color:'#111' }}>{COACH_NAME}</div>
@@ -105,14 +123,14 @@ export default function LaJefaChat({ inline = false }) {
       <style>{`@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}} @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}`}</style>
       {!open && (
         <button onClick={()=>setOpen(true)} title={`Ask ${COACH_NAME}`} style={{ position:'fixed', bottom:24, right:24, width:54, height:54, borderRadius:'50%', background:'#111', border:'3px solid #4CAF50', cursor:'pointer', padding:0, boxShadow:'0 4px 16px rgba(0,0,0,0.2)', zIndex:1000, overflow:'hidden' }}>
-          <img src="/la-jefa.png" alt={COACH_NAME} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;height:100%">🤼</span>';}} />
+          <img src="/pipecoach.png" alt={COACH_NAME} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;height:100%">🤼</span>';}} />
         </button>
       )}
       {open && (
         <div style={{ position:'fixed', bottom:24, right:24, width:360, height:480, background:'#fff', borderRadius:16, border:'1px solid #E2E5EA', boxShadow:'0 8px 32px rgba(0,0,0,0.12)', zIndex:1000, display:'flex', flexDirection:'column', overflow:'hidden', animation:'slideUp .2s ease' }}>
           <div style={{ padding:'12px 14px', borderBottom:'1px solid #E2E5EA', display:'flex', alignItems:'center', gap:10 }}>
             <div style={{ width:36, height:36, borderRadius:9, overflow:'hidden', border:'2px solid #4CAF50', flexShrink:0 }}>
-              <img src="/la-jefa.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:18px">🤼</span>';}} />
+              <img src="/pipecoach.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:18px">🤼</span>';}} />
             </div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:14, fontWeight:700, color:'#111' }}>{COACH_NAME}</div>
