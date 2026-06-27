@@ -28,8 +28,8 @@ router.get('/callback', async (req, res) => {
 
 router.get('/status', (req, res) => res.json({ connected: !!req.session.tokens }));
 router.post('/disconnect', (req, res) => {
-  HubSpotService.invalidateCache(req.session.id);
-  req.session.destroy();
+  HubSpotService.invalidateCache(req.sessionOptions?.signed ? req.session['.sig'] : 'no-session');
+  req.session = null; // cookie-session: set to null to clear
   res.json({ success: true });
 });
 

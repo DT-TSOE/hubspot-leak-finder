@@ -52,11 +52,11 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
   const pc = colors[plan] || colors.free;
   const features = getPlanFeatures();
 
-  const NavItem = ({ item }) => {
+  const NavItem = ({ item, dataTour }) => {
     const active = section === item.id;
     const locked = item.feature && !features[item.feature];
     return (
-      <button onClick={() => onSection(item.id)}
+      <button data-tour={dataTour} onClick={() => onSection(item.id)}
         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 16px', border: 'none', background: active ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, borderLeft: active ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
         <span style={{ fontSize: 13, color: active ? '#111' : '#555', fontWeight: active ? 600 : 400 }}>{item.label}</span>
         <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
@@ -86,7 +86,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
         {/* Dashboard — with live health score badge */}
-        <button onClick={() => onSection('dashboard')}
+        <button data-tour="nav-dashboard" onClick={() => onSection('dashboard')}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
           <span style={{ fontSize: 14, color: section === 'dashboard' ? '#111' : '#333', fontWeight: 700 }}>Dashboard</span>
           {healthScore ? (
@@ -106,9 +106,9 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
         <div style={{ margin: '8px 0 4px', borderTop: '1px solid #F3F4F6' }} />
 
         {NAV.filter(n => n.type === 'group').map(group => (
-          <div key={group.label} style={{ marginBottom: 8 }}>
+          <div key={group.label} style={{ marginBottom: 8 }} data-tour={`nav-${group.label.toLowerCase()}`}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 16px 4px' }}>{group.label}</div>
-            {group.items.map(item => <NavItem key={item.id} item={item} />)}
+            {group.items.map(item => <NavItem key={item.id} item={item} dataTour={`nav-${item.id}`} />)}
           </div>
         ))}
       </nav>
@@ -215,8 +215,13 @@ function InsightFilters({ activeType, activeSeverity, onTypeChange, onSeverityCh
   );
 }
 
+const VALID_SECTIONS = new Set(['dashboard','pipeline','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations']);
+
 export default function DashboardPage({ onDisconnect }) {
-  const [section, setSection] = useState('dashboard');
+  const [section, setSection] = useState(() => {
+    const path = window.location.pathname.slice(1);
+    return VALID_SECTIONS.has(path) ? path : 'dashboard';
+  });
   const [days, setDays] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -258,6 +263,29 @@ export default function DashboardPage({ onDisconnect }) {
     try { setRevenueData(await api.getRevenue()); } catch {}
     finally { setRevenueLoading(false); }
   }, [revenueData]);
+
+  // URL routing — back/forward browser navigation
+  const navigateTo = useCallback((sectionId) => {
+    setSection(sectionId);
+    const url = `/${sectionId}`;
+    if (window.location.pathname !== url) {
+      window.history.pushState({ section: sectionId }, '', url);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Set initial URL state
+    const path = window.location.pathname.slice(1);
+    const initial = VALID_SECTIONS.has(path) ? path : 'dashboard';
+    window.history.replaceState({ section: initial }, '', `/${initial}`);
+
+    const handlePop = (e) => {
+      const sec = e.state?.section;
+      if (sec && VALID_SECTIONS.has(sec)) setSection(sec);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, []);
 
   useEffect(() => { loadMain(days); }, [days, loadMain]);
   useEffect(() => { api.ga4Status().then(s => setGa4Connected(s.connected)).catch(() => {}); }, []);
@@ -326,7 +354,7 @@ export default function DashboardPage({ onDisconnect }) {
         </div>
       )}
 
-      <Sidebar section={section} onSection={setSection} plan={plan} onUpgrade={() => setShowUpgrade(true)} onDisconnect={handleDisconnect} ga4Connected={ga4Connected} insightCount={allInsights.length} atRiskCount={highRiskLeads} healthScore={healthScore} />
+      <Sidebar section={section} onSection={navigateTo} plan={plan} onUpgrade={() => setShowUpgrade(true)} onDisconnect={handleDisconnect} ga4Connected={ga4Connected} insightCount={allInsights.length} atRiskCount={highRiskLeads} healthScore={healthScore} />
 
       <div style={{ marginLeft: SIDEBAR_W, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <TopBar section={section} days={days} onDays={handleDays} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
@@ -341,7 +369,7 @@ export default function DashboardPage({ onDisconnect }) {
           )}
 
           {/* DASHBOARD */}
-          {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={setSection} onScoreLoad={setHealthScore} />}
+          {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={navigateTo} onScoreLoad={setHealthScore} />}
 
           {!loading && !error && funnelData && (
 

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const helmet = require('helmet');
 const { apiLimiter, authLimiter } = require('./middleware/security');
 
@@ -13,11 +13,24 @@ app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
 app.use(express.json({ limit: '100kb' }));
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-in-prod',
-  resave: false, saveUninitialized: false,
-  cookie: { secure: isProd, httpOnly: true, sameSite: isProd ? 'none' : 'lax', maxAge: 24*60*60*1000 }
+// cookie-session stores tokens in a signed cookie — survives Railway restarts/redeploys
+// with no external session store needed
+app.use(cookieSession({
+  name: 'pipechamp',
+  keys: [process.env.SESSION_SECRET || 'dev-secret-change-in-prod'],
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  secure: isProd,
+  httpOnly: true,
+  sameSite: isProd ? 'none' : 'lax',
 }));
+
+// cookie-session has no .id — derive one from the token for cache keying
+app.use((req, res, next) => {
+  if (!req.session.id && req.session?.tokens?.access_token) {
+    req.session.id = 'cs_' + req.session.tokens.access_token.slice(-16);
+  }
+  next();
+});
 
 app.use('/api/', apiLimiter);
 app.use('/auth/', authLimiter);
