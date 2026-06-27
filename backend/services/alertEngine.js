@@ -1,7 +1,7 @@
 /**
  * PipeChamp Alert Engine
  * Detects time-based, pattern-based, and benchmark-based alerts
- * Runs on demand when dashboard loads — no database needed
+ * Runs on demand when dashboard loads - no database needed
  */
 
 // Research-backed benchmarks
@@ -73,7 +73,7 @@ function generateAlerts(contacts, deals) {
         type: 'going_cold',
         severity: daysUntilCold <= 0 ? 'urgent' : 'warning',
         title: daysUntilCold <= 0
-          ? `${name} has gone cold — ${daysSinceContact} days no contact`
+          ? `${name} has gone cold - ${daysSinceContact} days no contact`
           : `${name} going cold in ${daysUntilCold} day${daysUntilCold === 1 ? '' : 's'}`,
         body: `${stageLabel} stage. Last contacted ${daysSinceContact} days ago. Your data shows ${Math.round(76 - daysSinceContact * 2)}% close probability drops sharply after ${BENCHMARKS.maxDaysNoContact} days without contact.`,
         action: { label: 'View in HubSpot', url: `https://app.hubspot.com/contacts/${contact.id}` },
@@ -105,7 +105,7 @@ function generateAlerts(contacts, deals) {
           type: 'stuck',
           severity: daysInStage > maxDays * 2.5 ? 'urgent' : 'warning',
           title: `${name} stuck in ${stageLabel} for ${daysInStage} days`,
-          body: `Typical ${stageLabel} contacts move in ${maxDays} days. This contact has been here for ${daysInStage} days — ${Math.round(daysInStage / maxDays * 10) / 10}× longer than average.`,
+          body: `Typical ${stageLabel} contacts move in ${maxDays} days. This contact has been here for ${daysInStage} days - ${Math.round(daysInStage / maxDays * 10) / 10}× longer than average.`,
           action: { label: 'View in HubSpot', url: `https://app.hubspot.com/contacts/${contact.id}` },
           contactId: contact.id,
           contactName: name,
@@ -185,7 +185,7 @@ function generateAlerts(contacts, deals) {
     });
   }
 
-  // Deduplicate — remove individual alerts if batch alert covers them
+  // Deduplicate - remove individual alerts if batch alert covers them
   const hasBatchMQL = alerts.some(a => a.id === 'batch-uncontacted-mqls');
   const deduped = hasBatchMQL
     ? alerts.filter(a => !a.id.startsWith('slow-response-'))
@@ -205,10 +205,10 @@ function buildEmailDigest(alerts, portalName = 'your pipeline') {
 
   return {
     subject: urgent.length > 0
-      ? `🔴 ${urgent.length} urgent alert${urgent.length > 1 ? 's' : ''} — PipeChamp daily brief`
+      ? `🔴 ${urgent.length} urgent alert${urgent.length > 1 ? 's' : ''} - PipeChamp daily brief`
       : warnings.length > 0
-      ? `⚠️ ${warnings.length} item${warnings.length > 1 ? 's' : ''} need attention — PipeChamp`
-      : '✅ Pipeline looks healthy today — PipeChamp',
+      ? `⚠️ ${warnings.length} item${warnings.length > 1 ? 's' : ''} need attention - PipeChamp`
+      : '✅ Pipeline looks healthy today - PipeChamp',
     urgent,
     warnings,
     totalAlerts: alerts.length,

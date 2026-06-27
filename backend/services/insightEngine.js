@@ -8,6 +8,7 @@
 
 const IRREGULAR_PLURALS = { 'MQL': 'MQLs', 'SQL': 'SQLs', 'Opportunity': 'Opportunities', 'Customer': 'Customers', 'Lead': 'Leads' };
 const plural = w => IRREGULAR_PLURALS[w] || (w.endsWith('s') ? w : `${w}s`);
+const fmtSrc = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
 
 const MIN_SAMPLE = 3;
 
@@ -28,7 +29,7 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           severity,
           priority: severity === 'high' ? 1 : severity === 'medium' ? 2 : 3,
           title: `${stage.dropOffRate}% of ${plural(prev.label)} never become ${plural(stage.label)}`,
-          dataPoint: `${stage.dropOff.toLocaleString()} contacts drop off here. Only ${stage.conversionRate}% convert — your ${prev.label}→${stage.label} transition is bleeding revenue.`,
+          dataPoint: `${stage.dropOff.toLocaleString()} contacts drop off here. Only ${stage.conversionRate}% convert - your ${prev.label}→${stage.label} transition is bleeding revenue.`,
           action: getFunnelAction(stage.stage, prev.label, stage.label, stage.conversionRate),
           metric: { label: 'Drop-off Rate', value: `${stage.dropOffRate}%` },
           hubspotSteps: getHubSpotSteps(stage.stage)
@@ -49,15 +50,15 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           severity,
           priority: severity === 'high' ? 1 : 2,
           title: `Contacts take ${t.medianDays} days to move from ${t.from} to ${t.to}`,
-          dataPoint: `Median of ${t.medianDays} days across ${t.sampleSize} contacts. Mean is ${t.meanDays} days — suggesting some contacts are stuck much longer.`,
-          action: `In HubSpot, create a Workflow: Contact enrolled in "${t.from}" stage → wait ${Math.round(t.medianDays * 0.5)} days → if still in same stage, create a task for the owner: "Follow up — contact stalled at ${t.from}." This catches stuck contacts before they go cold.`,
+          dataPoint: `Median of ${t.medianDays} days across ${t.sampleSize} contacts. Mean is ${t.meanDays} days - suggesting some contacts are stuck much longer.`,
+          action: `In HubSpot, create a Workflow: Contact enrolled in "${t.from}" stage → wait ${Math.round(t.medianDays * 0.5)} days → if still in same stage, create a task for the owner: "Follow up - contact stalled at ${t.from}." This catches stuck contacts before they go cold.`,
           metric: { label: 'Median Days', value: `${t.medianDays}d` },
           hubspotSteps: [
             `Go to Automation → Workflows → Create new`,
             `Trigger: Contact lifecycle stage is set to "${t.from}"`,
             `Add delay: ${Math.round(t.medianDays * 0.5)} days`,
             `Add condition: Lifecycle stage is still "${t.from}"`,
-            `Action: Create task assigned to contact owner — "Stalled contact — needs follow-up"`
+            `Action: Create task assigned to contact owner - "Stalled contact - needs follow-up"`
           ]
         });
       }
@@ -74,17 +75,17 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
         subtype: 'response',
         severity,
         priority: 1,
-        title: `Won deals contacted ${ratio.toFixed(1)}× faster — ${formatH(speedData.wonMedianHours)} vs ${formatH(speedData.lostMedianHours)}`,
+        title: `Won deals contacted ${ratio.toFixed(1)}× faster - ${formatH(speedData.wonMedianHours)} vs ${formatH(speedData.lostMedianHours)}`,
         dataPoint: `Based on ${speedData.wonSampleSize + speedData.lostSampleSize} closed contacts. The gap between your best and worst response times is costing you deals.`,
         action: `Set a ${formatH(speedData.wonMedianHours * 1.5)} response SLA for all new leads. In HubSpot, create a workflow that fires a task to the assigned rep the moment a new contact becomes an MQL. If no activity in ${formatH(speedData.wonMedianHours * 2)}, escalate to the manager.`,
         metric: { label: 'Response Gap', value: `${ratio.toFixed(1)}×` },
         hubspotSteps: [
           `Go to Automation → Workflows → Create new`,
           `Trigger: Contact Lifecycle Stage becomes Marketing Qualified Lead`,
-          `Action: Create task for Contact Owner — "New MQL — contact within ${formatH(speedData.wonMedianHours * 1.5)}"`,
+          `Action: Create task for Contact Owner - "New MQL - contact within ${formatH(speedData.wonMedianHours * 1.5)}"`,
           `Add delay: ${formatH(speedData.wonMedianHours * 2)}`,
           `Add condition: No associated activity logged`,
-          `Action: Send internal email to manager — "MQL not contacted: [Contact Name]"`
+          `Action: Send internal email to manager - "MQL not contacted: [Contact Name]"`
         ]
       });
     }
@@ -102,16 +103,16 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
         subtype: 'channel',
         severity,
         priority: 2,
-        title: `${best.source} closes at ${best.winRate}% — ${worst.source} closes at only ${worst.winRate}%`,
-        dataPoint: `${best.won} closed-won from ${best.source} (${best.total} total contacts). ${worst.source} has ${worst.total} contacts but only ${worst.won} wins. You may be over-investing in low-quality channels.`,
-        action: `Double down on ${best.source}. Review your ${worst.source} lead qualification — are you spending time on contacts that will never close? Add a disqualification workflow for ${worst.source} leads that haven't engaged after ${Math.round(30)} days.`,
-        metric: { label: `${best.source} Win Rate`, value: `${best.winRate}%` },
+        title: `${fmtSrc(best.source)} closes at ${best.winRate}% - ${fmtSrc(worst.source)} closes at only ${worst.winRate}%`,
+        dataPoint: `${best.won} closed-won from ${fmtSrc(best.source)} (${best.total} total contacts). ${fmtSrc(worst.source)} has ${worst.total} contacts but only ${worst.won} wins. You may be over-investing in low-quality channels.`,
+        action: `Double down on ${fmtSrc(best.source)}. Review your ${fmtSrc(worst.source)} lead qualification - are you spending time on contacts that will never close? Add a disqualification workflow for ${fmtSrc(worst.source)} leads that haven't engaged after ${Math.round(30)} days.`,
+        metric: { label: `${fmtSrc(best.source)} Win Rate`, value: `${best.winRate}%` },
         hubspotSteps: [
-          `In HubSpot, filter Contacts by Original Source = "${worst.source}"`,
-          `Look for patterns — job title, company size, engagement level`,
-          `Create a list of ${worst.source} contacts with no email opens or activity in 30 days`,
+          `In HubSpot, filter Contacts by Original Source = "${fmtSrc(worst.source)}"`,
+          `Look for patterns - job title, company size, engagement level`,
+          `Create a list of ${fmtSrc(worst.source)} contacts with no email opens or activity in 30 days`,
           `Enroll in a re-engagement sequence or mark as Unqualified`,
-          `Add ${best.source} as a required field in your lead scoring model`
+          `Add ${fmtSrc(best.source)} as a required field in your lead scoring model`
         ]
       });
     }
@@ -125,13 +126,13 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           subtype: 'channel',
           severity: 'low',
           priority: 4,
-          title: `${source.source} is a strong secondary channel at ${source.winRate}% close rate`,
-          dataPoint: `${source.won} wins from ${source.total} contacts. Close to your best channel — worth investing in.`,
-          action: `Analyze what ${source.source} leads have in common with your ${best.source} wins. Consider increasing investment in this channel.`,
+          title: `${fmtSrc(source.source)} is a strong secondary channel at ${source.winRate}% close rate`,
+          dataPoint: `${source.won} wins from ${source.total} contacts. Close to your best channel - worth investing in.`,
+          action: `Analyze what ${fmtSrc(source.source)} leads have in common with your ${fmtSrc(best.source)} wins. Consider increasing investment in this channel.`,
           metric: { label: 'Win Rate', value: `${source.winRate}%` },
           hubspotSteps: [
-            `Filter contacts by Original Source = "${source.source}"`,
-            `Compare job titles and company sizes to your ${best.source} wins`,
+            `Filter contacts by Original Source = "${fmtSrc(source.source)}"`,
+            `Compare job titles and company sizes to your ${fmtSrc(best.source)} wins`,
             `If similar profile, increase budget or effort on this channel`
           ]
         });
@@ -150,12 +151,12 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
         severity,
         priority: 2,
         title: diff > 0
-          ? `Won deals received ${activityData.wonMedianTouches} touches — lost deals only ${activityData.lostMedianTouches}`
-          : `More touches aren't driving closes — review outreach quality`,
-        dataPoint: `Based on ${activityData.wonSampleSize + activityData.lostSampleSize} closed contacts. ${diff > 0 ? `Your reps may be giving up too early on leads that need more nurturing.` : `Volume isn't the issue — content and timing may need review.`}`,
+          ? `Won deals received ${activityData.wonMedianTouches} touches - lost deals only ${activityData.lostMedianTouches}`
+          : `More touches aren't driving closes - review outreach quality`,
+        dataPoint: `Based on ${activityData.wonSampleSize + activityData.lostSampleSize} closed contacts. ${diff > 0 ? `Your reps may be giving up too early on leads that need more nurturing.` : `Volume isn't the issue - content and timing may need review.`}`,
         action: diff > 0
           ? `Build a ${Math.ceil(activityData.wonMedianTouches)}-touch sequence in HubSpot. Don't allow reps to mark a lead as lost until they've hit ${Math.ceil(activityData.wonMedianTouches)} documented touches. Create a sequence: Day 1 call → Day 2 email → Day 5 LinkedIn → Day 8 call → Day 12 email → Day 18 final breakup email.`
-          : `Your team is making enough contacts but not converting. Review your email templates and call scripts — the problem is messaging, not volume. A/B test your most common outreach templates.`,
+          : `Your team is making enough contacts but not converting. Review your email templates and call scripts - the problem is messaging, not volume. A/B test your most common outreach templates.`,
         metric: { label: 'Touch Difference', value: `+${Math.abs(diff).toFixed(1)}` },
         hubspotSteps: diff > 0 ? [
           `Go to Automation → Sequences → Create new sequence`,
@@ -181,7 +182,7 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
         subtype: 'meetings',
         severity: 'high',
         priority: 1,
-        title: `Won deals average ${won.avgMeetings} meetings — lost deals have almost none`,
+        title: `Won deals average ${won.avgMeetings} meetings - lost deals have almost none`,
         dataPoint: `Meetings are strongly correlated with closes in your pipeline. Deals without a meeting almost never close.`,
         action: `Make booking a meeting a required step in your sales process. In HubSpot, add "Meeting Booked" as a required deal property before moving to Opportunity stage. Create a sequence that pushes for a meeting on touch 2 and touch 4.`,
         metric: { label: 'Meeting Impact', value: 'Critical' },
@@ -225,15 +226,15 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           subtype: 'ltv',
           severity: 'medium',
           priority: 3,
-          title: `${best.source} deals are worth $${best.avgDealSize.toLocaleString()} vs $${worst.avgDealSize.toLocaleString()} from ${worst.source}`,
-          dataPoint: `${best.source} produces ${Math.round(best.avgDealSize / worst.avgDealSize * 10) / 10}× more revenue per deal. You may be spending equal effort on unequal opportunities.`,
-          action: `Prioritize ${best.source} leads in your pipeline. When two deals are competing for rep attention, ${best.source} leads should win. Consider adjusting your lead scoring to weight ${best.source} higher.`,
+          title: `${fmtSrc(best.source)} deals are worth $${best.avgDealSize.toLocaleString()} vs $${worst.avgDealSize.toLocaleString()} from ${fmtSrc(worst.source)}`,
+          dataPoint: `${fmtSrc(best.source)} produces ${Math.round(best.avgDealSize / worst.avgDealSize * 10) / 10}× more revenue per deal. You may be spending equal effort on unequal opportunities.`,
+          action: `Prioritize ${fmtSrc(best.source)} leads in your pipeline. When two deals are competing for rep attention, ${fmtSrc(best.source)} leads should win. Consider adjusting your lead scoring to weight ${fmtSrc(best.source)} higher.`,
           metric: { label: 'Deal Size Gap', value: `${Math.round(best.avgDealSize / worst.avgDealSize * 10) / 10}×` },
           hubspotSteps: [
             `Go to CRM → Contacts → filter by Original Source`,
             `Add Average Deal Size as a column and compare`,
-            `Update your HubSpot lead scoring: +10 points for ${best.source} leads`,
-            `Create a view: "${best.source} MQLs" sorted by create date for daily rep review`
+            `Update your HubSpot lead scoring: +10 points for ${fmtSrc(best.source)} leads`,
+            `Create a view: "${fmtSrc(best.source)} MQLs" sorted by create date for daily rep review`
           ]
         });
       }
@@ -248,7 +249,7 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           subtype: 'reps',
           severity: top.winRate - bottom.winRate > 30 ? 'high' : 'medium',
           priority: 2,
-          title: `Top rep closes at ${top.winRate}% — bottom rep at ${bottom.winRate}%`,
+          title: `Top rep closes at ${top.winRate}% - bottom rep at ${bottom.winRate}%`,
           dataPoint: `${top.winRate - bottom.winRate} point gap between your best and worst performers. If your bottom rep performed at your top rep's rate, you'd close significantly more revenue.`,
           action: `Schedule a pipeline review between your top and bottom reps. Have your top rep share their discovery call structure, objection handling, and follow-up cadence. Record their next 3 calls for training material.`,
           metric: { label: 'Performance Gap', value: `${top.winRate - bottom.winRate}pts` },
@@ -273,10 +274,10 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
 
 function getFunnelAction(stage, fromLabel, toLabel, convRate) {
   const actions = {
-    marketingqualifiedlead: `Your ${fromLabel}→${toLabel} conversion is ${convRate}%. Review your MQL definition — are you qualifying too loosely? Add lead scoring in HubSpot based on: email opens (5pts), page views (3pts), form submissions (10pts), demo request (25pts). Only contacts above 30 points should become MQLs. This will reduce volume but dramatically increase quality.`,
-    salesqualifiedlead: `Only ${convRate}% of MQLs become SQLs. This usually means either the MQL bar is too low or reps aren't following up fast enough. Check your average MQL response time — if it's over 4 hours, that's your problem. Create a HubSpot workflow: New MQL created → assign to rep → create "Call within 2 hours" task → if no activity in 4 hours, send manager alert.`,
+    marketingqualifiedlead: `Your ${fromLabel}→${toLabel} conversion is ${convRate}%. Review your MQL definition - are you qualifying too loosely? Add lead scoring in HubSpot based on: email opens (5pts), page views (3pts), form submissions (10pts), demo request (25pts). Only contacts above 30 points should become MQLs. This will reduce volume but dramatically increase quality.`,
+    salesqualifiedlead: `Only ${convRate}% of MQLs become SQLs. This usually means either the MQL bar is too low or reps aren't following up fast enough. Check your average MQL response time - if it's over 4 hours, that's your problem. Create a HubSpot workflow: New MQL created → assign to rep → create "Call within 2 hours" task → if no activity in 4 hours, send manager alert.`,
     opportunity: `${convRate}% of SQLs become Opportunities. Your reps may be advancing leads too early or your discovery process isn't qualifying properly. Add required fields before a contact can become an Opportunity: Budget confirmed, Decision maker identified, Timeline established, Pain point documented.`,
-    customer: `Only ${convRate}% of Opportunities close. This is your close rate — industry average for B2B is 15-30%. Review your last 10 lost deals: were they lost on price, timing, competition, or no decision? Create a required "Closed Lost Reason" field in HubSpot and make reps fill it in. You can't fix what you can't measure.`
+    customer: `Only ${convRate}% of Opportunities close. This is your close rate - industry average for B2B is 15-30%. Review your last 10 lost deals: were they lost on price, timing, competition, or no decision? Create a required "Closed Lost Reason" field in HubSpot and make reps fill it in. You can't fix what you can't measure.`
   };
   return actions[stage] || `Your ${fromLabel}→${toLabel} conversion is ${convRate}%. Review the qualification criteria and follow-up cadence at this stage.`;
 }
@@ -292,7 +293,7 @@ function getHubSpotSteps(stage) {
     salesqualifiedlead: [
       `Go to Automation → Workflows → Create "MQL Response SLA"`,
       `Trigger: Lifecycle stage = MQL`,
-      `Action: Create task for owner "Call new MQL — 2 hour SLA"`,
+      `Action: Create task for owner "Call new MQL - 2 hour SLA"`,
       `Delay 4 hours → if no call logged → email manager escalation`
     ],
     opportunity: [

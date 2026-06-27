@@ -33,7 +33,7 @@ function calculatePipelineHealthScore(contacts, deals) {
     total += 20;
   }
 
-  // 3. Activity level (20%) — % of active contacts with at least 1 touch
+  // 3. Activity level (20%) - % of active contacts with at least 1 touch
   const noTouch = calc.calculateNoTouchCount(contacts);
   if (noTouch.total > 0) {
     const score = Math.max(0, 100 - noTouch.pct);
@@ -101,7 +101,7 @@ function countStuckRecords(contacts, deals) {
 
 function findStuckRecords(contacts, deals) {
   const now = Date.now();
-  // Thresholds in days — realistic for a small business (not a high-velocity SDR team)
+  // Thresholds in days - realistic for a small business (not a high-velocity SDR team)
   const thresholds = { lead: 7, marketingqualifiedlead: 14, salesqualifiedlead: 14, opportunity: 21 };
   const stageProps = {
     lead: 'hs_lifecyclestage_lead_date',
@@ -174,10 +174,10 @@ function findStuckRecords(contacts, deals) {
 
 function getStuckAction(stage, days, threshold) {
   const actions = {
-    lead: `Sat as Lead for ${days} days. Qualify or disqualify today — set lifecycle stage based on engagement.`,
+    lead: `Sat as Lead for ${days} days. Qualify or disqualify today - set lifecycle stage based on engagement.`,
     marketingqualifiedlead: `MQL for ${days} days vs ${threshold}-day target. Assign owner and trigger sales outreach now.`,
     salesqualifiedlead: `SQL for ${days} days. Schedule discovery call or move back to MQL with re-nurture sequence.`,
-    opportunity: `Opportunity for ${days} days. Get a decision — close as won, lost, or push out timeline.`,
+    opportunity: `Opportunity for ${days} days. Get a decision - close as won, lost, or push out timeline.`,
   };
   return actions[stage] || 'Review and update stage or close.';
 }
@@ -210,9 +210,9 @@ function findUncontactedLeads(contacts) {
       source: c.properties.hs_analytics_source || 'Unknown',
       hoursSinceCreated: Math.round(hoursSinceCreated),
       urgency,
-      action: hoursSinceCreated < 6 ? 'Contact within the next hour — best close window' :
-              hoursSinceCreated < 24 ? 'Contact today — every hour reduces close probability' :
-              'Contact immediately — likely already gone cold',
+      action: hoursSinceCreated < 6 ? 'Contact within the next hour - best close window' :
+              hoursSinceCreated < 24 ? 'Contact today - every hour reduces close probability' :
+              'Contact immediately - likely already gone cold',
       hubspotUrl: `https://app.hubspot.com/contacts/${c.id}`,
     });
   }
@@ -233,7 +233,7 @@ function buildFixThisFirst(contacts, deals, healthScore) {
       steps: [
         'Go to Automation → Workflows → Create new (or use Saved View on Starter)',
         'On Pro: Trigger when Lifecycle Stage = MQL → Create task for owner',
-        'On Starter: Create a Saved Contact View filtered to MQLs created today, no last-contact date — review every morning',
+        'On Starter: Create a Saved Contact View filtered to MQLs created today, no last-contact date - review every morning',
       ],
       starterSafe: true,
     },
@@ -245,17 +245,17 @@ function buildFixThisFirst(contacts, deals, healthScore) {
         'Go to Contacts → Filters → Lifecycle stage is one of Lead, MQL, SQL',
         'Add filter: Last activity date is unknown',
         'Save view as "No-touch leads"',
-        'Assign daily review owner — clear list each morning',
+        'Assign daily review owner - clear list each morning',
       ],
       starterSafe: true,
     },
     conversion: {
       title: `${data.detail.split(': ')[1] || 'Stage conversion'} is your biggest leak`,
       description: data.detail,
-      action: 'Audit the qualification criteria at this stage — are reps moving contacts forward too fast or letting them stall?',
+      action: 'Audit the qualification criteria at this stage - are reps moving contacts forward too fast or letting them stall?',
       steps: [
         'Pull your last 20 contacts that converted at this stage and your last 20 that didn\'t',
-        'Identify what the 20 converters had in common — source, touches, demo attended, etc.',
+        'Identify what the 20 converters had in common - source, touches, demo attended, etc.',
         'Add those criteria as required fields/properties in HubSpot before stage advances',
       ],
       starterSafe: true,
@@ -263,11 +263,11 @@ function buildFixThisFirst(contacts, deals, healthScore) {
     winRate: {
       title: 'Your close rate is below benchmark',
       description: data.detail,
-      action: 'Review your last 10 lost deals for common patterns — price, timing, competitor, fit.',
+      action: 'Review your last 10 lost deals for common patterns - price, timing, competitor, fit.',
       steps: [
         'In HubSpot, filter Deals → Stage is Closed Lost → sorted by recent',
         'Make "Closed Lost Reason" a required field on close',
-        'Run monthly review — what reason appears most? That\'s your sales playbook gap',
+        'Run monthly review - what reason appears most? That\'s your sales playbook gap',
       ],
       starterSafe: true,
     },
@@ -277,7 +277,7 @@ function buildFixThisFirst(contacts, deals, healthScore) {
       action: 'Set stage-aging thresholds and review stuck records weekly.',
       steps: [
         'Create Saved Views for each stage: "MQLs > 3 days", "SQLs > 7 days", "Opportunities > 14 days"',
-        'Review weekly in pipeline meeting — every record either moves or closes lost',
+        'Review weekly in pipeline meeting - every record either moves or closes lost',
       ],
       starterSafe: true,
     },
@@ -289,7 +289,7 @@ function buildTopOpportunities(contacts, deals, healthScore, uncontacted, stuckR
   const items = [];
   const fmt$ = n => '$' + Math.round(n).toLocaleString();
 
-  // 1. Uncontacted leads — most time-sensitive
+  // 1. Uncontacted leads - most time-sensitive
   if (uncontacted.length > 0) {
     const critical = uncontacted.filter(u => u.urgency === 'critical').length;
     items.push({
@@ -333,7 +333,7 @@ function buildTopOpportunities(contacts, deals, healthScore, uncontacted, stuckR
   if (speedDim && speedDim.score < 60 && items.length < 4) {
     items.push({
       urgency: speedDim.score < 30 ? 'high' : 'medium',
-      title: 'Response time is too slow — leads are going cold',
+      title: 'Response time is too slow - leads are going cold',
       action: speedDim.detail || 'Set up automated task assignment so every new lead gets a response within 1 hour.',
       metric: `Speed score: ${speedDim.score}/100`,
       type: 'speed',
