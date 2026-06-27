@@ -2,40 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 
-const fmt = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
-const fmtK = n => n >= 1000 ? `$${(n/1000).toFixed(0)}k` : `$${n}`;
+const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
 const fmtSrc = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
 
-const REVENUE_COLORS = ['#059669','#10B981','#34D399','#6EE7B7','#A7F3D0'];
-const WINRATE_COLORS = ['#3B82F6','#60A5FA','#93C5FD','#BFDBFE','#DBEAFE'];
+// Color scale for Rev/Lead bar: green (best) → amber → red (worst)
+function barColor(value, max) {
+  if (!max || max === 0) return '#94A3B8';
+  const ratio = value / max;
+  if (ratio >= 0.75) return '#059669';
+  if (ratio >= 0.5)  return '#10B981';
+  if (ratio >= 0.25) return '#F59E0B';
+  return '#EF4444';
+}
 
-function SourceTooltip({ active, payload, formatter }) {
+function RevLeadTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
   return (
     <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:8, padding:'8px 12px', fontSize:12, boxShadow:'0 2px 8px rgba(0,0,0,.08)', pointerEvents:'none' }}>
-      <div style={{ fontWeight:700, color:'#111', marginBottom:3 }}>{payload[0].payload.name}</div>
-      <div style={{ color:'#555' }}>{formatter(payload[0].value)}</div>
+      <div style={{ fontWeight:700, color:'#111', marginBottom:3 }}>{d.name}</div>
+      <div style={{ color:'#059669', fontWeight:600 }}>${d.value.toLocaleString()} per lead</div>
+      <div style={{ color:'#888', marginTop:2 }}>{d.contacts} contacts · {d.won} won · {d.winRate}% win rate</div>
     </div>
   );
 }
 
-function HBarChart({ data, dataKey, formatter, colors }) {
-  if (!data?.length) return null;
-  return (
-    <div style={{ width:'100%', height: data.length * 44 + 16 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ left:0, right:16, top:4, bottom:4 }}>
-          <XAxis type="number" hide />
-          <YAxis type="category" dataKey="name" width={110} tick={{ fontSize:12, fill:'#555' }} axisLine={false} tickLine={false} />
-          <Tooltip content={<SourceTooltip formatter={formatter} />} cursor={false} wrapperStyle={{ pointerEvents:'none' }} />
-          <Bar dataKey={dataKey} radius={[0,5,5,0]} maxBarSize={24}>
-            {data.map((_,i) => <Cell key={i} fill={colors[i % colors.length]} />)}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
+const SOURCE_LABELS = {
+  hs_analytics_source: 'Original Source (first touch)',
+  hs_analytics_source_data_1: 'Source Detail',
+  hs_analytics_source_data_2: 'Source Detail 2',
+};
 
 export default function SourceQuality() {
   const [data, setData] = useState(null);
@@ -52,112 +48,127 @@ export default function SourceQuality() {
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Analyzing your sources…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
-  if (!data || !data.sources?.length) {
+  if (!data?.sources?.length) {
     return (
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'2rem', textAlign:'center' }}>
         <div style={{ fontSize:15, fontWeight:600, color:'#111', marginBottom:6 }}>Not enough source data yet</div>
-        <div style={{ fontSize:13, color:'#888', maxWidth:380, margin:'0 auto', lineHeight:1.6 }}>Once your contacts have source attribution and a few have closed, this will show which channels actually produce revenue.</div>
+        <div style={{ fontSize:13, color:'#888', maxWidth:380, margin:'0 auto', lineHeight:1.6 }}>Once contacts have source attribution and a few deals close, this will show which channels actually produce revenue.</div>
       </div>
     );
   }
 
-  const sourceLabels = {
-    hs_analytics_source: 'Original Source (first touch)',
-    hs_analytics_source_data_1: 'Source Detail',
-    hs_analytics_source_data_2: 'Source Detail 2',
-  };
+  // Rev per Lead for each source with at least 1 contact
+  const revLeadData = data.sources
+    .filter(s => s.contacts > 0 && s.revenue > 0)
+    .map(s => ({
+      name: fmtSrc(s.source),
+      value: Math.round(s.revenue / s.contacts),
+      contacts: s.contacts,
+      won: s.won,
+      winRate: s.winRate,
+    }))
+    .sort((a, b) => b.value - a.value);
 
-  const chartSources = data.sources.filter(s => s.deals >= 1);
-  const revenueData = [...chartSources].sort((a,b) => b.revenue - a.revenue).slice(0,6).map(s => ({ name: fmtSrc(s.source), value: s.revenue }));
-  const winRateData = [...chartSources].filter(s => s.deals >= 2).sort((a,b) => b.winRate - a.winRate).slice(0,6).map(s => ({ name: fmtSrc(s.source), value: s.winRate }));
+  const maxRevLead = revLeadData[0]?.value || 1;
+
+  // Add revPerLead to each source row for the table
+  const sourcesWithRevLead = data.sources.map(s => ({
+    ...s,
+    revPerLead: s.contacts > 0 && s.revenue > 0 ? Math.round(s.revenue / s.contacts) : 0,
+  }));
 
   return (
     <div>
-      {/* Attribution selector */}
+      {/* Attribution picker */}
       {data.availableProperties?.length > 1 && (
-        <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: '#666', fontWeight: 500 }}>Attribution:</span>
+        <div style={{ marginBottom:14, display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ fontSize:12, color:'#666', fontWeight:500 }}>Attribution model:</span>
           <select value={property} onChange={e => setProperty(e.target.value)}
-            style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E5EA', fontSize: 12, background: '#fff' }}>
-            {data.availableProperties.map(p => <option key={p} value={p}>{sourceLabels[p] || p}</option>)}
+            style={{ padding:'5px 10px', borderRadius:6, border:'1px solid #E2E5EA', fontSize:12, background:'#fff' }}>
+            {data.availableProperties.map(p => <option key={p} value={p}>{SOURCE_LABELS[p] || p}</option>)}
           </select>
         </div>
       )}
 
-      {/* Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 14 }}>
-        {data.bestRevenue && (
-          <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Top Revenue Source</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#111', marginBottom: 2 }}>{fmtSrc(data.bestRevenue.source)}</div>
-            <div style={{ fontSize: 12, color: '#666' }}>{fmt(data.bestRevenue.revenue)} from {data.bestRevenue.won} won deals</div>
+      {/* Rev per Lead chart + Fastest to Close side by side */}
+      <div style={{ display:'grid', gridTemplateColumns: data.fastestCycle ? '1fr 240px' : '1fr', gap:12, marginBottom:14 }}>
+
+        {/* Revenue per Lead bar chart */}
+        {revLeadData.length > 0 && (
+          <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px' }}>
+            <div style={{ marginBottom:4 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:'#111' }}>Revenue per Lead by source</div>
+              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Total revenue divided by total leads from that channel. Shows true ROI — best to worst.</div>
+            </div>
+            <div style={{ height: revLeadData.length * 44 + 20, marginTop:12 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revLeadData} layout="vertical" margin={{ left:0, right:20, top:4, bottom:4 }}>
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={110} tick={{ fontSize:12, fill:'#555' }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<RevLeadTooltip />} cursor={false} wrapperStyle={{ pointerEvents:'none' }} />
+                  <Bar dataKey="value" radius={[0,5,5,0]} maxBarSize={26} isAnimationActive={false}>
+                    {revLeadData.map((d, i) => <Cell key={i} fill={barColor(d.value, maxRevLead)} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Value labels below chart */}
+            <div style={{ display:'flex', flexDirection:'column', gap:2, marginTop:4 }}>
+              {revLeadData.map((d, i) => (
+                <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'2px 0', fontSize:11, color:'#888' }}>
+                  <span style={{ paddingLeft:116 }}>{d.name}</span>
+                  <span style={{ fontWeight:700, color: barColor(d.value, maxRevLead) }}>${d.value.toLocaleString()}/lead</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-        {data.bestWinRate && (
-          <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Best Win Rate</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#111', marginBottom: 2 }}>{fmtSrc(data.bestWinRate.source)}</div>
-            <div style={{ fontSize: 12, color: '#666' }}>{data.bestWinRate.winRate}% close rate · {fmt(data.bestWinRate.avgDealSize)} avg deal</div>
-          </div>
-        )}
-        {data.worstHighVolume && (
-          <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>High Volume, Low Conversion</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#111', marginBottom: 2 }}>{fmtSrc(data.worstHighVolume.source)}</div>
-            <div style={{ fontSize: 12, color: '#666' }}>{data.worstHighVolume.contacts} contacts, only {data.worstHighVolume.winRate}% win rate</div>
-          </div>
-        )}
+
+        {/* Fastest to Close */}
         {data.fastestCycle && (
-          <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#1D4ED8', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Fastest to Close</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#111', marginBottom: 2 }}>{fmtSrc(data.fastestCycle.source)}</div>
-            <div style={{ fontSize: 12, color: '#666' }}>{data.fastestCycle.avgSalesCycle} day avg sales cycle</div>
+          <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+            <div style={{ fontSize:10, fontWeight:700, color:'#1D4ED8', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:8 }}>Fastest to Close</div>
+            <div style={{ fontSize:22, fontWeight:800, color:'#111', marginBottom:4 }}>{fmtSrc(data.fastestCycle.source)}</div>
+            <div style={{ fontSize:13, color:'#666', marginBottom:16 }}>{data.fastestCycle.avgSalesCycle} day avg sales cycle</div>
+            <div style={{ fontSize:11, color:'#888', lineHeight:1.6 }}>
+              Leads from this source close significantly faster. If you have capacity, prioritize these in your pipeline.
+            </div>
           </div>
         )}
       </div>
 
-      {/* Charts side by side */}
-      {(revenueData.length > 0 || winRateData.length > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-          {revenueData.length > 0 && (
-            <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#111', marginBottom: 12 }}>Revenue by source</div>
-              <HBarChart data={revenueData} dataKey="value" formatter={v => fmt(v)} colors={REVENUE_COLORS} />
-            </div>
-          )}
-          {winRateData.length > 0 && (
-            <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#111', marginBottom: 12 }}>Win rate by source</div>
-              <HBarChart data={winRateData} dataKey="value" formatter={v => `${v}%`} colors={WINRATE_COLORS} />
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Source table */}
-      <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '12px 14px', overflowX: 'auto' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Source funnel</div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+      <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px', overflowX:'auto' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+          <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Source breakdown</div>
+          <div style={{ fontSize:11, color:'#aaa', display:'flex', alignItems:'center', gap:4 }}>
+            <span style={{ fontSize:13 }}>⚡</span>
+            Connect Google Ads to unlock Cost per Acquisition
+          </div>
+        </div>
+        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
-              {['Source', 'Contacts', 'MQLs', 'SQLs', 'Deals', 'Won', 'Revenue', 'Win %', 'Avg Deal', 'Avg Cycle'].map(h => (
-                <th key={h} style={{ textAlign: h === 'Source' ? 'left' : 'right', padding: '6px 8px', fontSize: 10, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '.04em' }}>{h}</th>
+            <tr style={{ borderBottom:'1px solid #F3F4F6' }}>
+              {['Source','Contacts','Deals','Won','Win %','Revenue','Rev / Lead','Avg Deal','Avg Cycle','CPA'].map(h => (
+                <th key={h} style={{ textAlign: h === 'Source' ? 'left' : 'right', padding:'6px 8px', fontSize:10, fontWeight:600, color: h === 'CPA' ? '#ccc' : '#999', textTransform:'uppercase', letterSpacing:'.04em' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {data.sources.map((s, i) => (
-              <tr key={s.source} style={{ borderBottom: '1px solid #F9FAFB' }}>
-                <td style={{ padding: '8px', fontWeight: 500, color: '#111' }}>{fmtSrc(s.source)}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.contacts}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.mqls}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.sqls}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.deals}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#059669', fontWeight: 600 }}>{s.won}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#111', fontWeight: 600 }}>{fmt(s.revenue)}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: s.winRate > 30 ? '#059669' : s.winRate > 15 ? '#F59E0B' : '#EF4444', fontWeight: 600 }}>{s.winRate}%</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{fmt(s.avgDealSize)}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.avgSalesCycle ? `${s.avgSalesCycle}d` : '—'}</td>
+            {sourcesWithRevLead.map(s => (
+              <tr key={s.source} style={{ borderBottom:'1px solid #F9FAFB' }}>
+                <td style={{ padding:'8px', fontWeight:500, color:'#111' }}>{fmtSrc(s.source)}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.contacts}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.deals}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#059669', fontWeight:600 }}>{s.won}</td>
+                <td style={{ padding:'8px', textAlign:'right', color: s.winRate > 30 ? '#059669' : s.winRate > 15 ? '#F59E0B' : '#EF4444', fontWeight:600 }}>{s.winRate}%</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#111', fontWeight:600 }}>{fmt$(s.revenue)}</td>
+                <td style={{ padding:'8px', textAlign:'right', color: s.revPerLead > 0 ? barColor(s.revPerLead, maxRevLead) : '#ccc', fontWeight: s.revPerLead > 0 ? 700 : 400 }}>
+                  {s.revPerLead > 0 ? `$${s.revPerLead.toLocaleString()}` : '—'}
+                </td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{fmt$(s.avgDealSize)}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.avgSalesCycle ? `${s.avgSalesCycle}d` : '—'}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#ddd', fontSize:11 }}>—</td>
               </tr>
             ))}
           </tbody>
