@@ -46,7 +46,7 @@ const ALL_ITEMS = [
   ...NAV.filter(n => n.type === 'group').flatMap(g => g.items),
 ];
 
-const DATE_FILTER_SECTIONS = new Set(['pipeline', 'insights']);
+const NO_DATE_SECTIONS = new Set(['ask-coach', 'integrations', 'exports']);
 
 function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connected, insightCount, atRiskCount, healthScore }) {
   const colors = { free: { bg: '#F3F4F6', text: '#555' }, starter: { bg: '#EFF6FF', text: '#1D4ED8' }, pro: { bg: '#ECFDF5', text: '#059669' } };
@@ -144,7 +144,7 @@ function TopBar({ section, days, onDays, loading, onRefresh, insightsData }) {
   const features = getPlanFeatures();
   const DATE_OPTS = [{ label: 'All time', value: null }, { label: 'Last 30 days', value: 30 }, { label: 'Last 60 days', value: 60 }, { label: 'Last 90 days', value: 90 }];
   const item = ALL_ITEMS.find(i => i.id === section);
-  const showDateFilter = DATE_FILTER_SECTIONS.has(section);
+  const showDateFilter = !NO_DATE_SECTIONS.has(section);
 
   return (
     <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '0 24px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
@@ -254,16 +254,16 @@ export default function DashboardPage({ onDisconnect }) {
   const loadLeads = useCallback(async () => {
     if (leadsData) return;
     setLeadsLoading(true);
-    try { setLeadsData(await api.getLeadScores()); } catch {}
+    try { setLeadsData(await api.getLeadScores(days)); } catch {}
     finally { setLeadsLoading(false); }
-  }, [leadsData]);
+  }, [leadsData, days]);
 
   const loadRevenue = useCallback(async () => {
     if (revenueData) return;
     setRevenueLoading(true);
-    try { setRevenueData(await api.getRevenue()); } catch {}
+    try { setRevenueData(await api.getRevenue(days)); } catch {}
     finally { setRevenueLoading(false); }
-  }, [revenueData]);
+  }, [revenueData, days]);
 
   // URL routing — back/forward browser navigation
   const navigateTo = useCallback((sectionId) => {
@@ -370,7 +370,7 @@ export default function DashboardPage({ onDisconnect }) {
           )}
 
           {/* DASHBOARD */}
-          {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={navigateTo} onScoreLoad={setHealthScore} />}
+          {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={navigateTo} onScoreLoad={setHealthScore} days={days} />}
 
           {!loading && !error && funnelData && (
 
@@ -406,7 +406,7 @@ export default function DashboardPage({ onDisconnect }) {
               {section === 'at-risk' && (() => {
                 if (!features.stageAging) return <div style={{ marginTop: 20 }}><UpgradePrompt feature="stageAging" requiredPlan="starter">Unlock At Risk analysis</UpgradePrompt></div>;
                 return <>
-                  <StageAging funnelData={funnelData} />
+                  <StageAging days={days} />
                   {features.leadRisk && (
                     <div style={{ marginTop: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Lead Risk Scores</div>
@@ -422,7 +422,7 @@ export default function DashboardPage({ onDisconnect }) {
               {/* LEAD SOURCES */}
               {section === 'lead-sources' && (
                 features.sourceQuality
-                  ? <SourceQuality funnelData={funnelData} />
+                  ? <SourceQuality days={days} />
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="sourceQuality" requiredPlan="starter">Unlock Lead Sources analysis</UpgradePrompt></div>
               )}
 
@@ -430,7 +430,7 @@ export default function DashboardPage({ onDisconnect }) {
               {section === 'lead-response' && (
                 features.speedToLead
                   ? <>
-                      <SpeedToLead funnelData={funnelData} />
+                      <SpeedToLead days={days} />
                       <IntegrationHint icon="💬" name="Slack" feature="Lead Response Alerts" benefit="Get notified the moment a lead goes 24+ hours without contact, so you never let a deal go cold." onConnect={() => navigateTo('integrations')} preview="rows" />
                     </>
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="speedToLead" requiredPlan="starter">Unlock Lead Response analysis</UpgradePrompt></div>
@@ -439,7 +439,7 @@ export default function DashboardPage({ onDisconnect }) {
               {/* REVENUE */}
               {section === 'revenue' && (
                 features.revenue
-                  ? <RevenueTab data={revenueData} loading={revenueLoading} onNavigate={navigateTo} />
+                  ? <RevenueTab data={revenueData} loading={revenueLoading} onNavigate={navigateTo} days={days} />
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="revenue" requiredPlan="pro">Unlock Revenue & LTV analysis</UpgradePrompt></div>
               )}
 

@@ -33,7 +33,7 @@ const SOURCE_LABELS = {
   hs_analytics_source_data_2: 'Source Detail 2',
 };
 
-export default function SourceQuality() {
+export default function SourceQuality({ days }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,10 +41,10 @@ export default function SourceQuality() {
 
   useEffect(() => {
     setLoading(true);
-    api.getSourceQuality(property)
+    api.getSourceQuality(property, days)
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, [property]);
+  }, [property, days]);
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Analyzing your sources…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;

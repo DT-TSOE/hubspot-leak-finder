@@ -28,17 +28,18 @@ function DistributionTooltip({ active, payload }) {
   );
 }
 
-export default function SpeedToLead() {
+export default function SpeedToLead({ days }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBucket, setSelectedBucket] = useState(null);
 
   useEffect(() => {
-    api.getSpeedToLead()
+    setLoading(true);
+    api.getSpeedToLead(days)
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, []);
+  }, [days]);
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Calculating response times…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;

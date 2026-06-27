@@ -1,5 +1,10 @@
 const BASE = process.env.REACT_APP_API_URL || '';
 
+function qs(params) {
+  const p = Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => `${k}=${v}`).join('&');
+  return p ? `?${p}` : '';
+}
+
 async function apiFetch(path, opts = {}) {
   const res = await fetch(BASE + path, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
   if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error||`HTTP ${res.status}`); }
@@ -18,10 +23,10 @@ async function apiDownload(path) {
 export const api = {
   authStatus: () => apiFetch('/auth/status'),
   disconnect: () => apiFetch('/auth/disconnect', {method:'POST'}),
-  getFunnel: (days) => apiFetch(`/api/funnel${days?`?days=${days}`:''}`),
-  getInsights: (days) => apiFetch(`/api/insights${days?`?days=${days}`:''}`),
-  getLeadScores: () => apiFetch('/api/leads/scores'),
-  getRevenue: () => apiFetch('/api/revenue'),
+  getFunnel: (days) => apiFetch(`/api/funnel${qs({days})}`),
+  getInsights: (days) => apiFetch(`/api/insights${qs({days})}`),
+  getLeadScores: (days) => apiFetch(`/api/leads/scores${qs({days})}`),
+  getRevenue: (days) => apiFetch(`/api/revenue${qs({days})}`),
   getAlerts: () => apiFetch('/api/alerts'),
   saveAlertPrefs: (prefs) => apiFetch('/api/alerts/preferences', {method:'POST', body:JSON.stringify(prefs)}),
   sendChat: (message, history) => apiFetch('/api/chat', {method:'POST', body:JSON.stringify({message, conversationHistory:history})}),
@@ -29,9 +34,9 @@ export const api = {
   exportFunnelCSV: () => apiDownload('/api/export/funnel-csv'),
   exportInsightsText: () => apiDownload('/api/export/insights-text'),
   ga4Status: () => apiFetch('/ga4/status'),
-  getGmDashboard: () => apiFetch('/api/reports/gm-dashboard'),
-  getMetricTiles: () => apiFetch('/api/reports/metric-tiles'),
-  getSourceQuality: (property) => apiFetch(`/api/reports/source-quality${property ? `?property=${property}` : ''}`),
-  getStageAging: () => apiFetch('/api/reports/stage-aging'),
-  getSpeedToLead: () => apiFetch('/api/reports/speed-to-lead'),
+  getGmDashboard: (days) => apiFetch(`/api/reports/gm-dashboard${qs({days})}`),
+  getMetricTiles: (days) => apiFetch(`/api/reports/metric-tiles${qs({days})}`),
+  getSourceQuality: (property, days) => apiFetch(`/api/reports/source-quality${qs({property, days})}`),
+  getStageAging: (days) => apiFetch(`/api/reports/stage-aging${qs({days})}`),
+  getSpeedToLead: (days) => apiFetch(`/api/reports/speed-to-lead${qs({days})}`),
 };
