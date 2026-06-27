@@ -1,5 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
+
+function SeedButton() {
+  const [status, setStatus] = useState('idle'); // idle | running | done | error
+  const [log, setLog] = useState('');
+  const logRef = useRef(null);
+
+  const run = async () => {
+    setStatus('running');
+    setLog('');
+    try {
+      const res = await fetch('/api/admin/seed', { method: 'POST', credentials: 'include' });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        setLog(prev => prev + decoder.decode(value));
+        if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+      }
+      setStatus('done');
+    } catch (e) {
+      setLog(e.message);
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div style={{ marginTop: 32, borderTop: '1px solid #F3F4F6', paddingTop: 24 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Developer</div>
+      <div style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 10, padding: '16px 18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: log ? 12 : 0 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 3 }}>Load test data</div>
+            <div style={{ fontSize: 12, color: '#888' }}>Creates 77 contacts, 17 deals, and 5 lead sources in your HubSpot account so every PipeChamp feature has data to show. Only use on a test account.</div>
+          </div>
+          <button onClick={run} disabled={status === 'running'}
+            style={{ marginLeft: 20, flexShrink: 0, padding: '8px 18px', borderRadius: 8, border: 'none', background: status === 'done' ? '#059669' : status === 'error' ? '#DC2626' : '#111', color: '#fff', fontSize: 12, fontWeight: 700, cursor: status === 'running' ? 'wait' : 'pointer', opacity: status === 'running' ? 0.7 : 1 }}>
+            {status === 'idle' ? 'Load test data' : status === 'running' ? 'Running...' : status === 'done' ? 'Done' : 'Error'}
+          </button>
+        </div>
+        {log && (
+          <pre ref={logRef} style={{ margin: 0, padding: '10px 12px', background: '#111', color: '#4CAF50', fontSize: 11, borderRadius: 7, maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {log}
+          </pre>
+        )}
+        {status === 'done' && (
+          <div style={{ marginTop: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>
+            Reload the page and switch tabs to see your data.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const INTEGRATIONS = [
   {
@@ -144,6 +198,7 @@ export default function Integrations() {
           </div>
         </div>
       ))}
+      <SeedButton />
     </div>
   );
 }
