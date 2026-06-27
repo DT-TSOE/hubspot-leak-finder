@@ -48,28 +48,46 @@ export default function SpeedToLead() {
 
   return (
     <div>
-      {/* Headline metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+      {/* Hero alert when uncontacted leads exist */}
+      {data.uncontactedCount > 0 && (
+        <div style={{ background:'linear-gradient(135deg,#1a1a1a,#2d1a1a)', borderRadius:12, padding:'16px 20px', marginBottom:14, display:'flex', alignItems:'center', gap:16 }}>
+          <div style={{ width:44, height:44, borderRadius:10, overflow:'hidden', border:'2px solid #EF4444', flexShrink:0 }}>
+            <img src="/rojo.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
+              onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🚨'; }} />
+          </div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:10, fontWeight:700, color:'#EF4444', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:3 }}>Needs Immediate Attention</div>
+            <div style={{ fontSize:18, fontWeight:700, color:'#fff', marginBottom:3 }}>
+              {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with zero outreach
+              {data.criticalCount > 0 && <span style={{ marginLeft:10, fontSize:13, fontWeight:600, color:'#EF4444' }}>({data.criticalCount} over 24h)</span>}
+            </div>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,.6)' }}>Responding within 1 hour closes 7x better. Every hour you wait, this number costs you money.</div>
+          </div>
+          <div style={{ textAlign:'right', flexShrink:0 }}>
+            <div style={{ fontSize:36, fontWeight:900, color:'#EF4444', lineHeight:1 }}>{data.uncontactedCount}</div>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', marginTop:2 }}>uncontacted</div>
+          </div>
+        </div>
+      )}
+
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
           <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median First Contact</div>
           <div style={{ fontSize:22, fontWeight:700, color: summary.value === null ? '#ccc' : summary.value < 6 ? '#059669' : summary.value < 24 ? '#F59E0B' : '#EF4444' }}>
             {fmtH(summary.value)}
           </div>
-          {summary.sample > 0 && <div style={{ fontSize:11, color:'#888', marginTop:2 }}>{summary.sample} contacts</div>}
+          {summary.sample > 0 && <div style={{ fontSize:11, color:'#888', marginTop:2 }}>{summary.sample} contacts measured</div>}
         </div>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Under 1 Hour</div>
+          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Contacted Under 1 Hour</div>
           <div style={{ fontSize:22, fontWeight:700, color: (summary.under1h ?? 0) > 50 ? '#059669' : '#F59E0B' }}>{summary.under1h ?? 0}%</div>
-          <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Best practice target</div>
-        </div>
-        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Under 24 Hours</div>
-          <div style={{ fontSize:22, fontWeight:700, color: (summary.under24h ?? 0) > 70 ? '#059669' : '#F59E0B' }}>{summary.under24h ?? 0}%</div>
+          <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Best practice: above 50%</div>
         </div>
         <div style={{ background: data.uncontactedCount > 0 ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${data.uncontactedCount > 0 ? '#FECACA' : '#BBF7D0'}`, borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color: data.uncontactedCount > 0 ? '#DC2626' : '#059669', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Not Contacted Yet</div>
-          <div style={{ fontSize:22, fontWeight:700, color: data.uncontactedCount > 0 ? '#DC2626' : '#059669' }}>{data.uncontactedCount}</div>
-          {data.criticalCount > 0 && <div style={{ fontSize:11, color:'#DC2626', marginTop:2 }}>{data.criticalCount} over 24 hours old</div>}
+          <div style={{ fontSize:10, color: data.uncontactedCount > 0 ? '#DC2626' : '#059669', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Under 24 Hours</div>
+          <div style={{ fontSize:22, fontWeight:700, color: (summary.under24h ?? 0) > 70 ? '#059669' : '#F59E0B' }}>{summary.under24h ?? 0}%</div>
+          <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Target: above 70%</div>
         </div>
       </div>
 

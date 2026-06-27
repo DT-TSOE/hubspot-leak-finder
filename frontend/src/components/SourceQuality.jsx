@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { api } from '../utils/api';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
@@ -102,39 +102,48 @@ export default function SourceQuality() {
             </div>
             <div style={{ height: revLeadData.length * 44 + 20, marginTop:12 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revLeadData} layout="vertical" margin={{ left:0, right:20, top:4, bottom:4 }}>
+                <BarChart data={revLeadData} layout="vertical" margin={{ left:0, right:60, top:4, bottom:4 }}>
                   <XAxis type="number" hide />
                   <YAxis type="category" dataKey="name" width={110} tick={{ fontSize:12, fill:'#555' }} axisLine={false} tickLine={false} />
                   <Tooltip content={<RevLeadTooltip />} cursor={false} wrapperStyle={{ pointerEvents:'none' }} />
                   <Bar dataKey="value" radius={[0,5,5,0]} maxBarSize={26} isAnimationActive={false}>
                     {revLeadData.map((d, i) => <Cell key={i} fill={barColor(d.value, maxRevLead)} />)}
+                    <LabelList dataKey="value" position="right" formatter={v => `$${v.toLocaleString()}`} style={{ fontSize:11, fill:'#555', fontWeight:600 }} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {/* Value labels below chart */}
-            <div style={{ display:'flex', flexDirection:'column', gap:2, marginTop:4 }}>
-              {revLeadData.map((d, i) => (
-                <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'2px 0', fontSize:11, color:'#888' }}>
-                  <span style={{ paddingLeft:116 }}>{d.name}</span>
-                  <span style={{ fontWeight:700, color: barColor(d.value, maxRevLead) }}>${d.value.toLocaleString()}/lead</span>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
-        {/* Fastest to Close */}
-        {data.fastestCycle && (
-          <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
-            <div style={{ fontSize:10, fontWeight:700, color:'#1D4ED8', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:8 }}>Fastest to Close</div>
-            <div style={{ fontSize:22, fontWeight:800, color:'#111', marginBottom:4 }}>{fmtSrc(data.fastestCycle.source)}</div>
-            <div style={{ fontSize:13, color:'#666', marginBottom:16 }}>{data.fastestCycle.avgSalesCycle} day avg sales cycle</div>
-            <div style={{ fontSize:11, color:'#888', lineHeight:1.6 }}>
-              Leads from this source close significantly faster. If you have capacity, prioritize these in your pipeline.
+        {/* Speed to Close by channel */}
+        {(() => {
+          const cycleData = data.sources
+            .filter(s => s.avgSalesCycle && s.avgSalesCycle > 0 && s.deals >= 2)
+            .sort((a, b) => a.avgSalesCycle - b.avgSalesCycle)
+            .slice(0, 6)
+            .map(s => ({ name: fmtSrc(s.source), value: s.avgSalesCycle, deals: s.deals }));
+          if (!cycleData.length) return null;
+          const minCycle = cycleData[0]?.value || 1;
+          return (
+            <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px' }}>
+              <div style={{ fontSize:13, fontWeight:700, color:'#111', marginBottom:4 }}>Speed to close by channel</div>
+              <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Avg days from deal created to closed-won. Fastest channels first.</div>
+              <div style={{ height: cycleData.length * 44 + 16 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={cycleData} layout="vertical" margin={{ left:0, right:48, top:4, bottom:4 }}>
+                    <XAxis type="number" hide />
+                    <YAxis type="category" dataKey="name" width={110} tick={{ fontSize:12, fill:'#555' }} axisLine={false} tickLine={false} />
+                    <Bar dataKey="value" radius={[0,5,5,0]} maxBarSize={24} isAnimationActive={false}>
+                      {cycleData.map((d, i) => <Cell key={i} fill={d.value === minCycle ? '#3B82F6' : '#93C5FD'} />)}
+                      <LabelList dataKey="value" position="right" formatter={v => `${v}d`} style={{ fontSize:11, fill:'#555', fontWeight:600 }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Source table */}

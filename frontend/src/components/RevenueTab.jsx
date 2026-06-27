@@ -31,7 +31,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
       </div>
       <IntegrationHint
         icon="💳" name="Stripe, QuickBooks, or Xero"
-        unlocks="Verify actual revenue vs HubSpot deal amounts, track MRR, and see true customer LTV by source"
+        feature="Verified Revenue & MRR" benefit="Verify actual revenue vs HubSpot estimates, track MRR trends, and calculate true LTV by source." preview="bars"
         onConnect={() => onNavigate?.('integrations')}
       />
     </div>
@@ -114,7 +114,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
       {/* Accounting integration hint */}
       <IntegrationHint
         icon="💳" name="Stripe, QuickBooks, or Xero"
-        unlocks="Verify actual revenue vs HubSpot estimates, track MRR trends, and calculate true customer LTV by source"
+        feature="Verified Revenue & MRR" benefit="Verify actual revenue vs HubSpot estimates, track MRR trends, and calculate true LTV by source." preview="bars"
         onConnect={() => onNavigate?.('integrations')}
       />
     </div>

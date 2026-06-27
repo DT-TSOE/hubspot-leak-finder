@@ -398,7 +398,7 @@ export default function DashboardPage({ onDisconnect }) {
                   )}
                   <Card title="Lifecycle funnel"><FunnelChart funnelStages={funnel.funnelStages} biggestLeak={funnel.biggestLeak} /></Card>
                   <Card title="Time between stages"><StageTimingTable stageTimes={funnel.stageTimes} /></Card>
-                  <IntegrationHint icon="🔍" name="Search Console" unlocks="See which organic keywords and pages are generating leads that actually convert into customers" onConnect={() => navigateTo('integrations')} />
+                  <IntegrationHint icon="🔍" name="Search Console" feature="Keyword to Pipeline Attribution" benefit="See which organic search keywords are generating leads that actually close into customers." onConnect={() => navigateTo('integrations')} preview="rows" />
                 </>;
               })()}
 
@@ -431,7 +431,7 @@ export default function DashboardPage({ onDisconnect }) {
                 features.speedToLead
                   ? <>
                       <SpeedToLead funnelData={funnelData} />
-                      <IntegrationHint icon="💬" name="Slack" unlocks="Get instant alerts when leads go 24+ hours without contact, plus your weekly pipeline digest in your team channel" onConnect={() => navigateTo('integrations')} />
+                      <IntegrationHint icon="💬" name="Slack" feature="Lead Response Alerts" benefit="Get notified the moment a lead goes 24+ hours without contact, so you never let a deal go cold." onConnect={() => navigateTo('integrations')} preview="rows" />
                     </>
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="speedToLead" requiredPlan="starter">Unlock Lead Response analysis</UpgradePrompt></div>
               )}

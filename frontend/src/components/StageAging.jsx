@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, LabelList, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 
 const URGENCY = {
@@ -29,19 +29,6 @@ function fmtStage(stage) {
 
 const BAR_COLORS = ['#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16'];
 
-function CustomTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
-  return (
-    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 8, padding: '8px 12px', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,.08)', pointerEvents: 'none' }}>
-      <div style={{ fontWeight: 700, color: '#111', marginBottom: 3 }}>{d.name}</div>
-      <div style={{ color: '#DC2626', fontWeight: 700 }}>${d.value.toLocaleString()} at risk</div>
-      <div style={{ color: '#888', marginTop: 1 }}>{d.count} records stuck</div>
-      <div style={{ color: '#3B82F6', marginTop: 4, fontSize: 11 }}>Click to filter list ↓</div>
-    </div>
-  );
-}
-
 function RevenueAtRiskChart({ stageBreakdown, selectedStage, onSelectStage }) {
   const data = stageBreakdown
     .filter(s => s.revenueAtRisk > 0)
@@ -68,8 +55,8 @@ function RevenueAtRiskChart({ stageBreakdown, selectedStage, onSelectStage }) {
         <BarChart data={data} layout="vertical" margin={{ left: 0, right: 20, top: 4, bottom: 4 }} onClick={handleClick} style={{ cursor: 'pointer' }}>
           <XAxis type="number" hide />
           <YAxis type="category" dataKey="name" width={88} tick={{ fontSize: 12, fill: '#555' }} axisLine={false} tickLine={false} />
-          <Tooltip content={<CustomTooltip />} cursor={false} wrapperStyle={{ pointerEvents: 'none' }} />
           <Bar dataKey="value" radius={[0, 5, 5, 0]} maxBarSize={26} isAnimationActive={false}>
+            <LabelList dataKey="value" position="right" formatter={v => `$${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} style={{ fontSize: 11, fill: '#666', fontWeight: 600 }} />
             {data.map((d, i) => (
               <Cell
                 key={i}
