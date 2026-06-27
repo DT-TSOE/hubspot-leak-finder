@@ -142,32 +142,37 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
   );
 }
 
-function TopBar({ section, days, onDays, onLockedDays, loading, onRefresh, insightsData }) {
-  const features = getPlanFeatures();
+function TopBar({ section, loading, onRefresh, insightsData }) {
   const item = ALL_ITEMS.find(i => i.id === section);
-  const showDateFilter = !NO_DATE_SECTIONS.has(section);
-
   return (
-    <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
+    <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '0 24px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{item?.label || section}</span>
         {insightsData?.insights && <span style={{ fontSize: 11, color: '#aaa', marginLeft: 4 }}>{insightsData.insights.length} insights</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <NotificationBell />
-        {showDateFilter && (
-          <DateRangePicker
-            days={days}
-            onChange={onDays}
-            locked={!features.dateFilter}
-            onLocked={onLockedDays}
-          />
-        )}
         <button onClick={onRefresh} disabled={loading}
           style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#555' }}>
           {loading ? '…' : '↺'}
         </button>
       </div>
+    </div>
+  );
+}
+
+// Date filter bar — sits at the top of content area, below the sticky nav
+function ContentDateBar({ section, days, onDays, onLockedDays }) {
+  const features = getPlanFeatures();
+  if (NO_DATE_SECTIONS.has(section)) return null;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 16 }}>
+      <DateRangePicker
+        days={days}
+        onChange={onDays}
+        locked={!features.dateFilter}
+        onLocked={onLockedDays}
+      />
     </div>
   );
 }
@@ -360,9 +365,11 @@ export default function DashboardPage({ onDisconnect }) {
       <Sidebar section={section} onSection={navigateTo} plan={plan} onUpgrade={() => setShowUpgrade(true)} onDisconnect={handleDisconnect} ga4Connected={ga4Connected} insightCount={allInsights.length} atRiskCount={highRiskLeads} healthScore={healthScore} />
 
       <div style={{ marginLeft: SIDEBAR_W, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <TopBar section={section} days={days} onDays={handleDays} onLockedDays={() => setShowUpgrade(true)} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
+        <TopBar section={section} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
 
         <main style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px' }}>
+
+          <ContentDateBar section={section} days={days} onDays={handleDays} onLockedDays={() => setShowUpgrade(true)} />
 
           {loading && section !== 'dashboard' && (
             <div style={{ textAlign: 'center', padding: '4rem', color: '#888', fontSize: 14 }}>Analyzing your HubSpot data…</div>
