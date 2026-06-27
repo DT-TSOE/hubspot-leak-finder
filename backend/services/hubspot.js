@@ -89,6 +89,37 @@ class HubSpotService {
     return data;
   }
 
+  async getActivitySummary(days = 30) {
+    const since = new Date(Date.now() - days * 86400000).toISOString();
+    const counts = {};
+    const types = [
+      { key: 'calls', url: '/crm/v3/objects/calls', dateField: 'hs_timestamp' },
+      { key: 'emails', url: '/crm/v3/objects/emails', dateField: 'hs_timestamp' },
+      { key: 'meetings', url: '/crm/v3/objects/meetings', dateField: 'hs_timestamp' },
+    ];
+    await Promise.all(types.map(async ({ key, url, dateField }) => {
+      try {
+        const r = await this.client.post(`${url}/search`, {
+          filterGroups: [{ filters: [{ propertyName: dateField, operator: 'GTE', value: since }] }],
+          limit: 1, properties: [dateField],
+        });
+        counts[key] = r.data.total || 0;
+      } catch { counts[key] = null; }
+    }));
+    return counts;
+  }
+
+  async getOwners() {
+    try {
+      const r = await this.client.get('/crm/v3/owners', { params: { limit: 100 } });
+      return (r.data.results || []).map(o => ({
+        id: String(o.id),
+        name: [o.firstName, o.lastName].filter(Boolean).join(' ') || o.email || `Owner ${o.id}`,
+        email: o.email,
+      }));
+    } catch { return []; }
+  }
+
   static invalidateCache(sessionId) {
     if (sessionId) _cache.delete(sessionId);
   }

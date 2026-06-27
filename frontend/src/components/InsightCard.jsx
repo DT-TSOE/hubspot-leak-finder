@@ -41,20 +41,19 @@ export default function InsightCard({ insight }) {
             <p style={{ margin:0, fontSize:13, color:'#333', lineHeight:1.6 }}>{insight.action}</p>
           </div>
 
-          {/* PipeCoach CTA — replaces static HubSpot steps */}
-          <button
-            onClick={e => { e.stopPropagation(); openPipeCoach(insight); }}
-            style={{ width:'100%', display:'flex', alignItems:'center', gap:10, background:'#111', border:'none', borderRadius:8, padding:'11px 14px', cursor:'pointer', textAlign:'left' }}>
-            <div style={{ width:28, height:28, borderRadius:7, overflow:'hidden', border:'2px solid #4CAF50', flexShrink:0 }}>
-              <img src="/pipecoach.png" alt="PipeCoach" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
-                onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:14px;display:flex;align-items:center;justify-content:center;height:100%;color:#fff">PC</span>'; }} />
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:'#4CAF50', letterSpacing:'.04em', marginBottom:1 }}>ASK PIPECOACH</div>
-              <div style={{ fontSize:12, color:'rgba(255,255,255,.75)' }}>Get step-by-step HubSpot instructions for this issue</div>
-            </div>
-            <span style={{ color:'#4CAF50', fontSize:16 }}>→</span>
-          </button>
+          {/* PipeCoach CTA - compact right-aligned button */}
+          <div style={{ display:'flex', justifyContent:'flex-end', marginTop:10 }}>
+            <button
+              onClick={e => { e.stopPropagation(); openPipeCoach(insight); }}
+              style={{ display:'flex', alignItems:'center', gap:7, background:'#111', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer' }}>
+              <div style={{ width:20, height:20, borderRadius:5, overflow:'hidden', border:'1.5px solid #4CAF50', flexShrink:0 }}>
+                <img src="/pipecoach.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
+                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;height:100%">PC</span>'; }} />
+              </div>
+              <span style={{ fontSize:12, fontWeight:700, color:'#fff' }}>Ask PipeCoach how to fix this</span>
+              <span style={{ color:'#4CAF50', fontSize:13 }}>→</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

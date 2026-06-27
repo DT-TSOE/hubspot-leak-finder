@@ -44,7 +44,7 @@ export default function SpeedToLead() {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 
-  const { summary, distribution, contactsByBucket, wonVsLost } = data;
+  const { summary, distribution, contactsByBucket, wonVsLost, activitySummary } = data;
 
   return (
     <div>
@@ -70,8 +70,8 @@ export default function SpeedToLead() {
         </div>
       )}
 
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
+      {/* Stats + Activity row */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${activitySummary ? 4 : 3}, 1fr)`, gap: 10, marginBottom: 14 }}>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
           <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median First Contact</div>
           <div style={{ fontSize:22, fontWeight:700, color: summary.value === null ? '#ccc' : summary.value < 6 ? '#059669' : summary.value < 24 ? '#F59E0B' : '#EF4444' }}>
@@ -89,6 +89,24 @@ export default function SpeedToLead() {
           <div style={{ fontSize:22, fontWeight:700, color: (summary.under24h ?? 0) > 70 ? '#059669' : '#F59E0B' }}>{summary.under24h ?? 0}%</div>
           <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Target: above 70%</div>
         </div>
+        {/* Activity summary - last 30 days */}
+        {activitySummary && (
+          <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
+            <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Activity (30 days)</div>
+            {[
+              { label:'Calls', value:activitySummary.calls, icon:'📞' },
+              { label:'Emails', value:activitySummary.emails, icon:'✉' },
+              { label:'Meetings', value:activitySummary.meetings, icon:'📅' },
+            ].map(a => (
+              <div key={a.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+                <span style={{ fontSize:11, color:'#666' }}>{a.icon} {a.label}</span>
+                <span style={{ fontSize:13, fontWeight:700, color: a.value === null ? '#ccc' : '#111' }}>
+                  {a.value === null ? '--' : a.value.toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Response time distribution + Won vs Lost side by side */}

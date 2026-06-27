@@ -95,17 +95,17 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         </div>
       )}
 
-      {/* Rep performance */}
-      {data.repPerformance?.length > 0 && (
+      {/* Rep performance - only show with 2+ reps */}
+      {data.repPerformance?.length > 1 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:12 }}>Rep performance</div>
+          <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:12 }}>Team performance</div>
           {data.repPerformance.map((r, i) => (
-            <div key={r.ownerId} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0', borderBottom:i < data.repPerformance.length-1 ? '1px solid #F9FAFB' : 'none' }}>
+            <div key={r.ownerId} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom:i < data.repPerformance.length-1 ? '1px solid #F9FAFB' : 'none' }}>
               <div>
-                <div style={{ fontSize:13, fontWeight:500, color:'#222' }}>Rep #{r.ownerId.slice(-6)}</div>
-                <div style={{ fontSize:11, color:'#999' }}>{r.won} won · {r.lost} lost · {fmt$(r.avgDealSize)} avg</div>
+                <div style={{ fontSize:13, fontWeight:600, color:'#222' }}>{r.name || `Team member ${i + 1}`}</div>
+                <div style={{ fontSize:11, color:'#999' }}>{r.won} won · {r.lost} lost · {fmt$(r.avgDealSize)} avg deal</div>
               </div>
-              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#059669' : '#333' }}>{r.winRate}%</div>
+              <div style={{ fontSize:16, fontWeight:700, color:i===0 ? '#059669' : '#555' }}>{r.winRate}%</div>
             </div>
           ))}
         </div>

@@ -169,6 +169,7 @@ router.get('/stage-aging', requireAuth, async (req, res) => {
 // Speed-to-lead monitor
 router.get('/speed-to-lead', requireAuth, async (req, res) => {
   try {
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts, deals } = await loadData(req);
 
     const speed = calc.calculateTimeToFirstTouch(contacts);
@@ -234,10 +235,14 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
       { label: 'Over 24h',   key: 'over24h', count: buckets.over24h.length,  color: '#EF4444' },
     ] : [];
 
+    // Activity summary - calls, emails, meetings in last 30 days
+    const activitySummary = await hs.getActivitySummary(30).catch(() => ({}));
+
     res.json({
       summary: speed,
       distribution,
       contactsByBucket: buckets,
+      activitySummary,
       uncontactedQueue: uncontacted,
       uncontactedCount: uncontacted.length,
       criticalCount: uncontacted.filter(u => u.urgency === 'critical').length,

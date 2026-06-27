@@ -30,7 +30,7 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
           priority: severity === 'high' ? 1 : severity === 'medium' ? 2 : 3,
           title: `${stage.dropOffRate}% of ${plural(prev.label)} never become ${plural(stage.label)}`,
           dataPoint: `${stage.dropOff.toLocaleString()} contacts drop off here. Only ${stage.conversionRate}% convert - your ${prev.label}→${stage.label} transition is bleeding revenue.`,
-          action: getFunnelAction(stage.stage, prev.label, stage.label, stage.conversionRate),
+          action: getFunnelAction(stage.stage, prev.label, stage.label, stage.conversionRate, speedData),
           metric: { label: 'Drop-off Rate', value: `${stage.dropOffRate}%` },
           hubspotSteps: getHubSpotSteps(stage.stage)
         });
@@ -272,12 +272,19 @@ function generateInsights(funnelData, sourceData, activityData, speedData, ltvDa
   });
 }
 
-function getFunnelAction(stage, fromLabel, toLabel, convRate) {
+function getFunnelAction(stage, fromLabel, toLabel, convRate, speedData) {
+  const speedContext = speedData?.value != null
+    ? ` Your team's median first contact is ${formatH(speedData.value)}${speedData.value > 1 ? ' - leads contacted within 1 hour convert significantly faster' : ', which is strong'}.`
+    : '';
+  const wonSpeedContext = speedData?.wonMedianHours != null
+    ? ` Won deals were contacted in ${formatH(speedData.wonMedianHours)} on average.`
+    : '';
+
   const actions = {
-    marketingqualifiedlead: `Your ${fromLabel}→${toLabel} conversion is ${convRate}%. Review your MQL definition - are you qualifying too loosely? Add lead scoring in HubSpot based on: email opens (5pts), page views (3pts), form submissions (10pts), demo request (25pts). Only contacts above 30 points should become MQLs. This will reduce volume but dramatically increase quality.`,
-    salesqualifiedlead: `Only ${convRate}% of MQLs become SQLs. This usually means either the MQL bar is too low or reps aren't following up fast enough. Check your average MQL response time - if it's over 4 hours, that's your problem. Create a HubSpot workflow: New MQL created → assign to rep → create "Call within 2 hours" task → if no activity in 4 hours, send manager alert.`,
-    opportunity: `${convRate}% of SQLs become Opportunities. Your reps may be advancing leads too early or your discovery process isn't qualifying properly. Add required fields before a contact can become an Opportunity: Budget confirmed, Decision maker identified, Timeline established, Pain point documented.`,
-    customer: `Only ${convRate}% of Opportunities close. This is your close rate - industry average for B2B is 15-30%. Review your last 10 lost deals: were they lost on price, timing, competition, or no decision? Create a required "Closed Lost Reason" field in HubSpot and make reps fill it in. You can't fix what you can't measure.`
+    marketingqualifiedlead: `Your ${fromLabel}→${toLabel} conversion is ${convRate}%.${speedContext} Review your MQL definition - are you qualifying too loosely? Add lead scoring in HubSpot: email opens (5pts), form fills (10pts), demo requests (25pts). Only contacts above 30 points should become MQLs.`,
+    salesqualifiedlead: `Only ${convRate}% of MQLs become SQLs.${speedContext}${wonSpeedContext} Reps following up faster close more. Create a HubSpot workflow: New MQL created → assign to rep → create a "Call within 2 hours" task → if no activity logged in 4 hours, send manager an alert.`,
+    opportunity: `${convRate}% of SQLs become Opportunities. Your reps may be advancing leads before they are truly qualified. Add required fields before a contact can reach Opportunity stage: budget confirmed, decision maker identified, timeline established.`,
+    customer: `Only ${convRate}% of Opportunities close. Industry average for B2B is 15-30%. Review your last 10 lost deals - were they lost on price, timing, competition, or no decision? Add a required "Closed Lost Reason" field in HubSpot so you can measure and fix the real issue.`,
   };
   return actions[stage] || `Your ${fromLabel}→${toLabel} conversion is ${convRate}%. Review the qualification criteria and follow-up cadence at this stage.`;
 }
