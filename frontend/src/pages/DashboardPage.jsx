@@ -14,6 +14,7 @@ import SpeedToLead from '../components/SpeedToLead';
 import PipelineReport from '../components/PipelineReport';
 import Integrations from '../components/Integrations';
 import TourOverlay from '../components/TourOverlay';
+import IntegrationHint from '../components/IntegrationHint';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 
@@ -397,6 +398,7 @@ export default function DashboardPage({ onDisconnect }) {
                   )}
                   <Card title="Lifecycle funnel"><FunnelChart funnelStages={funnel.funnelStages} biggestLeak={funnel.biggestLeak} /></Card>
                   <Card title="Time between stages"><StageTimingTable stageTimes={funnel.stageTimes} /></Card>
+                  <IntegrationHint icon="🔍" name="Search Console" unlocks="See which organic keywords and pages are generating leads that actually convert into customers" onConnect={() => navigateTo('integrations')} />
                 </>;
               })()}
 
@@ -427,14 +429,17 @@ export default function DashboardPage({ onDisconnect }) {
               {/* LEAD RESPONSE */}
               {section === 'lead-response' && (
                 features.speedToLead
-                  ? <SpeedToLead funnelData={funnelData} />
+                  ? <>
+                      <SpeedToLead funnelData={funnelData} />
+                      <IntegrationHint icon="💬" name="Slack" unlocks="Get instant alerts when leads go 24+ hours without contact, plus your weekly pipeline digest in your team channel" onConnect={() => navigateTo('integrations')} />
+                    </>
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="speedToLead" requiredPlan="starter">Unlock Lead Response analysis</UpgradePrompt></div>
               )}
 
               {/* REVENUE */}
               {section === 'revenue' && (
                 features.revenue
-                  ? <RevenueTab data={revenueData} loading={revenueLoading} />
+                  ? <RevenueTab data={revenueData} loading={revenueLoading} onNavigate={navigateTo} />
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="revenue" requiredPlan="pro">Unlock Revenue & LTV analysis</UpgradePrompt></div>
               )}
 

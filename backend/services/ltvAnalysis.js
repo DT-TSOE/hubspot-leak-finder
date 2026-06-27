@@ -60,10 +60,26 @@ function analyzeLTV(contacts, deals) {
     .map(([ownerId, r]) => ({ ownerId, won:r.won, lost:r.lost, total:r.won+r.lost, winRate: Math.round((r.won/(r.won+r.lost))*1000)/10, avgDealSize: r.won > 0 ? Math.round(r.totalValue/r.won) : 0 }))
     .sort((a,b) => b.winRate - a.winRate);
 
+  // Monthly revenue trend (last 12 months with closed deals)
+  const monthMap = {};
+  for (const deal of wonDeals) {
+    const closed = new Date(deal.properties.closedate);
+    if (isNaN(closed.getTime())) continue;
+    const key = `${closed.getFullYear()}-${String(closed.getMonth()+1).padStart(2,'0')}`;
+    const label = closed.toLocaleDateString('en-US', { month:'short', year:'2-digit' });
+    if (!monthMap[key]) monthMap[key] = { key, label, revenue:0, deals:0 };
+    monthMap[key].revenue += parseFloat(deal.properties.amount||'0');
+    monthMap[key].deals++;
+  }
+  const revenueTrend = Object.values(monthMap)
+    .sort((a,b) => a.key.localeCompare(b.key))
+    .slice(-12)
+    .map(m => ({ ...m, revenue: Math.round(m.revenue) }));
+
   return {
     insufficient: false,
     overview: { totalWonDeals: wonDeals.length, totalRevenue: Math.round(totalRevenue), avgDealSize: Math.round(avgDealSize) },
-    ltvBySource, salesCycleBySource, repPerformance
+    ltvBySource, salesCycleBySource, repPerformance, revenueTrend
   };
 }
 

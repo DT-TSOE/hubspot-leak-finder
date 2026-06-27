@@ -5,7 +5,8 @@ const requireAuth = require('../middleware/requireAuth');
 
 router.get('/connect', requireAuth, (req, res) => {
   if (!process.env.GA4_CLIENT_ID) return res.status(503).json({ error: 'GA4 not configured.' });
-  const params = new URLSearchParams({ client_id:process.env.GA4_CLIENT_ID, redirect_uri:process.env.GA4_REDIRECT_URI||'http://localhost:3001/ga4/callback', response_type:'code', scope:'https://www.googleapis.com/auth/analytics.readonly', access_type:'offline', prompt:'consent', state:req.session.id });
+  const state = req.session.id || ('ga4_' + Math.random().toString(36).slice(2));
+  const params = new URLSearchParams({ client_id:process.env.GA4_CLIENT_ID, redirect_uri:process.env.GA4_REDIRECT_URI||'http://localhost:3001/ga4/callback', response_type:'code', scope:'https://www.googleapis.com/auth/analytics.readonly', access_type:'offline', prompt:'consent', state });
   res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
 });
 
