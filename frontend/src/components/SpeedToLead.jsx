@@ -32,6 +32,7 @@ export default function SpeedToLead() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedBucket, setSelectedBucket] = useState(null);
 
   useEffect(() => {
     api.getSpeedToLead()
@@ -43,7 +44,7 @@ export default function SpeedToLead() {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 
-  const { summary, distribution, wonVsLost } = data;
+  const { summary, distribution, contactsByBucket, wonVsLost } = data;
 
   return (
     <div>
@@ -78,28 +79,62 @@ export default function SpeedToLead() {
         {/* Histogram */}
         {distribution?.length > 0 && (
           <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px' }}>
-            <div style={{ fontSize:12, fontWeight:600, color:'#111', marginBottom:4 }}>When do you contact leads?</div>
-            <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Time from lead creation to first contact</div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+              <div style={{ fontSize:12, fontWeight:600, color:'#111' }}>When do you contact leads?</div>
+              {selectedBucket && (
+                <button onClick={() => setSelectedBucket(null)} style={{ fontSize:10, color:'#3B82F6', background:'#EFF6FF', border:'none', borderRadius:5, padding:'2px 8px', cursor:'pointer', fontWeight:600 }}>Clear ✕</button>
+              )}
+            </div>
+            <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Click a bar to see which contacts — time from creation to first contact</div>
             <div style={{ height: 140 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={distribution} margin={{ left:0, right:8, top:4, bottom:0 }}>
+                <BarChart data={distribution} margin={{ left:0, right:8, top:4, bottom:0 }}
+                  onClick={e => { if (e?.activePayload?.[0]) { const k = e.activePayload[0].payload.key; setSelectedBucket(selectedBucket === k ? null : k); } }}
+                  style={{ cursor:'pointer' }}>
                   <XAxis dataKey="label" tick={{ fontSize:11, fill:'#888' }} axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip content={<DistributionTooltip />} cursor={false} wrapperStyle={{ pointerEvents:'none' }} />
-                  <Bar dataKey="count" radius={[4,4,0,0]} maxBarSize={56}>
-                    {distribution.map((d,i) => <Cell key={i} fill={d.color} />)}
+                  <Bar dataKey="count" radius={[4,4,0,0]} maxBarSize={56} isAnimationActive={false}>
+                    {distribution.map((d,i) => <Cell key={i} fill={d.color} opacity={selectedBucket && selectedBucket !== d.key ? 0.3 : 1} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <div style={{ display:'flex', gap:12, marginTop:8 }}>
               {distribution.map(d => (
-                <div key={d.label} style={{ flex:1, textAlign:'center' }}>
+                <div key={d.label} onClick={() => setSelectedBucket(selectedBucket === d.key ? null : d.key)}
+                  style={{ flex:1, textAlign:'center', cursor:'pointer', opacity: selectedBucket && selectedBucket !== d.key ? 0.4 : 1 }}>
                   <div style={{ fontSize:14, fontWeight:700, color:d.color }}>{d.count}</div>
                   <div style={{ fontSize:10, color:'#888' }}>{d.label}</div>
                 </div>
               ))}
             </div>
+
+            {/* Drill-down: contacts in selected bucket */}
+            {selectedBucket && contactsByBucket?.[selectedBucket]?.length > 0 && (
+              <div style={{ marginTop:14, borderTop:'1px solid #F3F4F6', paddingTop:12 }}>
+                <div style={{ fontSize:11, fontWeight:600, color:'#555', marginBottom:8 }}>
+                  {distribution.find(d => d.key === selectedBucket)?.label} — {contactsByBucket[selectedBucket].length} contacts
+                </div>
+                {contactsByBucket[selectedBucket].slice(0,10).map((c,i) => (
+                  <div key={c.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'6px 0', borderBottom: i < Math.min(contactsByBucket[selectedBucket].length,10)-1 ? '1px solid #F9FAFB' : 'none' }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:12, fontWeight:600, color:'#111' }}>{c.name}</div>
+                      {c.email && <div style={{ fontSize:11, color:'#888' }}>{c.email}</div>}
+                    </div>
+                    <div style={{ fontSize:11, color:'#666', flexShrink:0 }}>{fmtH(c.hours)} response</div>
+                    <a href={c.hubspotUrl} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0 }}>Open →</a>
+                  </div>
+                ))}
+                {contactsByBucket[selectedBucket].length > 10 && (
+                  <div style={{ fontSize:11, color:'#888', marginTop:6 }}>+{contactsByBucket[selectedBucket].length - 10} more</div>
+                )}
+              </div>
+            )}
+            {selectedBucket && (!contactsByBucket?.[selectedBucket]?.length) && (
+              <div style={{ marginTop:12, fontSize:12, color:'#888', textAlign:'center' }}>No contact data for this bucket</div>
+            )}
           </div>
         )}
 

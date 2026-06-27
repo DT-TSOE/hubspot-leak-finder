@@ -201,25 +201,43 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
     const wonMedian = wonSpeeds.length >= 3 ? Math.round(calc.median(wonSpeeds) * 10) / 10 : null;
     const lostMedian = lostSpeeds.length >= 3 ? Math.round(calc.median(lostSpeeds) * 10) / 10 : null;
 
-    // Response time distribution for histogram
-    const allTimes = contacts.map(c => {
+    // Response time distribution for histogram + per-bucket contact lists
+    const stageLabels = { lead: 'Lead', marketingqualifiedlead: 'MQL', salesqualifiedlead: 'SQL', opportunity: 'Opportunity' };
+    const contactedLeads = contacts.map(c => {
       const created = new Date(c.properties.createdate).getTime();
       const firstTouch = c.properties.notes_last_contacted ? new Date(c.properties.notes_last_contacted).getTime() : null;
       if (!firstTouch) return null;
       const hours = (firstTouch - created) / 3600000;
-      return hours > 0 && hours < 720 ? hours : null;
-    }).filter(t => t !== null);
+      if (hours <= 0 || hours > 720) return null;
+      return {
+        id: c.id,
+        name: [c.properties.firstname, c.properties.lastname].filter(Boolean).join(' ') || 'Unknown',
+        email: c.properties.email,
+        hours: Math.round(hours * 10) / 10,
+        stage: stageLabels[c.properties.lifecyclestage] || c.properties.lifecyclestage,
+        source: c.properties.hs_analytics_source,
+        hubspotUrl: `https://app.hubspot.com/contacts/${c.id}`,
+      };
+    }).filter(Boolean);
 
-    const distribution = allTimes.length > 0 ? [
-      { label: 'Under 1h',  hours: '<1',   count: allTimes.filter(t => t < 1).length,          color: '#10B981' },
-      { label: '1-6 hours', hours: '1-6',  count: allTimes.filter(t => t >= 1 && t < 6).length,  color: '#34D399' },
-      { label: '6-24 hours',hours: '6-24', count: allTimes.filter(t => t >= 6 && t < 24).length, color: '#F59E0B' },
-      { label: 'Over 24h',  hours: '24+',  count: allTimes.filter(t => t >= 24).length,          color: '#EF4444' },
+    const buckets = {
+      under1h: contactedLeads.filter(c => c.hours < 1),
+      h1to6:   contactedLeads.filter(c => c.hours >= 1 && c.hours < 6),
+      h6to24:  contactedLeads.filter(c => c.hours >= 6 && c.hours < 24),
+      over24h: contactedLeads.filter(c => c.hours >= 24),
+    };
+
+    const distribution = contactedLeads.length > 0 ? [
+      { label: 'Under 1h',   key: 'under1h', count: buckets.under1h.length, color: '#10B981' },
+      { label: '1-6 hours',  key: 'h1to6',   count: buckets.h1to6.length,   color: '#34D399' },
+      { label: '6-24 hours', key: 'h6to24',  count: buckets.h6to24.length,  color: '#F59E0B' },
+      { label: 'Over 24h',   key: 'over24h', count: buckets.over24h.length,  color: '#EF4444' },
     ] : [];
 
     res.json({
       summary: speed,
       distribution,
+      contactsByBucket: buckets,
       uncontactedQueue: uncontacted,
       uncontactedCount: uncontacted.length,
       criticalCount: uncontacted.filter(u => u.urgency === 'critical').length,
