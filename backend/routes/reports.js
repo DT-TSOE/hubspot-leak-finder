@@ -201,8 +201,25 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
     const wonMedian = wonSpeeds.length >= 3 ? Math.round(calc.median(wonSpeeds) * 10) / 10 : null;
     const lostMedian = lostSpeeds.length >= 3 ? Math.round(calc.median(lostSpeeds) * 10) / 10 : null;
 
+    // Response time distribution for histogram
+    const allTimes = contacts.map(c => {
+      const created = new Date(c.properties.createdate).getTime();
+      const firstTouch = c.properties.notes_last_contacted ? new Date(c.properties.notes_last_contacted).getTime() : null;
+      if (!firstTouch) return null;
+      const hours = (firstTouch - created) / 3600000;
+      return hours > 0 && hours < 720 ? hours : null;
+    }).filter(t => t !== null);
+
+    const distribution = allTimes.length > 0 ? [
+      { label: 'Under 1h',  hours: '<1',   count: allTimes.filter(t => t < 1).length,          color: '#10B981' },
+      { label: '1-6 hours', hours: '1-6',  count: allTimes.filter(t => t >= 1 && t < 6).length,  color: '#34D399' },
+      { label: '6-24 hours',hours: '6-24', count: allTimes.filter(t => t >= 6 && t < 24).length, color: '#F59E0B' },
+      { label: 'Over 24h',  hours: '24+',  count: allTimes.filter(t => t >= 24).length,          color: '#EF4444' },
+    ] : [];
+
     res.json({
       summary: speed,
+      distribution,
       uncontactedQueue: uncontacted,
       uncontactedCount: uncontacted.length,
       criticalCount: uncontacted.filter(u => u.urgency === 'critical').length,
