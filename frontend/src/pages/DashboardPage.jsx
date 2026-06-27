@@ -15,6 +15,7 @@ import PipelineReport from '../components/PipelineReport';
 import Integrations from '../components/Integrations';
 import TourOverlay from '../components/TourOverlay';
 import IntegrationHint from '../components/IntegrationHint';
+import DateRangePicker from '../components/DateRangePicker';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 
@@ -140,26 +141,26 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
   );
 }
 
-function TopBar({ section, days, onDays, loading, onRefresh, insightsData }) {
+function TopBar({ section, days, onDays, onLockedDays, loading, onRefresh, insightsData }) {
   const features = getPlanFeatures();
-  const DATE_OPTS = [{ label: 'All time', value: null }, { label: 'Last 30 days', value: 30 }, { label: 'Last 60 days', value: 60 }, { label: 'Last 90 days', value: 90 }];
   const item = ALL_ITEMS.find(i => i.id === section);
   const showDateFilter = !NO_DATE_SECTIONS.has(section);
 
   return (
-    <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '0 24px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
+    <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{item?.label || section}</span>
-        {insightsData && <span style={{ fontSize: 11, color: '#ccc' }}>·</span>}
-        {insightsData?.insights && <span style={{ fontSize: 11, color: '#aaa' }}>{insightsData.insights.length} insights</span>}
+        {insightsData?.insights && <span style={{ fontSize: 11, color: '#aaa', marginLeft: 4 }}>{insightsData.insights.length} insights</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <NotificationBell />
         {showDateFilter && (
-          <select value={days ?? ''} onChange={e => { if (!features.dateFilter && e.target.value) return; onDays(e.target.value ? parseInt(e.target.value) : null); }}
-            style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E5EA', fontSize: 11, color: '#555', background: '#fff' }}>
-            {DATE_OPTS.map(o => <option key={o.label} value={o.value ?? ''}>{o.label}</option>)}
-          </select>
+          <DateRangePicker
+            days={days}
+            onChange={onDays}
+            locked={!features.dateFilter}
+            onLocked={onLockedDays}
+          />
         )}
         <button onClick={onRefresh} disabled={loading}
           style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#555' }}>
@@ -358,7 +359,7 @@ export default function DashboardPage({ onDisconnect }) {
       <Sidebar section={section} onSection={navigateTo} plan={plan} onUpgrade={() => setShowUpgrade(true)} onDisconnect={handleDisconnect} ga4Connected={ga4Connected} insightCount={allInsights.length} atRiskCount={highRiskLeads} healthScore={healthScore} />
 
       <div style={{ marginLeft: SIDEBAR_W, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <TopBar section={section} days={days} onDays={handleDays} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
+        <TopBar section={section} days={days} onDays={handleDays} onLockedDays={() => setShowUpgrade(true)} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
 
         <main style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px' }}>
 
