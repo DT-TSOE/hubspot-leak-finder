@@ -16,6 +16,7 @@ import Integrations from '../components/Integrations';
 import TourOverlay from '../components/TourOverlay';
 import IntegrationHint from '../components/IntegrationHint';
 import DateRangePicker from '../components/DateRangePicker';
+import PipelineInsights from '../components/PipelineInsights';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 
@@ -399,6 +400,7 @@ export default function DashboardPage({ onDisconnect }) {
                   )}
                   <Card title="Lifecycle funnel"><FunnelChart funnelStages={funnel.funnelStages} biggestLeak={funnel.biggestLeak} /></Card>
                   <Card title="Time between stages"><StageTimingTable stageTimes={funnel.stageTimes} /></Card>
+                  <PipelineInsights stageInsights={funnelData.stageInsights} trend={funnelData.trend} />
                   <IntegrationHint icon="🔍" name="Search Console" feature="Keyword to Pipeline Attribution" benefit="See which organic search keywords are generating leads that actually close into customers." onConnect={() => navigateTo('integrations')} preview="rows" />
                 </>;
               })()}

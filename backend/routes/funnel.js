@@ -3,7 +3,7 @@ const router = express.Router();
 const requireAuth = require('../middleware/requireAuth');
 const HubSpotService = require('../services/hubspot');
 const { analyzeFunnel } = require('../services/funnelAnalysis');
-const { analyzeBySource, analyzeActivityLevels, analyzeSpeedToLead } = require('../services/behavioralAnalysis');
+const { analyzeBySource, analyzeActivityLevels, analyzeSpeedToLead, analyzeStageInsights, analyzePipelineTrend } = require('../services/behavioralAnalysis');
 
 router.get('/', requireAuth, async (req, res) => {
   try {
@@ -17,7 +17,13 @@ router.get('/', requireAuth, async (req, res) => {
     }
     res.json({
       funnel: analyzeFunnel(filtered),
-      behavioral: { bySource: analyzeBySource(filtered, dealsWithContacts), activityLevels: analyzeActivityLevels(filtered, dealsWithContacts), speedToLead: analyzeSpeedToLead(filtered, dealsWithContacts) },
+      behavioral: {
+        bySource: analyzeBySource(filtered, dealsWithContacts),
+        activityLevels: analyzeActivityLevels(filtered, dealsWithContacts),
+        speedToLead: analyzeSpeedToLead(filtered, dealsWithContacts),
+      },
+      stageInsights: analyzeStageInsights(filtered),
+      trend: analyzePipelineTrend(filtered, days),
       summary: { totalContacts: contacts.length, filteredContacts: filtered.length, totalDeals: deals.length, dateRange: days ? parseInt(days) : null }
     });
   } catch (err) {
