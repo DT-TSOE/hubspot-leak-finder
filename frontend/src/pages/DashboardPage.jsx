@@ -168,7 +168,7 @@ function ContentDateBar({ section, days, onDays, onLockedDays }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 16 }}>
       <DateRangePicker
-        days={days}
+        value={days}
         onChange={onDays}
         locked={!features.dateFilter}
         onLocked={onLockedDays}
