@@ -5,7 +5,15 @@ const HubSpotService = require('../services/hubspot');
 const calc = require('../services/metricCalculations');
 const health = require('../services/pipelineHealth');
 
-function applyDateFilter(items, days, dateField = 'createdate') {
+function applyDateFilter(items, days, dateField = 'createdate', startDate, endDate) {
+  if (startDate && endDate) {
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime() + 86400000; // inclusive end date
+    return items.filter(i => {
+      const t = new Date(i.properties[dateField] || 0).getTime();
+      return t >= start && t <= end;
+    });
+  }
   if (!days || isNaN(parseInt(days))) return items;
   const cutoff = Date.now() - parseInt(days) * 86400000;
   return items.filter(i => new Date(i.properties[dateField] || 0).getTime() >= cutoff);
@@ -21,9 +29,9 @@ async function loadData(req) {
 router.get('/gm-dashboard', requireAuth, async (req, res) => {
   try {
     const { contacts: allContacts, deals: allDeals } = await loadData(req);
-    const { days } = req.query;
-    const contacts = applyDateFilter(allContacts, days);
-    const deals = applyDateFilter(allDeals, days, 'closedate');
+    const { days, startDate, endDate } = req.query;
+    const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
+    const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
 
     const healthScore = health.calculatePipelineHealthScore(contacts, deals);
     const biggestLeak = calc.calculateBiggestDropoff(contacts);
@@ -116,9 +124,9 @@ router.get('/metric-tiles', requireAuth, async (req, res) => {
 router.get('/source-quality', requireAuth, async (req, res) => {
   try {
     const { contacts: allContacts, deals: allDeals } = await loadData(req);
-    const { days, property } = req.query;
-    const contacts = applyDateFilter(allContacts, days);
-    const deals = applyDateFilter(allDeals, days, 'closedate');
+    const { days, property, startDate, endDate } = req.query;
+    const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
+    const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
     const sourceProperty = property || 'hs_analytics_source';
 
     const sources = calc.calculateSourceQuality(contacts, deals, sourceProperty);
@@ -149,9 +157,9 @@ router.get('/source-quality', requireAuth, async (req, res) => {
 router.get('/stage-aging', requireAuth, async (req, res) => {
   try {
     const { contacts: allContacts, deals: allDeals } = await loadData(req);
-    const { days } = req.query;
-    const contacts = applyDateFilter(allContacts, days);
-    const deals = applyDateFilter(allDeals, days, 'closedate');
+    const { days, startDate, endDate } = req.query;
+    const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
+    const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
     const stuck = health.findStuckRecords(contacts, deals);
 
     const byStage = {};
@@ -186,9 +194,9 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts: allContacts, deals: allDeals } = await loadData(req);
-    const { days } = req.query;
-    const contacts = applyDateFilter(allContacts, days);
-    const deals = applyDateFilter(allDeals, days, 'closedate');
+    const { days, startDate, endDate } = req.query;
+    const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
+    const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
 
     const speed = calc.calculateTimeToFirstTouch(contacts);
     const uncontacted = health.findUncontactedLeads(contacts);

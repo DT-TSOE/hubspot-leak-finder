@@ -314,7 +314,7 @@ export default function DashboardPage({ onDisconnect }) {
   };
 
   const handleDays = (val) => {
-    if (!features.dateFilter && val) { setShowUpgrade(true); return; }
+    if (!features.dateFilter && val !== null) { setShowUpgrade(true); return; }
     setDays(val); setLeadsData(null); setRevenueData(null);
   };
 

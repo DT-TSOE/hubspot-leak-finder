@@ -12,11 +12,15 @@ router.get('/', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const analyzer = new ActivityAnalyzer(req.session.tokens.access_token);
-    const { days } = req.query;
+    const { days, startDate, endDate } = req.query;
 
     const { contacts, deals, dealsWithContacts } = await hs.getCachedData();
     let filtered = contacts;
-    if (days && !isNaN(parseInt(days))) {
+    if (startDate && endDate) {
+      const start = new Date(startDate).getTime();
+      const end = new Date(endDate).getTime() + 86400000;
+      filtered = contacts.filter(c => { const t = new Date(c.properties.createdate).getTime(); return t >= start && t <= end; });
+    } else if (days && !isNaN(parseInt(days))) {
       const cutoff = Date.now() - parseInt(days) * 86400000;
       filtered = contacts.filter(c => new Date(c.properties.createdate).getTime() >= cutoff);
     }

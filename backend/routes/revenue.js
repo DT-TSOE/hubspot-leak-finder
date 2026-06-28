@@ -14,13 +14,15 @@ router.get('/', requireAuth, async (req, res) => {
     const ownerMap = Object.fromEntries(owners.map(o => [o.id, o.name]));
 
     // Filter deals by close date when days param is set
-    const { days } = req.query;
+    const { days, startDate, endDate } = req.query;
     let filteredDeals = dealsWithContacts;
-    if (days && !isNaN(parseInt(days))) {
+    if (startDate && endDate) {
+      const start = new Date(startDate).getTime();
+      const end = new Date(endDate).getTime() + 86400000;
+      filteredDeals = dealsWithContacts.filter(d => { const t = new Date(d.properties.closedate || 0).getTime(); return t >= start && t <= end; });
+    } else if (days && !isNaN(parseInt(days))) {
       const cutoff = Date.now() - parseInt(days) * 86400000;
-      filteredDeals = dealsWithContacts.filter(d =>
-        new Date(d.properties.closedate || 0).getTime() >= cutoff
-      );
+      filteredDeals = dealsWithContacts.filter(d => new Date(d.properties.closedate || 0).getTime() >= cutoff);
     }
 
     const data = analyzeLTV(contacts, filteredDeals);
