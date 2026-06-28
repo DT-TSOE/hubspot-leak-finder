@@ -15,6 +15,14 @@ router.get('/', requireAuth, async (req, res) => {
       const cutoff = Date.now() - parseInt(days) * 86400000;
       filtered = contacts.filter(c => new Date(c.properties.createdate).getTime() >= cutoff);
     }
+    let stageInsights = [], trend = null;
+    try {
+      stageInsights = analyzeStageInsights(filtered);
+      trend = analyzePipelineTrend(filtered, days);
+    } catch (e) {
+      console.error('stageInsights error:', e.message);
+    }
+
     res.json({
       funnel: analyzeFunnel(filtered),
       behavioral: {
@@ -22,8 +30,8 @@ router.get('/', requireAuth, async (req, res) => {
         activityLevels: analyzeActivityLevels(filtered, dealsWithContacts),
         speedToLead: analyzeSpeedToLead(filtered, dealsWithContacts),
       },
-      stageInsights: analyzeStageInsights(filtered),
-      trend: analyzePipelineTrend(filtered, days),
+      stageInsights,
+      trend,
       summary: { totalContacts: contacts.length, filteredContacts: filtered.length, totalDeals: deals.length, dateRange: days ? parseInt(days) : null }
     });
   } catch (err) {
