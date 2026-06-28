@@ -197,4 +197,32 @@ router.post('/seed', requireAuth, async (req, res) => {
   res.end();
 });
 
+// Debug: show what HubSpot is actually returning for contacts
+router.get('/debug', requireAuth, async (req, res) => {
+  const token = req.session.tokens.access_token;
+  const client = axios.create({ baseURL: BASE, headers: { Authorization: `Bearer ${token}` } });
+  try {
+    const r = await client.get('/crm/v3/objects/contacts', {
+      params: {
+        limit: 10,
+        properties: 'firstname,lastname,lifecyclestage,hs_lifecyclestage_lead_date,hs_lifecyclestage_marketingqualifiedlead_date,hs_analytics_source,createdate,num_contacted_notes',
+        sorts: 'createdate',
+      }
+    });
+    const contacts = r.data.results.map(c => ({
+      id: c.id,
+      name: `${c.properties.firstname} ${c.properties.lastname}`,
+      stage: c.properties.lifecyclestage,
+      lead_date: c.properties.hs_lifecyclestage_lead_date,
+      mql_date: c.properties.hs_lifecyclestage_marketingqualifiedlead_date,
+      source: c.properties.hs_analytics_source,
+      createdate: c.properties.createdate,
+      touches: c.properties.num_contacted_notes,
+    }));
+    res.json({ total: r.data.total, sample: contacts });
+  } catch (e) {
+    res.status(500).json({ error: e.response?.data || e.message });
+  }
+});
+
 module.exports = router;
