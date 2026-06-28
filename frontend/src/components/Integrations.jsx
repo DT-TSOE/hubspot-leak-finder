@@ -6,11 +6,13 @@ function SeedButton() {
   const [log, setLog] = useState('');
   const logRef = useRef(null);
 
+  const BASE = process.env.REACT_APP_API_URL || '';
+
   const run = async () => {
     setStatus('running');
     setLog('');
     try {
-      const res = await fetch('/api/admin/seed', { method: 'POST', credentials: 'include' });
+      const res = await fetch(`${BASE}/api/admin/seed`, { method: 'POST', credentials: 'include' });
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
