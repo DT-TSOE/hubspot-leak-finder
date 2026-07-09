@@ -71,7 +71,13 @@ export const PLANS = {
   }
 };
 
+// BETA: give every user full (Pro) access while onboarding beta testers.
+// No tiering, no upgrade gates. Set to false to restore plan-based gating
+// once billing is live.
+export const BETA_ALL_ACCESS = true;
+
 export function getCurrentPlan() {
+  if (BETA_ALL_ACCESS) return 'pro';
   const stored = localStorage.getItem('pipechamp_plan');
   return PLANS[stored] ? stored : 'free';
 }
@@ -81,11 +87,13 @@ export function setPlan(planKey) {
 }
 
 export function canAccess(feature) {
+  if (BETA_ALL_ACCESS) return true;
   const plan = getCurrentPlan();
   return PLANS[plan]?.features[feature] ?? false;
 }
 
 export function getPlanFeatures() {
+  if (BETA_ALL_ACCESS) return PLANS.pro.features;
   const plan = getCurrentPlan();
   return PLANS[plan]?.features ?? PLANS.free.features;
 }

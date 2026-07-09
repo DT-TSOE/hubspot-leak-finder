@@ -1,14 +1,34 @@
 const axios = require('axios');
 const BASE_URL = 'https://api.hubapi.com';
 
-// Session-level cache: { [sessionId]: { contacts, deals, dealsWithContacts, expiresAt } }
+// Session-level cache: { [sessionId]: { data, expiresAt } }
 const _cache = new Map();
+// In-flight loaders keyed by session, so concurrent routes on a cold cache
+// share ONE fetch instead of each firing a full paginated load.
+const _inflight = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 class HubSpotService {
   constructor(accessToken, sessionId) {
     this.client = axios.create({ baseURL: BASE_URL, headers: { Authorization: `Bearer ${accessToken}` } });
     this.sessionId = sessionId || null;
+    // Retry on HubSpot rate limits (429). Respect the Retry-After header when
+    // present, otherwise back off exponentially. Prevents the raw
+    // "ten_secondly_rolling" / "status code 429" error reaching the UI.
+    this.client.interceptors.response.use(null, async (error) => {
+      const cfg = error.config;
+      if (!cfg || error.response?.status !== 429) return Promise.reject(error);
+      cfg._retryCount = (cfg._retryCount || 0) + 1;
+      if (cfg._retryCount > 4) return Promise.reject(error);
+      const retryAfter = Number(error.response.headers?.['retry-after']);
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? retryAfter * 1000
+        : Math.min(1000 * 2 ** (cfg._retryCount - 1), 8000);
+      await sleep(waitMs);
+      return this.client(cfg);
+    });
   }
 
   async paginate(url, params = {}) {
@@ -74,19 +94,34 @@ class HubSpotService {
     const cached = _cache.get(key);
     if (cached && cached.expiresAt > Date.now()) return cached.data;
 
-    const [contacts, deals] = await Promise.all([this.getContacts(), this.getDeals()]);
-    const sampleDeals = deals.slice(0, 200);
-    const assocMap = await this.getDealAssociationsBatch(sampleDeals.map(d => d.id));
-    const dealsWithContacts = sampleDeals.map(d => ({ ...d, _contactIds: assocMap[d.id] || [] }));
+    // Coalesce concurrent cold-cache callers (e.g. funnel + insights firing
+    // together on page load) onto a single fetch to avoid duplicate paginated
+    // loads that trip HubSpot's 100 req/10s limit.
+    const existing = _inflight.get(key);
+    if (existing) return existing;
 
-    const data = { contacts, deals, dealsWithContacts };
-    _cache.set(key, { data, expiresAt: Date.now() + CACHE_TTL });
+    const loader = (async () => {
+      const [contacts, deals] = await Promise.all([this.getContacts(), this.getDeals()]);
+      const sampleDeals = deals.slice(0, 200);
+      const assocMap = await this.getDealAssociationsBatch(sampleDeals.map(d => d.id));
+      const dealsWithContacts = sampleDeals.map(d => ({ ...d, _contactIds: assocMap[d.id] || [] }));
 
-    // Prune stale entries
-    for (const [k, v] of _cache.entries()) {
-      if (v.expiresAt < Date.now()) _cache.delete(k);
+      const data = { contacts, deals, dealsWithContacts };
+      _cache.set(key, { data, expiresAt: Date.now() + CACHE_TTL });
+
+      // Prune stale entries
+      for (const [k, v] of _cache.entries()) {
+        if (v.expiresAt < Date.now()) _cache.delete(k);
+      }
+      return data;
+    })();
+
+    _inflight.set(key, loader);
+    try {
+      return await loader;
+    } finally {
+      _inflight.delete(key);
     }
-    return data;
   }
 
   async getActivitySummary(days = 30) {
