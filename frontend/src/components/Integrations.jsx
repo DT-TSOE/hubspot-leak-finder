@@ -175,7 +175,7 @@ export default function Integrations() {
                         <div style={{ fontSize:13, fontWeight:700, color:'#111' }}>{integration.name}</div>
                         {status !== 'loading' && (
                           integration.connectUrl && status !== 'connected'
-                            ? <a href={integration.connectUrl} style={{ fontSize:11, fontWeight:600, padding:'3px 10px', borderRadius:20, background:'#EFF6FF', color:'#3B82F6', textDecoration:'none' }}>Connect</a>
+                            ? <a href={`${process.env.REACT_APP_API_URL || ''}${integration.connectUrl}`} style={{ fontSize:11, fontWeight:600, padding:'3px 10px', borderRadius:20, background:'#EFF6FF', color:'#3B82F6', textDecoration:'none' }}>Connect</a>
                             : <StatusBadge status={status} />
                         )}
                       </div>
