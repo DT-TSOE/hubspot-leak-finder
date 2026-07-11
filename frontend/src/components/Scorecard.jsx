@@ -303,17 +303,28 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
                 </div>
                 <div style={{ fontSize: 12.5, color: '#444', lineHeight: 1.5, marginBottom: 8 }}>{r.whatsHappening}</div>
                 <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, marginBottom: 10 }}><strong style={{ color: '#111' }}>Do it now:</strong> {r.diy}</div>
-                <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#C2410C', marginBottom: 2 }}>⬆ Upgrade: {r.upgrade.tier} · {r.upgrade.feature}</div>
-                  <div style={{ fontSize: 11.5, color: '#7C2D12', lineHeight: 1.5 }}>{r.upgrade.why}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <button onClick={() => window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: r.coachMessage } }))}
+                    style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
+                    Ask PipeCoach how →
+                  </button>
+                  <span style={{ fontSize: 11, color: '#aaa' }}>⚡ Or automate it with {r.upgrade.tier}</span>
                 </div>
-                <button onClick={() => window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: r.coachMessage } }))}
-                  style={{ marginTop: 10, fontSize: 11, fontWeight: 700, color: '#fff', background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
-                  Ask PipeCoach how →
-                </button>
               </div>
             );
           })}
+          {/* One soft, consolidated upgrade note instead of per-card pitches */}
+          {(() => {
+            const tiers = {};
+            recommendations.forEach(r => { (tiers[r.upgrade.tier] = tiers[r.upgrade.tier] || []).push(r.label); });
+            return (
+              <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid #F3F4F6', fontSize: 11.5, color: '#999', lineHeight: 1.6 }}>
+                {Object.entries(tiers).map(([tier, labels]) => (
+                  <div key={tier}>⚡ <strong style={{ color: '#777' }}>{tier}</strong> could automate {labels.length > 1 ? `${labels.length} of these` : 'this'} ({labels.slice(0, 3).join(', ')}{labels.length > 3 ? '…' : ''}).</div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 
