@@ -33,7 +33,7 @@ const SOURCE_LABELS = {
   hs_analytics_source_data_2: 'Source Detail 2',
 };
 
-export default function SourceQuality({ days }) {
+export default function SourceQuality({ days, onNavigate }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -150,10 +150,11 @@ export default function SourceQuality({ days }) {
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px', overflowX:'auto' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Source breakdown</div>
-          <div style={{ fontSize:11, color:'#aaa', display:'flex', alignItems:'center', gap:4 }}>
+          <button onClick={() => onNavigate?.('integrations')}
+            style={{ fontSize:11, fontWeight:600, color:'#FF7A59', background:'#FFF4F0', border:'1px solid #FFD9CC', borderRadius:6, padding:'5px 10px', cursor:'pointer', display:'flex', alignItems:'center', gap:5 }}>
             <span style={{ fontSize:13 }}>⚡</span>
-            Connect Google Ads to unlock Cost per Acquisition
-          </div>
+            Connect Google Ads to unlock Cost per Acquisition →
+          </button>
         </div>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
           <thead>
@@ -179,7 +180,9 @@ export default function SourceQuality({ days }) {
                 </td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{fmt$(s.avgDealSize)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.avgSalesCycle ? `${s.avgSalesCycle}d` : '—'}</td>
-                <td style={{ padding:'8px', textAlign:'right', color:'#ddd', fontSize:11 }}>—</td>
+                <td onClick={() => onNavigate?.('integrations')} title="Connect Google Ads to see real cost per acquisition" style={{ padding:'8px', textAlign:'right', cursor:'pointer' }}>
+                  <span style={{ filter:'blur(3.5px)', color:'#F97316', fontWeight:700, userSelect:'none' }}>${30 + (s.source.length * 17) % 90}</span>
+                </td>
               </tr>
             ))}
           </tbody>

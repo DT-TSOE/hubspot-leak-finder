@@ -69,6 +69,20 @@ reach won" — read from `dealstage` property history (`propertiesWithHistory`),
 not linear stage-to-stage. Exposed at `GET /api/reports/scorecard`; rendered by
 `frontend/src/components/Scorecard.jsx` as the Dashboard hero.
 
+## Adaptive scorecard tuning
+
+Onboarding answers (business type, hubs, revenue, growth challenge, goal) tune
+the scorecard. `resolveScoreProfile(profile)` in `scoring.js` applies **banded
+preset nudges** (NOT per-portal statistics) to the marketing/sales split and
+dimension weights, and returns a `tunedFor` label + `methodology` notes shown in
+the UI ("why these weights?"). Answers are stored in the session cookie via
+`GET/POST /api/reports/onboarding` (no DB). Sales-only/marketing-only profiles
+lock the unused funnel — the UI renders it blurred with an unlock prompt (an
+intentional upsell hook). Onboarding modal: `Onboarding.jsx`. The "Dashboard" nav
+is now labelled **Scorecard** (internal id stays `dashboard`). The old "Pipeline"
+tab is split into **Marketing** (`MarketingPipeline.jsx`) and **Sales**
+(`SalesPipeline.jsx`).
+
 ## Beta access
 
 `BETA_ALL_ACCESS = true` in `frontend/src/utils/plan.js` gives **every** user full

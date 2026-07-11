@@ -131,7 +131,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
                 <thead><tr style={{ color:'#999', fontSize:10, textTransform:'uppercase', letterSpacing:'.04em' }}>
                   <th style={{ textAlign:'left', padding:'4px 6px 4px 0' }}>Stage</th>
-                  <th style={{ textAlign:'right', padding:'4px 6px' }}>Ever reached</th>
+                  <th style={{ textAlign:'right', padding:'4px 6px' }}>Created</th>
                   <th style={{ textAlign:'right', padding:'4px 6px' }}>Won</th>
                   <th style={{ textAlign:'right', padding:'4px 0 4px 6px' }}>Win rate from here</th>
                 </tr></thead>

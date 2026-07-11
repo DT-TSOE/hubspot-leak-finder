@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import FunnelChart from '../components/FunnelChart';
 import InsightCard from '../components/InsightCard';
-import StageTimingTable from '../components/StageTimingTable';
 import SourceQuality from '../components/SourceQuality';
 import LeadScoreTable from '../components/LeadScoreTable';
 import RevenueTab from '../components/RevenueTab';
@@ -10,8 +8,7 @@ import UpgradePrompt from '../components/UpgradePrompt';
 import NotificationBell from '../components/NotificationBell';
 import GmDashboard from '../components/GmDashboard';
 import Scorecard from '../components/Scorecard';
-import MarketingPipeline from '../components/MarketingPipeline';
-import SalesPipeline from '../components/SalesPipeline';
+import GrowthFunnel from '../components/GrowthFunnel';
 import StageAging from '../components/StageAging';
 import SpeedToLead from '../components/SpeedToLead';
 import PipelineReport from '../components/PipelineReport';
@@ -29,8 +26,7 @@ const NAV = [
   { id: 'dashboard', label: 'Scorecard', icon: '▦', standalone: true },
   {
     type: 'group', label: 'Analyze', items: [
-      { id: 'marketing',     label: 'Marketing',     feature: 'funnel',       dateFilter: true },
-      { id: 'sales',         label: 'Sales',         feature: 'funnel',       dateFilter: true },
+      { id: 'growth-funnel', label: 'Growth Funnel',  feature: 'funnel',       dateFilter: true },
       { id: 'at-risk',       label: 'At Risk',       feature: 'stageAging' },
       { id: 'lead-sources',  label: 'Lead Sources',  feature: 'sourceQuality' },
       { id: 'lead-response', label: 'Lead Response', feature: 'speedToLead' },
@@ -227,7 +223,7 @@ function InsightFilters({ activeType, activeSeverity, onTypeChange, onSeverityCh
   );
 }
 
-const VALID_SECTIONS = new Set(['dashboard','marketing','sales','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations']);
+const VALID_SECTIONS = new Set(['dashboard','growth-funnel','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations']);
 
 export default function DashboardPage({ onDisconnect }) {
   const [section, setSection] = useState(() => {
@@ -388,17 +384,9 @@ export default function DashboardPage({ onDisconnect }) {
           {!loading && !error && funnelData && (
 
             <>
-              {/* MARKETING (acquisition funnel) */}
-              {section === 'marketing' && (
-                <MarketingPipeline funnelData={funnelData} onNavigate={navigateTo} />
-              )}
-
-              {/* SALES (SQL → deal stages) */}
-              {section === 'sales' && (
-                <>
-                  <SalesPipeline funnelData={funnelData} />
-                  <PipelineInsights stageInsights={funnelData.stageInsights} trend={funnelData.trend} />
-                </>
+              {/* GROWTH FUNNEL — Marketing / Sales sub-tabs */}
+              {section === 'growth-funnel' && (
+                <GrowthFunnel funnelData={funnelData} onNavigate={navigateTo} />
               )}
 
               {/* AT RISK — Stage Aging + Lead Risk merged */}
@@ -421,7 +409,7 @@ export default function DashboardPage({ onDisconnect }) {
               {/* LEAD SOURCES */}
               {section === 'lead-sources' && (
                 features.sourceQuality
-                  ? <SourceQuality days={days} />
+                  ? <SourceQuality days={days} onNavigate={navigateTo} />
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="sourceQuality" requiredPlan="starter">Unlock Lead Sources analysis</UpgradePrompt></div>
               )}
 

@@ -109,7 +109,7 @@ export function DealStageTable({ pipeline }) {
           <thead>
             <tr style={{ textAlign: 'left', color: '#999', fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.05em' }}>
               <th style={{ padding: '6px 8px 6px 0', fontWeight: 600 }}>Stage</th>
-              <th style={{ padding: '6px 8px', fontWeight: 600, textAlign: 'right' }}>Ever reached</th>
+              <th style={{ padding: '6px 8px', fontWeight: 600, textAlign: 'right' }}>Created</th>
               <th style={{ padding: '6px 8px', fontWeight: 600, textAlign: 'right' }}>Won</th>
               <th style={{ padding: '6px 0 6px 8px', fontWeight: 600, textAlign: 'right' }}>Conversion</th>
             </tr>
