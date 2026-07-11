@@ -212,6 +212,15 @@ class HubSpotService {
     } catch { return []; }
   }
 
+  // HubSpot portal (account) id — stable per connected account. Used to key
+  // monthly snapshots so they follow the account, not the browser session.
+  async getPortalId() {
+    try {
+      const r = await this.client.get('/account-info/v3/details');
+      return r.data?.portalId ? String(r.data.portalId) : null;
+    } catch { return null; }
+  }
+
   static invalidateCache(sessionId) {
     if (sessionId) _cache.delete(sessionId);
   }

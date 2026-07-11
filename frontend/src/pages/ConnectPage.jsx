@@ -19,7 +19,7 @@ export default function ConnectPage() {
             onMouseOver={e=>e.currentTarget.style.opacity='.9'} onMouseOut={e=>e.currentTarget.style.opacity='1'}>
             Connect HubSpot
           </a>
-          <p style={{ fontSize:11, color:'#999', margin:0 }}>Read-only access · No data stored permanently</p>
+          <p style={{ fontSize:11, color:'#999', margin:0 }}>Read-only access · We never store your contacts</p>
         </div>
       </div>
     </div>

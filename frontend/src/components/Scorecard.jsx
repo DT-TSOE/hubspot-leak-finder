@@ -168,7 +168,8 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn’t build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Grading your pipeline…</div>;
 
-  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized } = data;
+  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized, trend } = data;
+  const scoreDelta = trend?.overallScoreDelta;
   const headline = overall.score === null ? 'Not enough data to grade yet'
     : overall.score >= 80 ? 'Your pipeline is performing well'
     : overall.score >= 60 ? 'Solid pipeline with clear room to improve'
@@ -182,7 +183,22 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         <GradeRing score={overall.score} grade={overall.grade} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#43A047', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Pipeline Grade</div>
-          <div style={{ fontSize: 21, fontWeight: 700, color: '#111', letterSpacing: '-0.3px', marginBottom: 10 }}>{headline}</div>
+          <div style={{ fontSize: 21, fontWeight: 700, color: '#111', letterSpacing: '-0.3px', marginBottom: trend ? 6 : 10 }}>{headline}</div>
+          {trend && scoreDelta != null && (
+            <div style={{ marginBottom: 10 }}>
+              {(() => {
+                const up = scoreDelta > 0, flat = scoreDelta === 0;
+                const c = flat ? '#888' : up ? '#059669' : '#DC2626';
+                const bg = flat ? '#F3F4F6' : up ? '#F0FDF4' : '#FEF2F2';
+                return (
+                  <span style={{ fontSize: 12, fontWeight: 700, color: c, background: bg, border: `1px solid ${c}33`, borderRadius: 20, padding: '3px 11px' }}>
+                    {flat ? '→' : up ? '▲' : '▼'} {flat ? 'No change' : `${up ? '+' : ''}${scoreDelta} pts`} vs last month
+                    {trend.previousGrade ? ` · was ${trend.previousGrade}` : ''}
+                  </span>
+                );
+              })()}
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 12, background: '#F7F8FA', border: '1px solid #E2E5EA', color: '#555' }}>
               <span style={{ color: GRADE_COLOR[marketing.grade] || '#ccc', fontWeight: 700 }}>●</span> Marketing <strong style={{ color: '#111' }}>{marketing.grade || '—'}</strong>

@@ -5,6 +5,7 @@ const HubSpotService = require('../services/hubspot');
 const calc = require('../services/metricCalculations');
 const health = require('../services/pipelineHealth');
 const { buildScorecard } = require('../services/scoring');
+const db = require('../services/db');
 
 function applyDateFilter(items, days, dateField = 'createdate', startDate, endDate) {
   if (startDate && endDate) {
@@ -54,7 +55,38 @@ router.get('/scorecard', requireAuth, async (req, res) => {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts, deals, dealsWithHistory, pipelines } = await hs.getCachedData();
     const scorecard = buildScorecard({ contacts, deals, dealsWithHistory, pipelines }, req.session.onboarding);
-    res.json({ ...scorecard, generatedAt: new Date().toISOString() });
+
+    // Monthly snapshot + "vs last month" trend (no-ops until DB is provisioned).
+    let trend = null;
+    if (db.enabled()) {
+      if (!req.session.portalId) req.session.portalId = await hs.getPortalId();
+      const portalId = req.session.portalId;
+      if (portalId) {
+        // Store only aggregate numbers — never contacts/PII.
+        const snap = {
+          overall: scorecard.overall,
+          marketing: { score: scorecard.marketing.score, grade: scorecard.marketing.grade },
+          sales: { score: scorecard.sales.score, grade: scorecard.sales.grade },
+          revenueOpportunity: scorecard.revenueImpact?.total || 0,
+        };
+        const prevRow = await db.getPreviousSnapshot(portalId);
+        await db.saveSnapshot(portalId, snap);
+        if (prevRow?.payload) {
+          const p = prevRow.payload;
+          const delta = (a, b) => (a == null || b == null) ? null : a - b;
+          trend = {
+            period: prevRow.period,
+            overallScoreDelta: delta(scorecard.overall.score, p.overall?.score),
+            previousGrade: p.overall?.grade || null,
+            marketingScoreDelta: delta(scorecard.marketing.score, p.marketing?.score),
+            salesScoreDelta: delta(scorecard.sales.score, p.sales?.score),
+            revenueOpportunityDelta: delta(scorecard.revenueImpact?.total || 0, p.revenueOpportunity || 0),
+          };
+        }
+      }
+    }
+
+    res.json({ ...scorecard, trend, generatedAt: new Date().toISOString() });
   } catch (err) {
     console.error('Scorecard error:', err.message);
     res.status(500).json({ error: err.message });
