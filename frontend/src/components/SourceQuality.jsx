@@ -158,7 +158,7 @@ export default function SourceQuality({ days }) {
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #F3F4F6' }}>
-              {['Source','Contacts','Deals','Won','Win %','Revenue','Rev / Lead','Avg Deal','Avg Cycle','CPA'].map(h => (
+              {['Source','Contacts','Opps','Deals','Won','Win %','Conv %','Revenue','Rev / Lead','Avg Deal','Avg Cycle','CPA'].map(h => (
                 <th key={h} style={{ textAlign: h === 'Source' ? 'left' : 'right', padding:'6px 8px', fontSize:10, fontWeight:600, color: h === 'CPA' ? '#ccc' : '#999', textTransform:'uppercase', letterSpacing:'.04em' }}>{h}</th>
               ))}
             </tr>
@@ -168,9 +168,11 @@ export default function SourceQuality({ days }) {
               <tr key={s.source} style={{ borderBottom:'1px solid #F9FAFB' }}>
                 <td style={{ padding:'8px', fontWeight:500, color:'#111' }}>{fmtSrc(s.source)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.contacts}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.opportunities || 0}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.deals}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#059669', fontWeight:600 }}>{s.won}</td>
                 <td style={{ padding:'8px', textAlign:'right', color: s.winRate > 30 ? '#059669' : s.winRate > 15 ? '#F59E0B' : '#EF4444', fontWeight:600 }}>{s.winRate}%</td>
+                <td style={{ padding:'8px', textAlign:'right', color: s.conversionRate >= 5 ? '#059669' : s.conversionRate >= 2 ? '#F59E0B' : '#999', fontWeight:600 }} title="Contacts that became customers">{s.conversionRate}%</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#111', fontWeight:600 }}>{fmt$(s.revenue)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color: s.revPerLead > 0 ? barColor(s.revPerLead, maxRevLead) : '#ccc', fontWeight: s.revPerLead > 0 ? 700 : 400 }}>
                   {s.revPerLead > 0 ? `$${s.revPerLead.toLocaleString()}` : '—'}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 
@@ -33,19 +33,33 @@ export default function SpeedToLead({ days }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBucket, setSelectedBucket] = useState(null);
+  const [marking, setMarking] = useState(false);
+  const [showTriage, setShowTriage] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    api.getSpeedToLead(days)
+  const load = useCallback((withSpinner = true) => {
+    if (withSpinner) setLoading(true);
+    return api.getSpeedToLead(days)
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
   }, [days]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleSpam = async (id, currentlySpam) => {
+    setMarking(true);
+    try {
+      await api.markSpam([id], currentlySpam ? 'remove' : 'add');
+      await load(false); // recompute metrics without the full-page spinner
+    } finally {
+      setMarking(false);
+    }
+  };
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Calculating response times…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 
-  const { summary, distribution, contactsByBucket, wonVsLost, activitySummary } = data;
+  const { summary, distribution, contactsByBucket, wonVsLost, activitySummary, triageCandidates, spamCount } = data;
 
   return (
     <div>
@@ -109,6 +123,41 @@ export default function SpeedToLead({ days }) {
           </div>
         )}
       </div>
+
+      {/* Spam cleanup — junk form-fills skew response time; let the user filter them out */}
+      {triageCandidates?.length > 0 && (
+        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 16px', marginBottom:14 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <div style={{ fontSize:12.5, fontWeight:600, color:'#111' }}>Cleaning up spam? {spamCount > 0 && <span style={{ color:'#059669' }}>{spamCount} filtered out</span>}</div>
+              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Junk form-fills drag your response time down. Mark them spam and every metric here recalculates without them.</div>
+            </div>
+            <button onClick={() => setShowTriage(v => !v)} style={{ fontSize:11, fontWeight:600, color:'#3B82F6', background:'#EFF6FF', border:'none', borderRadius:6, padding:'6px 12px', cursor:'pointer', flexShrink:0 }}>
+              {showTriage ? 'Hide' : 'Review recent contacts'}
+            </button>
+          </div>
+          {showTriage && (
+            <div style={{ marginTop:12, borderTop:'1px solid #F3F4F6', paddingTop:10, opacity: marking ? 0.6 : 1, transition:'opacity .15s' }}>
+              {triageCandidates.map((c, i) => (
+                <div key={c.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 0', borderBottom: i < triageCandidates.length-1 ? '1px solid #F9FAFB' : 'none' }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:12.5, fontWeight:600, color: c.isSpam ? '#bbb' : '#111', textDecoration: c.isSpam ? 'line-through' : 'none' }}>{c.name}</div>
+                    <div style={{ fontSize:11, color:'#999' }}>{[c.email, c.source && fmtSrc(c.source), c.stage].filter(Boolean).join(' · ')}</div>
+                  </div>
+                  <div style={{ fontSize:11, color:'#888', flexShrink:0, minWidth:70, textAlign:'right' }}>
+                    {c.respHours == null ? (c.touched ? 'touched' : 'no touch') : fmtH(c.respHours)}
+                  </div>
+                  <button disabled={marking} onClick={() => handleSpam(c.id, c.isSpam)}
+                    style={{ fontSize:10.5, fontWeight:700, borderRadius:6, padding:'4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink:0, minWidth:78, textAlign:'center',
+                      background: c.isSpam ? '#F0FDF4' : '#FEF2F2', color: c.isSpam ? '#059669' : '#DC2626', border:`1px solid ${c.isSpam ? '#BBF7D0' : '#FECACA'}` }}>
+                    {c.isSpam ? '↩ Not spam' : 'Mark spam'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Response time distribution + Won vs Lost side by side */}
       <div style={{ display: 'grid', gridTemplateColumns: distribution?.length ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 14 }}>

@@ -46,7 +46,7 @@ class HubSpotService {
 
   async getContacts() {
     return this.paginate('/crm/v3/objects/contacts', {
-      properties: ['firstname','lastname','email','company','createdate','lifecyclestage',
+      properties: ['firstname','lastname','email','company','jobtitle','createdate','lifecyclestage',
         'hs_lifecyclestage_lead_date','hs_lifecyclestage_marketingqualifiedlead_date',
         'hs_lifecyclestage_salesqualifiedlead_date','hs_lifecyclestage_opportunity_date',
         'hs_lifecyclestage_customer_date','hs_analytics_source','num_contacted_notes','notes_last_contacted'].join(',')
@@ -55,7 +55,7 @@ class HubSpotService {
 
   async getDeals() {
     return this.paginate('/crm/v3/objects/deals', {
-      properties: ['dealstage','closedate','createdate','dealname','amount','hubspot_owner_id'].join(',')
+      properties: ['dealstage','closedate','createdate','dealname','amount','hubspot_owner_id','closed_lost_reason'].join(',')
     });
   }
 

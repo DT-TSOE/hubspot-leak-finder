@@ -48,4 +48,5 @@ export const api = {
   getSourceQuality:(property, f) => apiFetch(`/api/reports/source-quality${qs({property, ...dateParams(f)})}`),
   getStageAging:   (f) => apiFetch(`/api/reports/stage-aging${qs(dateParams(f))}`),
   getSpeedToLead:  (f) => apiFetch(`/api/reports/speed-to-lead${qs(dateParams(f))}`),
+  markSpam: (contactIds, action='add') => apiFetch('/api/reports/spam', {method:'POST', body:JSON.stringify({contactIds, action})}),
 };

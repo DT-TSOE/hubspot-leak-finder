@@ -3,11 +3,13 @@ const router = express.Router();
 const requireAuth = require('../middleware/requireAuth');
 const HubSpotService = require('../services/hubspot');
 const { analyzeLTV } = require('../services/ltvAnalysis');
+const { calculateDealStageConversion } = require('../services/scoring');
+const { lostReasonBreakdown, winLoseTiming, revenueByJobTitle } = require('../services/revenueInsights');
 
 router.get('/', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
-    const [{ contacts, dealsWithContacts }, owners] = await Promise.all([
+    const [{ contacts, dealsWithContacts, dealsWithHistory, pipelines }, owners] = await Promise.all([
       hs.getCachedData(),
       hs.getOwners(),
     ]);
@@ -33,6 +35,13 @@ router.get('/', requireAuth, async (req, res) => {
         name: ownerMap[String(r.ownerId)] || null,
       }));
     }
+
+    // Forecasting + "aha" insights (all-time / not date-filtered):
+    // deal-stage conversion, why deals lose, win-vs-lose timing, who buys.
+    data.dealStageConversion = calculateDealStageConversion(dealsWithHistory, pipelines);
+    data.lostReasons = lostReasonBreakdown(dealsWithContacts);
+    data.winLoseTiming = winLoseTiming(dealsWithContacts);
+    data.revenueByJobTitle = revenueByJobTitle(dealsWithContacts, contacts);
 
     res.json(data);
   } catch (err) { res.status(500).json({ error: err.message }); }

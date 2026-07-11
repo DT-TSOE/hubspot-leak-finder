@@ -26,6 +26,27 @@ async function loadData(req) {
   return { contacts, deals: dealsWithContacts };
 }
 
+// Per-session spam marks. In-memory (resets on redeploy / not shared across
+// instances) — durable persistence arrives with the snapshot DB. Lets a user
+// flag junk form-fills so they don't drag down response-time metrics.
+const _spam = new Map(); // sessionId -> Set(contactId)
+function spamSet(req) {
+  const key = req.session.id || 'no-session';
+  if (!_spam.has(key)) _spam.set(key, new Set());
+  return _spam.get(key);
+}
+
+// Mark/unmark contacts as spam
+router.post('/spam', requireAuth, (req, res) => {
+  const set = spamSet(req);
+  const { contactIds = [], action = 'add' } = req.body || {};
+  for (const id of contactIds) {
+    if (action === 'remove') set.delete(String(id));
+    else set.add(String(id));
+  }
+  res.json({ spamIds: [...set], spamCount: set.size });
+});
+
 // Two-funnel scorecard: overall grade + marketing/sales sub-scores +
 // deal-stage conversion + revenue impact. All-time (stage history spans time).
 router.get('/scorecard', requireAuth, async (req, res) => {
@@ -210,11 +231,37 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts: allContacts, deals: allDeals } = await loadData(req);
     const { days, startDate, endDate } = req.query;
-    const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
+    const dateContacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
     const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
+
+    // Exclude contacts the user has flagged as spam so junk form-fills don't
+    // skew response-time metrics (Dan: form contacts are mostly garbage).
+    const spam = spamSet(req);
+    const contacts = dateContacts.filter(c => !spam.has(c.id));
 
     const speed = calc.calculateTimeToFirstTouch(contacts);
     const uncontacted = health.findUncontactedLeads(contacts);
+
+    // Triage list: most recent contacts to review & mark spam. Newest first.
+    const stageLbl = { lead: 'Lead', marketingqualifiedlead: 'MQL', salesqualifiedlead: 'SQL', opportunity: 'Opportunity', customer: 'Customer' };
+    const triageCandidates = [...dateContacts]
+      .sort((a, b) => new Date(b.properties.createdate || 0) - new Date(a.properties.createdate || 0))
+      .slice(0, 40)
+      .map(c => {
+        const created = new Date(c.properties.createdate).getTime();
+        const firstTouch = c.properties.notes_last_contacted ? new Date(c.properties.notes_last_contacted).getTime() : null;
+        const respHours = firstTouch && !isNaN(created) ? Math.round(((firstTouch - created) / 3600000) * 10) / 10 : null;
+        return {
+          id: c.id,
+          name: [c.properties.firstname, c.properties.lastname].filter(Boolean).join(' ') || '(no name)',
+          email: c.properties.email || null,
+          source: c.properties.hs_analytics_source || null,
+          stage: stageLbl[c.properties.lifecyclestage] || c.properties.lifecyclestage || '—',
+          respHours,
+          touched: parseInt(c.properties.num_contacted_notes || '0') > 0,
+          isSpam: spam.has(c.id),
+        };
+      });
 
     // Won vs lost speed comparison
     const contactMap = {};
@@ -284,6 +331,8 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
       distribution,
       contactsByBucket: buckets,
       activitySummary,
+      triageCandidates,
+      spamCount: spam.size,
       uncontactedQueue: uncontacted,
       uncontactedCount: uncontacted.length,
       criticalCount: uncontacted.filter(u => u.urgency === 'critical').length,
