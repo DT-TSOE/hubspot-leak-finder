@@ -45,6 +45,7 @@ app.use('/api/export', require('./routes/export'));
 app.use('/api/alerts', require('./routes/alerts'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/ga4', require('./routes/ga4'));
+app.use('/gsc', require('./routes/gsc'));
 app.use('/api/admin', require('./routes/admin'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok', env: isProd ? 'production' : 'development' }));

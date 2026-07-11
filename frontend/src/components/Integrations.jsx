@@ -85,9 +85,10 @@ const INTEGRATIONS = [
   },
   {
     id: 'search-console', name: 'Search Console', category: 'SEO', logo: '🔍', color: '#34A853',
-    description: 'Which organic keywords and pages are generating leads that actually convert.',
-    unlocks: ['Keyword to closed deal attribution', 'Which pages produce the best leads', 'Organic vs paid lead quality comparison'],
-    comingSoon: true,
+    description: 'Search impressions, clicks, and top queries — the top of your acquisition funnel.',
+    unlocks: ['Real Impressions on the Marketing funnel', 'Top search queries driving traffic', 'Clicks and CTR by query'],
+    connectUrl: '/gsc/connect',
+    getStatus: async () => { const s = await api.gscStatus(); return s.connected ? 'connected' : 'available'; },
   },
   {
     id: 'stripe', name: 'Stripe', category: 'Revenue', logo: '💳', color: '#635BFF',
