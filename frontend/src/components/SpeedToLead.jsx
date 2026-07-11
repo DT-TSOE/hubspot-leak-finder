@@ -59,7 +59,7 @@ export default function SpeedToLead({ days }) {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 
-  const { summary, distribution, contactsByBucket, wonVsLost, activitySummary, triageCandidates, spamCount } = data;
+  const { summary, distribution, contactsByBucket, wonVsLost, activitySummary, activityComparison, triageCandidates, spamCount } = data;
 
   return (
     <div>
@@ -123,6 +123,32 @@ export default function SpeedToLead({ days }) {
           </div>
         )}
       </div>
+
+      {/* Activity — this week vs last week ("did we book any calls last week?") */}
+      {activityComparison && Object.keys(activityComparison).length > 0 && (
+        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
+          <div style={{ fontSize:12.5, fontWeight:600, color:'#111', marginBottom:12 }}>Activity — this week vs last week</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+            {[{k:'calls',label:'Calls',icon:'📞'},{k:'emails',label:'Emails',icon:'✉'},{k:'meetings',label:'Meetings booked',icon:'📅'}].map(a => {
+              const c = activityComparison[a.k] || {};
+              const tw = c.thisWeek, lw = c.lastWeek;
+              const delta = (tw != null && lw != null) ? tw - lw : null;
+              const up = delta > 0, flat = delta === 0;
+              const dc = delta == null ? '#aaa' : flat ? '#888' : up ? '#059669' : '#DC2626';
+              return (
+                <div key={a.k} style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:8, padding:'12px 14px' }}>
+                  <div style={{ fontSize:11, color:'#888', marginBottom:4 }}>{a.icon} {a.label}</div>
+                  <div style={{ display:'flex', alignItems:'baseline', gap:8 }}>
+                    <span style={{ fontSize:24, fontWeight:800, color: tw == null ? '#ccc' : '#111' }}>{tw == null ? '—' : tw}</span>
+                    {delta != null && <span style={{ fontSize:12, fontWeight:700, color:dc }}>{flat ? '→ same' : `${up ? '▲ +' : '▼ '}${delta}`}</span>}
+                  </div>
+                  <div style={{ fontSize:11, color:'#aaa', marginTop:2 }}>{lw == null ? '' : `${lw} last week`}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Spam cleanup — junk form-fills skew response time; let the user filter them out */}
       {triageCandidates?.length > 0 && (

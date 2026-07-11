@@ -201,6 +201,30 @@ class HubSpotService {
     return counts;
   }
 
+  // Week-over-week activity counts (calls / emails / meetings booked).
+  async getActivityComparison() {
+    const now = Date.now(), wk = 7 * 86400000;
+    const thisStart = new Date(now - wk).toISOString();
+    const lastStart = new Date(now - 2 * wk).toISOString();
+    const lastEnd = new Date(now - wk).toISOString();
+    const types = [
+      { key: 'calls', url: '/crm/v3/objects/calls', dateField: 'hs_timestamp' },
+      { key: 'emails', url: '/crm/v3/objects/emails', dateField: 'hs_timestamp' },
+      { key: 'meetings', url: '/crm/v3/objects/meetings', dateField: 'hs_timestamp' },
+    ];
+    const result = {};
+    await Promise.all(types.map(async ({ key, url, dateField }) => {
+      try {
+        const [thisWk, lastWk] = await Promise.all([
+          this.client.post(`${url}/search`, { filterGroups: [{ filters: [{ propertyName: dateField, operator: 'GTE', value: thisStart }] }], limit: 1, properties: [dateField] }),
+          this.client.post(`${url}/search`, { filterGroups: [{ filters: [{ propertyName: dateField, operator: 'GTE', value: lastStart }, { propertyName: dateField, operator: 'LT', value: lastEnd }] }], limit: 1, properties: [dateField] }),
+        ]);
+        result[key] = { thisWeek: thisWk.data.total || 0, lastWeek: lastWk.data.total || 0 };
+      } catch { result[key] = { thisWeek: null, lastWeek: null }; }
+    }));
+    return result;
+  }
+
   async getOwners() {
     try {
       const r = await this.client.get('/crm/v3/owners', { params: { limit: 100 } });

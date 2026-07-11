@@ -159,7 +159,12 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
 
   const load = useCallback(() => {
     return api.getScorecard()
-      .then(d => { setData(d); if (onScoreLoad && d.overall) onScoreLoad(d.overall); })
+      .then(d => {
+        setData(d);
+        if (onScoreLoad && d.overall) onScoreLoad(d.overall);
+        // First-run: auto-prompt onboarding until they personalize or dismiss it.
+        if (!d.personalized && !localStorage.getItem('pipechamp_onboard_dismissed')) setShowOnboarding(true);
+      })
       .catch(e => setError(e.message));
   }, [onScoreLoad]);
 
@@ -268,7 +273,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
 
       {showOnboarding && (
         <Onboarding
-          onClose={() => setShowOnboarding(false)}
+          onClose={() => { localStorage.setItem('pipechamp_onboard_dismissed', '1'); setShowOnboarding(false); }}
           onComplete={() => { setShowOnboarding(false); setData(null); load(); }}
         />
       )}

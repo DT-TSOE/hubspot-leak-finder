@@ -384,14 +384,16 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
       { label: 'Over 24h',   key: 'over24h', count: buckets.over24h.length,  color: '#EF4444' },
     ] : [];
 
-    // Activity summary - calls, emails, meetings in last 30 days
+    // Activity summary - calls, emails, meetings in last 30 days + week-over-week
     const activitySummary = await hs.getActivitySummary(30).catch(() => ({}));
+    const activityComparison = await hs.getActivityComparison().catch(() => ({}));
 
     res.json({
       summary: speed,
       distribution,
       contactsByBucket: buckets,
       activitySummary,
+      activityComparison,
       triageCandidates,
       spamCount: spam.size,
       uncontactedQueue: uncontacted,

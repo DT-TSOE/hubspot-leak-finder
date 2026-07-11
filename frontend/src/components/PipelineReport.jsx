@@ -36,6 +36,24 @@ export default function PipelineReport({ funnelData, insightsData }) {
   const [showEmailBox, setShowEmailBox] = useState(false);
   const reportRef = useRef(null);
 
+  // Report customization — pick which modules appear (persisted).
+  const [sections, setSections] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pipechamp_report_sections')) || {}; } catch { return {}; }
+  });
+  const show = (k) => sections[k] !== false;
+  const toggle = (k) => setSections(s => {
+    const next = { ...s, [k]: s[k] === false ? true : false };
+    localStorage.setItem('pipechamp_report_sections', JSON.stringify(next));
+    return next;
+  });
+  const SECTIONS = [
+    { k: 'health', label: 'Health Breakdown' },
+    { k: 'metrics', label: 'Key Metrics' },
+    { k: 'funnel', label: 'Funnel' },
+    { k: 'issues', label: 'Top Issues' },
+    { k: 'sources', label: 'Lead Sources' },
+  ];
+
   useEffect(() => {
     Promise.all([
       api.getGmDashboard().catch(() => null),
@@ -105,8 +123,11 @@ export default function PipelineReport({ funnelData, insightsData }) {
       {/* Print CSS */}
       <style>{`
         @media print {
-          body > * { display: none !important; }
-          .pipe-report-root { display: block !important; position: fixed; top: 0; left: 0; width: 100%; }
+          /* visibility (not display) so the report's ancestors can stay hidden
+             while the report itself and its descendants remain visible */
+          body * { visibility: hidden !important; }
+          .pipe-report-root, .pipe-report-root * { visibility: visible !important; }
+          .pipe-report-root { position: absolute; top: 0; left: 0; width: 100%; }
           .no-print { display: none !important; }
           .report-section { break-inside: avoid; }
         }
@@ -146,6 +167,21 @@ export default function PipelineReport({ funnelData, insightsData }) {
           </div>
         </div>
 
+        {/* Customize which modules appear — hidden on print */}
+        <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16, padding: '10px 12px', background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>Include:</span>
+          {SECTIONS.map(sec => {
+            const on = show(sec.k);
+            return (
+              <button key={sec.k} onClick={() => toggle(sec.k)}
+                style={{ fontSize: 12, fontWeight: 600, padding: '5px 11px', borderRadius: 14, cursor: 'pointer',
+                  background: on ? '#111' : '#fff', color: on ? '#fff' : '#999', border: `1px solid ${on ? '#111' : '#E2E5EA'}` }}>
+                {on ? '✓ ' : ''}{sec.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Report body */}
         <div ref={reportRef} style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '32px 36px' }}>
 
@@ -166,7 +202,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           </div>
 
           {/* Health dimensions */}
-          {score?.dimensions && (
+          {show('health') && score?.dimensions && (
             <ReportSection title="Health Breakdown">
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {Object.entries(score.dimensions).map(([key, dim]) => {
@@ -184,7 +220,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           )}
 
           {/* Key metrics */}
-          <ReportSection title="Key Metrics">
+          {show('metrics') && <ReportSection title="Key Metrics">
             <MetricRow items={[
               { label: 'Win Rate', value: getMetric('win_rate')?.value || '—', color: '#111' },
               { label: 'Avg Sales Cycle', value: getMetric('sales_cycle')?.value || '—', color: '#111' },
@@ -197,10 +233,10 @@ export default function PipelineReport({ funnelData, insightsData }) {
               { label: 'Top Revenue Source', value: fmtSource(getMetric('top_revenue_source')?.value) || '—', color: '#059669' },
               { label: 'Worst Conversion Source', value: fmtSource(getMetric('worst_source')?.value) || '—', alert: true },
             ]} />
-          </ReportSection>
+          </ReportSection>}
 
           {/* Funnel */}
-          {funnel?.funnelStages?.length > 0 && (
+          {show('funnel') && funnel?.funnelStages?.length > 0 && (
             <ReportSection title="Lifecycle Funnel">
               {funnel.biggestLeak && (
                 <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderLeft: '3px solid #EF4444', borderRadius: 7, padding: '10px 14px', marginBottom: 12, fontSize: 13, color: '#DC2626', fontWeight: 600 }}>
@@ -231,7 +267,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           )}
 
           {/* Top Issues */}
-          {topIssues.length > 0 && (
+          {show('issues') && topIssues.length > 0 && (
             <ReportSection title="Top Issues Detected">
               {topIssues.map((ins, i) => {
                 const sevColor = { high: '#EF4444', medium: '#F59E0B', low: '#059669' }[ins.severity] || '#888';
@@ -254,7 +290,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           )}
 
           {/* Lead Sources */}
-          {sources.length > 0 && (
+          {show('sources') && sources.length > 0 && (
             <ReportSection title="Lead Sources">
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
