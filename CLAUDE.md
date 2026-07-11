@@ -58,6 +58,17 @@ as HTTP 429). This has bitten us more than once. Rules:
 - If you add a route that needs HubSpot data, pass `req.session.id` into
   `new HubSpotService(token, sessionId)` and use `getCachedData()`.
 
+## Scoring (the core IP)
+
+Two-funnel scorecard lives in `backend/services/scoring.js`, with the full
+methodology documented in `backend/services/SCORING.md` (read it before touching
+scoring). Marketing score + Sales score + one headline overall grade + estimated
+revenue impact. Benchmarks are a swappable config in `scoring.js`. The flagship
+**deal-stage conversion %** uses "of all deals that ever entered a stage, % that
+reach won" — read from `dealstage` property history (`propertiesWithHistory`),
+not linear stage-to-stage. Exposed at `GET /api/reports/scorecard`; rendered by
+`frontend/src/components/Scorecard.jsx` as the Dashboard hero.
+
 ## Beta access
 
 `BETA_ALL_ACCESS = true` in `frontend/src/utils/plan.js` gives **every** user full

@@ -4,6 +4,7 @@ const requireAuth = require('../middleware/requireAuth');
 const HubSpotService = require('../services/hubspot');
 const calc = require('../services/metricCalculations');
 const health = require('../services/pipelineHealth');
+const { buildScorecard } = require('../services/scoring');
 
 function applyDateFilter(items, days, dateField = 'createdate', startDate, endDate) {
   if (startDate && endDate) {
@@ -24,6 +25,20 @@ async function loadData(req) {
   const { contacts, dealsWithContacts } = await hs.getCachedData();
   return { contacts, deals: dealsWithContacts };
 }
+
+// Two-funnel scorecard: overall grade + marketing/sales sub-scores +
+// deal-stage conversion + revenue impact. All-time (stage history spans time).
+router.get('/scorecard', requireAuth, async (req, res) => {
+  try {
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
+    const { contacts, deals, dealsWithHistory, pipelines } = await hs.getCachedData();
+    const scorecard = buildScorecard({ contacts, deals, dealsWithHistory, pipelines });
+    res.json({ ...scorecard, generatedAt: new Date().toISOString() });
+  } catch (err) {
+    console.error('Scorecard error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // GM Dashboard
 router.get('/gm-dashboard', requireAuth, async (req, res) => {

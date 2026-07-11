@@ -88,6 +88,52 @@ class HubSpotService {
     } catch { return []; }
   }
 
+  // Deal pipeline definitions: stage internal IDs, labels, order, and which
+  // stages are "closed won". Needed to compute deal-stage conversion in order.
+  async getDealPipelines() {
+    try {
+      const r = await this.client.get('/crm/v3/pipelines/deals');
+      return (r.data.results || []).map(p => ({
+        id: p.id,
+        label: p.label,
+        stages: (p.stages || [])
+          .slice()
+          .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+          .map(s => ({
+            id: s.id,
+            label: s.label,
+            displayOrder: s.displayOrder ?? 0,
+            isClosedWon: s.metadata?.isClosed === 'true' && Number(s.metadata?.probability) === 1,
+            isClosed: s.metadata?.isClosed === 'true',
+            probability: Number(s.metadata?.probability),
+          })),
+      }));
+    } catch { return []; }
+  }
+
+  // Stage history: for each deal, the SET of dealstage values it has ever held
+  // (via propertiesWithHistory). This is how we answer "did this deal EVER reach
+  // stage X" — including stages it skipped past — the reliable modern approach.
+  // Batched 100/call so it stays within rate limits.
+  async getDealStageHistory(dealIds) {
+    const history = {};
+    const chunks = [];
+    for (let i = 0; i < dealIds.length; i += 100) chunks.push(dealIds.slice(i, i + 100));
+    await Promise.all(chunks.map(async (chunk) => {
+      try {
+        const r = await this.client.post('/crm/v3/objects/deals/batch/read', {
+          propertiesWithHistory: ['dealstage'],
+          inputs: chunk.map(id => ({ id: String(id) })),
+        });
+        for (const d of (r.data.results || [])) {
+          const versions = d.propertiesWithHistory?.dealstage || [];
+          history[d.id] = [...new Set(versions.map(v => v.value).filter(Boolean))];
+        }
+      } catch { /* history unavailable for chunk — leave empty */ }
+    }));
+    return history;
+  }
+
   // Cached data loader — shared across all routes in the same session
   async getCachedData() {
     const key = this.sessionId || 'no-session';
@@ -101,12 +147,23 @@ class HubSpotService {
     if (existing) return existing;
 
     const loader = (async () => {
-      const [contacts, deals] = await Promise.all([this.getContacts(), this.getDeals()]);
+      const [contacts, deals, pipelines] = await Promise.all([
+        this.getContacts(), this.getDeals(), this.getDealPipelines(),
+      ]);
       const sampleDeals = deals.slice(0, 200);
-      const assocMap = await this.getDealAssociationsBatch(sampleDeals.map(d => d.id));
+      // Stage history over a bounded set of deals (100/call) to keep within rate
+      // limits; STAGE_HISTORY_LIMIT deals = STAGE_HISTORY_LIMIT/100 calls.
+      const STAGE_HISTORY_LIMIT = 500;
+      const historyDeals = deals.slice(0, STAGE_HISTORY_LIMIT);
+      const [assocMap, stageHistory] = await Promise.all([
+        this.getDealAssociationsBatch(sampleDeals.map(d => d.id)),
+        this.getDealStageHistory(historyDeals.map(d => d.id)),
+      ]);
       const dealsWithContacts = sampleDeals.map(d => ({ ...d, _contactIds: assocMap[d.id] || [] }));
+      // Attach the set of stages each deal ever entered (empty array if unknown).
+      const dealsWithHistory = historyDeals.map(d => ({ ...d, _stagesEntered: stageHistory[d.id] || [] }));
 
-      const data = { contacts, deals, dealsWithContacts };
+      const data = { contacts, deals, dealsWithContacts, pipelines, dealsWithHistory };
       _cache.set(key, { data, expiresAt: Date.now() + CACHE_TTL });
 
       // Prune stale entries

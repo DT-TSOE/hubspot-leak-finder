@@ -42,6 +42,7 @@ export const api = {
   exportFunnelCSV: () => apiDownload('/api/export/funnel-csv'),
   exportInsightsText: () => apiDownload('/api/export/insights-text'),
   ga4Status: () => apiFetch('/ga4/status'),
+  getScorecard:    () => apiFetch('/api/reports/scorecard'),
   getGmDashboard:  (f) => apiFetch(`/api/reports/gm-dashboard${qs(dateParams(f))}`),
   getMetricTiles:  (f) => apiFetch(`/api/reports/metric-tiles${qs(dateParams(f))}`),
   getSourceQuality:(property, f) => apiFetch(`/api/reports/source-quality${qs({property, ...dateParams(f)})}`),
