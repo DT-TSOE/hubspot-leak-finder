@@ -109,6 +109,18 @@ GA4 fills **Traffic** (sessions/users + channels) on the Marketing funnel;
 **Impressions** stays locked pending Google Ads/Search Console. Tokens + selected
 property id live in the session (no DB). See [[positioning-hubspot-upsell-tool]].
 
+## Search Console integration
+
+`backend/routes/gsc.js` + `backend/services/gsc.js` — Google OAuth (scope
+`webmasters.readonly`), **reuses the GA4 Google app** (`GA4_CLIENT_ID/SECRET`)
+unless `GSC_CLIENT_ID/SECRET` are set; needs `GSC_REDIRECT_URI` (= backend host +
+`/gsc/callback`), the **Search Console API** enabled, the scope added to the
+consent screen, and `/gsc/callback` added as an authorized redirect URI. Fills
+the **Impressions** stage of the Marketing funnel (impressions/clicks/CTR + top
+queries). Site selection + tokens live in the session. Until configured,
+`/gsc/connect` returns 503 and the funnel shows the connect upsell. Together with
+GA4, completes Impressions→Traffic→Lead→MQL→SQL in `MarketingPipeline`.
+
 ## Beta access
 
 `BETA_ALL_ACCESS = true` in `frontend/src/utils/plan.js` gives **every** user full
