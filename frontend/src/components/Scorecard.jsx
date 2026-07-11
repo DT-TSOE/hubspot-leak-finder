@@ -3,6 +3,19 @@ import { api } from '../utils/api';
 import Onboarding from './Onboarding';
 
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
+const fmtH = h => h == null ? '—' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
+
+// Rows describing a winning-deal segment (behavioral only).
+function profileRows(p) {
+  return [
+    { l: 'Top source', v: p.source ? `${p.source.pct}% ${p.source.label}` : '—' },
+    { l: 'First response', v: p.speedHours ? `${fmtH(p.speedHours.p25)}–${fmtH(p.speedHours.p75)}` : '—' },
+    { l: 'Follow-up', v: p.touches ? `${p.touches.p25}–${p.touches.p75} touches` : '—' },
+    { l: 'Stage discipline', v: p.stagesEntered ? `moved through ${p.stagesEntered} stages` : '—' },
+    { l: 'Deal size', v: p.valueRange ? `${fmt$(p.valueRange.p25)}–${fmt$(p.valueRange.p90)}` : '—' },
+    { l: 'Time to close', v: p.cycleRange ? `${p.cycleRange.p25}–${p.cycleRange.p75} days` : '—' },
+  ];
+}
 
 const GRADE_COLOR = { A: '#10B981', B: '#34D399', C: '#F59E0B', D: '#F97316', F: '#EF4444' };
 const scoreColor = s => s === null || s === undefined ? '#ccc' : s >= 70 ? '#10B981' : s >= 50 ? '#F59E0B' : '#EF4444';
@@ -156,6 +169,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   const [error, setError] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showWhy, setShowWhy] = useState(false);
+  const [interested, setInterested] = useState(false);
 
   const load = useCallback(() => {
     return api.getScorecard()
@@ -173,7 +187,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn’t build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Grading your pipeline…</div>;
 
-  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized, trend, recommendations } = data;
+  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized, trend, recommendations, dealProfiles, dataDriven } = data;
   const scoreDelta = trend?.overallScoreDelta;
   const headline = overall.score === null ? 'Not enough data to grade yet'
     : overall.score >= 80 ? 'Your pipeline is performing well'
@@ -216,6 +230,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
           {personalized ? (
             <div style={{ marginTop: 10, fontSize: 11.5, color: '#888', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span>Tuned for: <strong style={{ color: '#555' }}>{tunedFor}</strong></span>
+              {dataDriven && <span style={{ fontSize: 10.5, fontWeight: 700, color: '#059669', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '1px 8px' }}>📊 tuned from your win data</span>}
               {methodology?.length > 0 && (
                 <button onClick={() => setShowWhy(v => !v)} style={{ fontSize: 11, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
                   {showWhy ? 'hide why' : 'why these weights?'}
@@ -299,6 +314,45 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Your best deals look like this — behavioral winning-deal profiles */}
+      {dealProfiles && !dealProfiles.insufficient && (
+        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best deals look like this</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>Behavioral patterns of your winning segments · based on {dealProfiles.wonCount} won deals</div>
+          <div style={{ display: 'grid', gridTemplateColumns: dealProfiles.fastestClose ? '1fr 1fr' : '1fr', gap: 12 }}>
+            {[
+              { title: 'Highest-value customers', tag: 'top 25% by deal size', p: dealProfiles.highestValue, accent: '#059669' },
+              dealProfiles.fastestClose && { title: 'Fastest closes', tag: 'fastest 25% by cycle', p: dealProfiles.fastestClose, accent: '#3B82F6' },
+            ].filter(Boolean).map(card => (
+              <div key={card.title} style={{ border: '1px solid #F0F1F4', borderRadius: 10, padding: '14px', borderTop: `3px solid ${card.accent}` }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{card.title}</div>
+                <div style={{ fontSize: 10.5, color: '#999', marginBottom: 10 }}>{card.tag} · {card.p.sample} deals</div>
+                {profileRows(card.p).map(r => (
+                  <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #F9FAFB', fontSize: 12.5 }}>
+                    <span style={{ color: '#888' }}>{r.l}</span>
+                    <span style={{ color: '#111', fontWeight: 600, textAlign: 'right' }}>{r.v}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          {/* Interest CTA for the future customer-analysis app (demand test) */}
+          <div style={{ marginTop: 12, background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ flex: 1, fontSize: 12.5, color: '#7C2D12', lineHeight: 1.5 }}>
+              <strong style={{ color: '#111' }}>Want to know who these buyers actually are — and where to find more like them?</strong> Job titles, company profiles, and lookalike targeting.
+            </div>
+            {interested ? (
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669', flexShrink: 0 }}>✓ We’ll be in touch</span>
+            ) : (
+              <button onClick={() => { api.recordInterest('customer-profiles').catch(() => {}); setInterested(true); }}
+                style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#fff', background: '#C2410C', border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}>
+                I want this →
+              </button>
+            )}
+          </div>
         </div>
       )}
 

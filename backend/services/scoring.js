@@ -229,10 +229,77 @@ function resolveScoreProfile(profile) {
   return { ...w, tunedFor, methodology: notes, locked, personalized: true };
 }
 
+// --- Data-driven drivers: what separates THIS portal's wins from losses ------
+// Layered on top of the onboarding weights when there's enough closed-deal data
+// to be meaningful. Explains itself with the portal's own numbers.
+function computeDataDrivers(data) {
+  const { contacts = [], dealsWithContacts = [], dealsWithHistory = [] } = data;
+  const contactMap = {}; contacts.forEach(c => { contactMap[c.id] = c; });
+  const wonSpeed = [], lostSpeed = [], wonTouch = [], lostTouch = [];
+  for (const d of dealsWithContacts) {
+    const won = d.properties.dealstage === 'closedwon', lost = d.properties.dealstage === 'closedlost';
+    if (!won && !lost) continue;
+    const c = (d._contactIds || []).map(id => contactMap[id]).find(Boolean);
+    if (!c) continue;
+    const cc = new Date(c.properties.createdate).getTime();
+    const ft = c.properties.notes_last_contacted ? new Date(c.properties.notes_last_contacted).getTime() : null;
+    let sp = null; if (ft && !isNaN(cc)) { const h = (ft - cc) / 3600000; if (h > 0 && h < 720) sp = h; }
+    const t = c.properties.num_contacted_notes != null ? parseInt(c.properties.num_contacted_notes) : null;
+    if (won) { if (sp != null) wonSpeed.push(sp); if (t != null) wonTouch.push(t); }
+    else { if (sp != null) lostSpeed.push(sp); if (t != null) lostTouch.push(t); }
+  }
+  const wonStages = [], lostStages = [];
+  for (const d of dealsWithHistory) {
+    const n = (d._stagesEntered || []).length; if (!n) continue;
+    if (d.properties.dealstage === 'closedwon') wonStages.push(n);
+    else if (d.properties.dealstage === 'closedlost') lostStages.push(n);
+  }
+  const med = calc.median;
+  const drivers = {}, notes = [];
+  if (wonSpeed.length >= 5 && lostSpeed.length >= 5) {
+    const w = med(wonSpeed), l = med(lostSpeed);
+    if (w > 0 && l > w) {
+      const ratio = l / w, strength = clamp((ratio - 1) / 2, 0, 1);
+      drivers.speedToLead = strength;
+      if (strength >= 0.3) notes.push({ factor: 'Speed-to-lead (from your data)', reason: `Your won deals were contacted ${Math.round(ratio * 10) / 10}× faster than the ones you lost — so speed is weighted up for you.` });
+    }
+  }
+  if (wonTouch.length >= 5 && lostTouch.length >= 5) {
+    const w = med(wonTouch), l = med(lostTouch);
+    if (w > l) {
+      const ratio = l > 0 ? w / l : 2, strength = clamp((ratio - 1) / 2, 0, 1);
+      drivers.followUpCoverage = strength;
+      if (strength >= 0.3) notes.push({ factor: 'Follow-up (from your data)', reason: `Won deals had ~${Math.round(w)} touches vs ~${Math.round(l)} on losses — follow-up is weighted up for you.` });
+    }
+  }
+  if (wonStages.length >= 5 && lostStages.length >= 5) {
+    const w = med(wonStages), l = med(lostStages);
+    if (w > l) {
+      const strength = clamp((w - l) / Math.max(l, 1), 0, 1);
+      drivers.dealStageConversion = strength;
+      if (strength >= 0.3) notes.push({ factor: 'Stage discipline (from your data)', reason: `Deals you won moved through more stages than deals you lost — stage discipline is weighted up for you.` });
+    }
+  }
+  return { sufficient: Object.keys(drivers).length > 0, drivers, notes };
+}
+
 // --- The scorecard -----------------------------------------------------------
 function buildScorecard(data, profile) {
-  const { contacts = [], deals = [], dealsWithHistory = [], pipelines = [] } = data;
+  const { contacts = [], deals = [], dealsWithContacts = [], dealsWithHistory = [], pipelines = [] } = data;
   const W = resolveScoreProfile(profile);
+
+  // Blend in data-driven drivers (what actually separates their wins from losses).
+  const dd = computeDataDrivers({ contacts, dealsWithContacts, dealsWithHistory });
+  if (dd.sufficient) {
+    const MAX_BOOST = 0.8;
+    const boost = (obj, key) => { if (dd.drivers[key] != null && obj[key] != null) obj[key] = obj[key] * (1 + dd.drivers[key] * MAX_BOOST); };
+    boost(W.marketing, 'followUpCoverage');
+    boost(W.sales, 'speedToLead');
+    boost(W.sales, 'dealStageConversion');
+    _normalize(W.marketing); _normalize(W.sales);
+    W.methodology = [...(W.methodology || []), ...dd.notes];
+    W.dataDriven = true;
+  }
 
   const avgDeal = calc.calculateAverageDealSize(deals);
   const avgDealSize = avgDeal.value || 0;
@@ -320,6 +387,7 @@ function buildScorecard(data, profile) {
     tunedFor: W.tunedFor,
     methodology: W.methodology,
     personalized: W.personalized,
+    dataDriven: !!W.dataDriven,
   };
 }
 

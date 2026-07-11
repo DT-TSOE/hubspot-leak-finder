@@ -6,6 +6,7 @@ const calc = require('../services/metricCalculations');
 const health = require('../services/pipelineHealth');
 const { buildScorecard } = require('../services/scoring');
 const { buildRecommendations } = require('../services/recommendations');
+const { buildDealProfiles } = require('../services/dealProfiles');
 const db = require('../services/db');
 
 function applyDateFilter(items, days, dateField = 'createdate', startDate, endDate) {
@@ -54,9 +55,13 @@ router.post('/spam', requireAuth, (req, res) => {
 router.get('/scorecard', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
-    const { contacts, deals, dealsWithHistory, pipelines } = await hs.getCachedData();
-    const scorecard = buildScorecard({ contacts, deals, dealsWithHistory, pipelines }, req.session.onboarding);
+    const { contacts, deals, dealsWithContacts, dealsWithHistory, pipelines } = await hs.getCachedData();
+    const scorecard = buildScorecard({ contacts, deals, dealsWithContacts, dealsWithHistory, pipelines }, req.session.onboarding);
     scorecard.recommendations = buildRecommendations(scorecard);
+
+    // Winning-deal profiles (behavioral). Stage discipline needs history keyed by deal id.
+    const stageHistoryById = Object.fromEntries((dealsWithHistory || []).map(d => [d.id, d._stagesEntered || []]));
+    scorecard.dealProfiles = buildDealProfiles(dealsWithContacts, contacts, stageHistoryById);
 
     // Monthly snapshot + "vs last month" trend (no-ops until DB is provisioned).
     let trend = null;
@@ -93,6 +98,13 @@ router.get('/scorecard', requireAuth, async (req, res) => {
     console.error('Scorecard error:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Lightweight interest signal for the future customer-analysis app (demand test).
+router.post('/interest', requireAuth, (req, res) => {
+  const feature = (req.body?.feature || 'unknown').slice(0, 60);
+  console.log(`[interest] portal=${req.session.portalId || '?'} feature=${feature} at=${new Date().toISOString()}`);
+  res.json({ ok: true });
 });
 
 // Onboarding profile (business type, hubs, revenue, challenge, goal) — used to

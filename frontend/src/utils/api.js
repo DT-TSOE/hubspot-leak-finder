@@ -50,6 +50,7 @@ export const api = {
   gscSelectSite: (siteUrl) => apiFetch('/gsc/select-site', {method:'POST', body:JSON.stringify({siteUrl})}),
   gscImpressions: () => apiFetch('/gsc/impressions'),
   getScorecard:    () => apiFetch('/api/reports/scorecard'),
+  recordInterest:  (feature) => apiFetch('/api/reports/interest', {method:'POST', body:JSON.stringify({feature})}),
   getOnboarding:   () => apiFetch('/api/reports/onboarding'),
   saveOnboarding:  (answers) => apiFetch('/api/reports/onboarding', {method:'POST', body:JSON.stringify(answers)}),
   getGmDashboard:  (f) => apiFetch(`/api/reports/gm-dashboard${qs(dateParams(f))}`),
