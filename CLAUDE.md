@@ -83,6 +83,19 @@ is now labelled **Scorecard** (internal id stays `dashboard`). The old "Pipeline
 tab is split into **Marketing** (`MarketingPipeline.jsx`) and **Sales**
 (`SalesPipeline.jsx`).
 
+## Monthly snapshots (database)
+
+`backend/services/db.js` is a Postgres-backed store for monthly scorecard
+snapshots. It **gracefully no-ops when `DATABASE_URL` is unset**, so the app runs
+fine without a DB (snapshots just don't record). Provision **Railway Postgres**
+and set `DATABASE_URL` on the backend service (private URL needs no SSL; for an
+external URL set `DATABASE_SSL=true`). Table `scorecard_snapshots` auto-creates
+on first use. Snapshots store **only aggregate scores/metrics** keyed by HubSpot
+portal id (`hs.getPortalId()`), captured lazily on scorecard view (one row per
+portal per month). The scorecard endpoint returns a `trend` (vs last month);
+the UI shows a grade-delta badge. This is why the connect screen says "we never
+store your contacts" rather than "no data stored." See [[positioning-hubspot-upsell-tool]].
+
 ## Beta access
 
 `BETA_ALL_ACCESS = true` in `frontend/src/utils/plan.js` gives **every** user full
