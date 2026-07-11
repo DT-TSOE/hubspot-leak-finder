@@ -69,7 +69,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
             </div>
           </div>
         ))}
-        <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} />
+        <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} stageContacts={funnel.stageContacts} />
       </div>
       {Object.keys(timings).length > 0 && (
         <div style={CARD}>

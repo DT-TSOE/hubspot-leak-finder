@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import IntegrationHint from './IntegrationHint';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : 'N/A';
@@ -10,9 +10,9 @@ function RevenueTooltip({ active, payload }) {
   const d = payload[0].payload;
   return (
     <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:8, padding:'8px 12px', fontSize:12, boxShadow:'0 2px 8px rgba(0,0,0,.08)', pointerEvents:'none' }}>
-      <div style={{ fontWeight:700, color:'#111', marginBottom:2 }}>{d.label}</div>
-      <div style={{ color:'#059669', fontWeight:700 }}>${d.revenue.toLocaleString()}</div>
-      <div style={{ color:'#888' }}>{d.deals} deal{d.deals !== 1 ? 's' : ''} closed</div>
+      <div style={{ fontWeight:700, color:'#111', marginBottom:3 }}>{d.label}</div>
+      <div style={{ color:'#059669', fontWeight:700 }}>${(d.revenue||0).toLocaleString()} won <span style={{ color:'#888', fontWeight:400 }}>· {d.deals} deal{d.deals !== 1 ? 's' : ''}</span></div>
+      {(d.lost > 0) && <div style={{ color:'#EF4444', fontWeight:700, marginTop:1 }}>${(d.lostRevenue||0).toLocaleString()} lost <span style={{ color:'#888', fontWeight:400 }}>· {d.lost} deal{d.lost !== 1 ? 's' : ''}</span></div>}
     </div>
   );
 }
@@ -37,8 +37,6 @@ export default function RevenueTab({ data, loading, onNavigate }) {
     </div>
   );
 
-  const maxRevenue = Math.max(...(data.revenueTrend?.map(m => m.revenue) || [1]));
-
   return (
     <div>
       {/* Headline metrics */}
@@ -58,21 +56,24 @@ export default function RevenueTab({ data, loading, onNavigate }) {
       {/* Monthly revenue trend */}
       {data.revenueTrend?.length > 1 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
-          <div style={{ marginBottom:14 }}>
-            <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Monthly revenue</div>
-            <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Closed-won deals by month</div>
+          <div style={{ marginBottom:14, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Won vs lost by month</div>
+              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Closed revenue — won and lost — by close month</div>
+            </div>
+            <div style={{ display:'flex', gap:12, fontSize:11 }}>
+              <span style={{ color:'#555' }}><span style={{ color:'#059669', fontWeight:700 }}>●</span> Won</span>
+              <span style={{ color:'#555' }}><span style={{ color:'#EF4444', fontWeight:700 }}>●</span> Lost</span>
+            </div>
           </div>
           <div style={{ height:160 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.revenueTrend} margin={{ left:0, right:0, top:4, bottom:0 }}>
+              <BarChart data={data.revenueTrend} margin={{ left:0, right:0, top:4, bottom:0 }} barGap={2}>
                 <XAxis dataKey="label" tick={{ fontSize:11, fill:'#888' }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<RevenueTooltip />} cursor={false} wrapperStyle={{ pointerEvents:'none' }} />
-                <Bar dataKey="revenue" radius={[4,4,0,0]} maxBarSize={48} isAnimationActive={false}>
-                  {data.revenueTrend.map((d, i) => (
-                    <Cell key={i} fill={d.revenue === maxRevenue ? '#059669' : '#34D399'} />
-                  ))}
-                </Bar>
+                <Bar dataKey="revenue" name="Won" radius={[4,4,0,0]} maxBarSize={26} isAnimationActive={false} fill="#059669" />
+                <Bar dataKey="lostRevenue" name="Lost" radius={[4,4,0,0]} maxBarSize={26} isAnimationActive={false} fill="#EF4444" />
               </BarChart>
             </ResponsiveContainer>
           </div>

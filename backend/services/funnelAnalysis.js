@@ -27,12 +27,24 @@ function msTodays(ms) { return Math.round(ms / 86400000); }
 function analyzeFunnel(contacts) {
   const MIN = 3;
   const stageCounts = {};
-  LIFECYCLE_STAGES.forEach(s => stageCounts[s] = 0);
+  const stageContacts = {}; // capped account lists per stage for drill-down
+  LIFECYCLE_STAGES.forEach(s => { stageCounts[s] = 0; stageContacts[s] = []; });
 
   for (const c of contacts) {
     const highest = getHighestStage(c);
     const idx = LIFECYCLE_STAGES.indexOf(highest);
-    for (let i = 0; i <= idx; i++) stageCounts[LIFECYCLE_STAGES[i]]++;
+    for (let i = 0; i <= idx; i++) {
+      const st = LIFECYCLE_STAGES[i];
+      stageCounts[st]++;
+      if (stageContacts[st].length < 60) {
+        stageContacts[st].push({
+          id: c.id,
+          name: [c.properties.firstname, c.properties.lastname].filter(Boolean).join(' ') || '(no name)',
+          email: c.properties.email || null,
+          company: c.properties.company || null,
+        });
+      }
+    }
   }
 
   const funnelStages = LIFECYCLE_STAGES.map((stage, i) => {
@@ -83,7 +95,7 @@ function analyzeFunnel(contacts) {
     description: `Only ${lowestConversionStage.conversionRate}% of ${funnelStages[LIFECYCLE_STAGES.indexOf(lowestConversionStage.stage)-1]?.label || 'leads'} convert to ${lowestConversionStage.label}`
   } : null;
 
-  return { totalContacts: contacts.length, funnelStages, stageTimes, biggestLeak, lowestConversionStage, highestDropOffStage, longestDelayTransition, meta: { generatedAt: new Date().toISOString() } };
+  return { totalContacts: contacts.length, funnelStages, stageContacts, stageTimes, biggestLeak, lowestConversionStage, highestDropOffStage, longestDelayTransition, meta: { generatedAt: new Date().toISOString() } };
 }
 
 module.exports = { analyzeFunnel, LIFECYCLE_STAGES, STAGE_LABELS };

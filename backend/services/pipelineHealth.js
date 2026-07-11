@@ -157,6 +157,7 @@ function findStuckRecords(contacts, deals) {
       id: d.id,
       type: 'deal',
       name: d.properties.dealname || 'Unnamed deal',
+      owner: d.properties.hubspot_owner_id || null,
       stage: stage || 'Unknown',
       daysInStage: daysOpen,
       threshold: 14,

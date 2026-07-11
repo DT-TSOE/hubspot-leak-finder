@@ -12,6 +12,7 @@ const SALES_TIMING_KEYS = ['salesqualifiedlead_to_opportunity', 'opportunity_to_
 // deal-stage conversion table (fetched from the scorecard endpoint).
 export default function SalesPipeline({ funnelData }) {
   const [scorecard, setScorecard] = useState(null);
+  const [pipelineIdx, setPipelineIdx] = useState(0);
   useEffect(() => { api.getScorecard().then(setScorecard).catch(() => {}); }, []);
 
   if (!funnelData?.funnel) return <div style={{ textAlign: 'center', padding: '3rem', color: '#888', fontSize: 13 }}>Loading sales funnel…</div>;
@@ -39,11 +40,34 @@ export default function SalesPipeline({ funnelData }) {
 
       <div style={CARD}>
         <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Sales funnel — SQL → Opportunity → Customer</div>
-        <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} />
+        <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} stageContacts={funnel.stageContacts} />
       </div>
 
-      {/* Real deal-stage conversion (created→won + per-stage) */}
-      {scorecard?.dealStageConversion?.[0] && <DealStageTable pipeline={scorecard.dealStageConversion[0]} />}
+      {/* Real deal-stage conversion (created→won + per-stage) with pipeline picker */}
+      {scorecard?.dealStageConversion?.length > 0 && (() => {
+        const pipelines = scorecard.dealStageConversion;
+        const active = pipelines[Math.min(pipelineIdx, pipelines.length - 1)];
+        return (
+          <div>
+            {pipelines.length > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                <span style={{ fontSize: 11, color: '#888', fontWeight: 600 }}>Pipeline:</span>
+                {pipelines.map((p, i) => {
+                  const on = i === Math.min(pipelineIdx, pipelines.length - 1);
+                  return (
+                    <button key={p.pipelineId} onClick={() => setPipelineIdx(i)}
+                      style={{ fontSize: 11.5, fontWeight: 600, padding: '4px 11px', borderRadius: 7, cursor: 'pointer',
+                        background: on ? '#111' : '#fff', color: on ? '#fff' : '#555', border: `1px solid ${on ? '#111' : '#E2E5EA'}` }}>
+                      {p.pipelineLabel}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <DealStageTable pipeline={active} />
+          </div>
+        );
+      })()}
 
       {Object.keys(timings).length > 0 && (
         <div style={CARD}>

@@ -203,11 +203,28 @@ router.get('/source-quality', requireAuth, async (req, res) => {
 // Stage aging
 router.get('/stage-aging', requireAuth, async (req, res) => {
   try {
+    const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts: allContacts, deals: allDeals } = await loadData(req);
     const { days, startDate, endDate } = req.query;
     const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
     const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
     const stuck = health.findStuckRecords(contacts, deals);
+
+    // Attribute at-risk records to their owner so a manager can see who's on top
+    // of theirs and who's letting deals rot.
+    const owners = await hs.getOwners().catch(() => []);
+    const ownerMap = Object.fromEntries(owners.map(o => [String(o.id), o.name]));
+    const ownerAgg = {};
+    for (const r of stuck) {
+      const id = r.owner ? String(r.owner) : 'unassigned';
+      if (!ownerAgg[id]) ownerAgg[id] = { ownerId: id, name: id === 'unassigned' ? 'Unassigned' : (ownerMap[id] || `Owner ${id}`), count: 0, critical: 0, revenueAtRisk: 0 };
+      ownerAgg[id].count++;
+      if (r.urgency === 'critical') ownerAgg[id].critical++;
+      ownerAgg[id].revenueAtRisk += r.revenueAtRisk || 0;
+    }
+    const byOwner = Object.values(ownerAgg)
+      .map(o => ({ ...o, revenueAtRisk: Math.round(o.revenueAtRisk) }))
+      .sort((a, b) => b.count - a.count);
 
     const byStage = {};
     for (const r of stuck) {
@@ -229,6 +246,7 @@ router.get('/stage-aging', requireAuth, async (req, res) => {
       high: stuck.filter(r => r.urgency === 'high').length,
       medium: stuck.filter(r => r.urgency === 'medium').length,
       stageBreakdown,
+      byOwner,
       totalRevenueAtRisk: stuck.reduce((sum, r) => sum + (r.revenueAtRisk || 0), 0),
     });
   } catch (err) {

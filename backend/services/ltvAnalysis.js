@@ -60,21 +60,25 @@ function analyzeLTV(contacts, deals) {
     .map(([ownerId, r]) => ({ ownerId, won:r.won, lost:r.lost, total:r.won+r.lost, winRate: Math.round((r.won/(r.won+r.lost))*1000)/10, avgDealSize: r.won > 0 ? Math.round(r.totalValue/r.won) : 0 }))
     .sort((a,b) => b.winRate - a.winRate);
 
-  // Monthly revenue trend (last 12 months with closed deals)
+  // Monthly trend (last 12 months) — won AND lost, by close month.
   const monthMap = {};
-  for (const deal of wonDeals) {
+  for (const deal of deals) {
+    const stage = deal.properties.dealstage;
+    const isWon = stage === 'closedwon', isLost = stage === 'closedlost';
+    if (!isWon && !isLost) continue;
     const closed = new Date(deal.properties.closedate);
     if (isNaN(closed.getTime())) continue;
     const key = `${closed.getFullYear()}-${String(closed.getMonth()+1).padStart(2,'0')}`;
     const label = closed.toLocaleDateString('en-US', { month:'short', year:'2-digit' });
-    if (!monthMap[key]) monthMap[key] = { key, label, revenue:0, deals:0 };
-    monthMap[key].revenue += parseFloat(deal.properties.amount||'0');
-    monthMap[key].deals++;
+    if (!monthMap[key]) monthMap[key] = { key, label, revenue:0, deals:0, lostRevenue:0, lost:0 };
+    const amount = parseFloat(deal.properties.amount||'0') || 0;
+    if (isWon) { monthMap[key].revenue += amount; monthMap[key].deals++; }
+    else { monthMap[key].lostRevenue += amount; monthMap[key].lost++; }
   }
   const revenueTrend = Object.values(monthMap)
     .sort((a,b) => a.key.localeCompare(b.key))
     .slice(-12)
-    .map(m => ({ ...m, revenue: Math.round(m.revenue) }));
+    .map(m => ({ ...m, revenue: Math.round(m.revenue), lostRevenue: Math.round(m.lostRevenue) }));
 
   return {
     insufficient: false,

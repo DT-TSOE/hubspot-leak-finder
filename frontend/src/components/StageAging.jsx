@@ -123,6 +123,28 @@ export default function StageAging({ days }) {
         </div>
       </div>
 
+      {/* By owner — who's on top of theirs, who's letting deals rot */}
+      {data.byOwner?.length > 1 && (
+        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 2 }}>At-risk by owner</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 12 }}>Who's staying on top of their pipeline — and who needs a nudge.</div>
+          {data.byOwner.map((o, i) => {
+            const maxCount = data.byOwner[0].count || 1;
+            return (
+              <div key={o.ownerId} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < data.byOwner.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
+                <div style={{ width: 150, flexShrink: 0, fontSize: 13, fontWeight: 500, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.name}</div>
+                <div style={{ flex: 1, height: 8, background: '#F0F1F4', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ width: `${(o.count / maxCount) * 100}%`, height: '100%', background: o.critical > 0 ? '#EF4444' : '#F59E0B', borderRadius: 4 }} />
+                </div>
+                <div style={{ width: 60, textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#111', flexShrink: 0 }}>{o.count}</div>
+                <div style={{ width: 70, textAlign: 'right', fontSize: 11, color: o.critical > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.critical > 0 ? `${o.critical} crit` : '—'}</div>
+                <div style={{ width: 80, textAlign: 'right', fontSize: 12, fontWeight: 600, color: o.revenueAtRisk > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.revenueAtRisk > 0 ? fmtK(o.revenueAtRisk) : '—'}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Stage breakdown table + Revenue at Risk chart side by side */}
       {data.stageBreakdown?.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: '55% 1fr', gap: 12, marginBottom: 12 }}>
