@@ -96,6 +96,19 @@ portal per month). The scorecard endpoint returns a `trend` (vs last month);
 the UI shows a grade-delta badge. This is why the connect screen says "we never
 store your contacts" rather than "no data stored." See [[positioning-hubspot-upsell-tool]].
 
+## GA4 integration
+
+OAuth in `backend/routes/ga4.js` (Google, scope `analytics.readonly`), data in
+`backend/services/ga4.js` (token refresh on 401, Admin API property list, Data
+API traffic-by-channel). Needs env vars on the backend: `GA4_CLIENT_ID`,
+`GA4_CLIENT_SECRET`, `GA4_REDIRECT_URI` (= backend host + `/ga4/callback`), plus
+the Google Analytics **Data API** and **Admin API** enabled and an OAuth consent
+screen (testing mode allows ~100 test users, no verification). Until configured,
+`/ga4/connect` returns 503 and `MarketingPipeline` shows the connect upsell.
+GA4 fills **Traffic** (sessions/users + channels) on the Marketing funnel;
+**Impressions** stays locked pending Google Ads/Search Console. Tokens + selected
+property id live in the session (no DB). See [[positioning-hubspot-upsell-tool]].
+
 ## Beta access
 
 `BETA_ALL_ACCESS = true` in `frontend/src/utils/plan.js` gives **every** user full
