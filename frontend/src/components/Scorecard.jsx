@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../utils/api';
+import Onboarding from './Onboarding';
 
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
 
@@ -49,23 +50,32 @@ function DimensionRow({ dim }) {
   );
 }
 
-function FunnelCard({ title, subtitle, score, grade, dimensions }) {
+function FunnelCard({ title, subtitle, score, grade, dimensions, locked, unlockHint }) {
   const color = grade ? (GRADE_COLOR[grade] || '#ccc') : '#ccc';
   return (
-    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px' }}>
+    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', position: 'relative', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{title}</div>
           <div style={{ fontSize: 11, color: '#999' }}>{subtitle}</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ fontSize: 24, fontWeight: 800, color }}>{grade || '—'}</span>
-          <span style={{ fontSize: 12, color: '#888', fontWeight: 600 }}>{score !== null ? `${score}/100` : ''}</span>
-        </div>
+        {!locked && (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: 24, fontWeight: 800, color }}>{grade || '—'}</span>
+            <span style={{ fontSize: 12, color: '#888', fontWeight: 600 }}>{score !== null ? `${score}/100` : ''}</span>
+          </div>
+        )}
       </div>
-      <div>
+      <div style={{ filter: locked ? 'blur(5px)' : 'none', userSelect: locked ? 'none' : 'auto', pointerEvents: locked ? 'none' : 'auto' }} aria-hidden={locked}>
         {dimensions.map(d => <DimensionRow key={d.key} dim={d} />)}
       </div>
+      {locked && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', background: 'rgba(255,255,255,.45)' }}>
+          <div style={{ fontSize: 22, marginBottom: 6 }}>🔒</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 4 }}>Your {title} grade is locked</div>
+          <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, maxWidth: 260 }}>{unlockHint}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -74,7 +84,7 @@ function FunnelCard({ title, subtitle, score, grade, dimensions }) {
 // Created→won is the HERO number: most SMB deals skip stages and go straight
 // created→closed, so it's the only reliably-populated metric. Per-stage detail
 // is secondary and shown only where enough deals actually passed through.
-function DealStageTable({ pipeline }) {
+export function DealStageTable({ pipeline }) {
   if (!pipeline) return null;
   const c2wColor = scoreColor(pipeline.createdToWon);
   return (
@@ -144,19 +154,21 @@ function HoverCard({ children, popover }) {
 export default function Scorecard({ onScoreLoad, onTabChange }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showWhy, setShowWhy] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    api.getScorecard()
-      .then(d => { if (mounted) { setData(d); if (onScoreLoad && d.overall) onScoreLoad(d.overall); } })
-      .catch(e => { if (mounted) setError(e.message); });
-    return () => { mounted = false; };
+  const load = useCallback(() => {
+    return api.getScorecard()
+      .then(d => { setData(d); if (onScoreLoad && d.overall) onScoreLoad(d.overall); })
+      .catch(e => setError(e.message));
   }, [onScoreLoad]);
+
+  useEffect(() => { load(); }, [load]);
 
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn’t build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Grading your pipeline…</div>;
 
-  const { overall, marketing, sales, revenueImpact, dealStageConversion } = data;
+  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized } = data;
   const headline = overall.score === null ? 'Not enough data to grade yet'
     : overall.score >= 80 ? 'Your pipeline is performing well'
     : overall.score >= 60 ? 'Solid pipeline with clear room to improve'
@@ -179,6 +191,31 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
               <span style={{ color: GRADE_COLOR[sales.grade] || '#ccc', fontWeight: 700 }}>●</span> Sales <strong style={{ color: '#111' }}>{sales.grade || '—'}</strong>
             </span>
           </div>
+          {/* Tuned-for / personalize — the visible methodology */}
+          {personalized ? (
+            <div style={{ marginTop: 10, fontSize: 11.5, color: '#888', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span>Tuned for: <strong style={{ color: '#555' }}>{tunedFor}</strong></span>
+              {methodology?.length > 0 && (
+                <button onClick={() => setShowWhy(v => !v)} style={{ fontSize: 11, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
+                  {showWhy ? 'hide why' : 'why these weights?'}
+                </button>
+              )}
+              <button onClick={() => setShowOnboarding(true)} style={{ fontSize: 11, color: '#999', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>edit</button>
+            </div>
+          ) : (
+            <button onClick={() => setShowOnboarding(true)} style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: '#111', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '6px 12px', cursor: 'pointer' }}>
+              ✨ Personalize this grade for your business →
+            </button>
+          )}
+          {showWhy && methodology?.length > 0 && (
+            <div style={{ marginTop: 10, background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '10px 12px' }}>
+              {methodology.map((m, i) => (
+                <div key={i} style={{ fontSize: 11.5, color: '#555', marginBottom: i < methodology.length - 1 ? 6 : 0, lineHeight: 1.45 }}>
+                  <strong style={{ color: '#111' }}>{m.factor}:</strong> {m.reason}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {revenueImpact?.total > 0 && (
           <HoverCard popover={
@@ -204,12 +241,21 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
 
       {/* Marketing vs Sales breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-        <FunnelCard title="Marketing" subtitle="Generate leads → SQL" score={marketing.score} grade={marketing.grade} dimensions={marketing.dimensions} />
-        <FunnelCard title="Sales" subtitle="SQL → opportunity → customer" score={sales.score} grade={sales.grade} dimensions={sales.dimensions} />
+        <FunnelCard title="Marketing" subtitle="Generate leads → SQL" score={marketing.score} grade={marketing.grade} dimensions={marketing.dimensions}
+          locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification." />
+        <FunnelCard title="Sales" subtitle="SQL → opportunity → customer" score={sales.score} grade={sales.grade} dimensions={sales.dimensions}
+          locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate." />
       </div>
 
       {/* Deal-stage conversion table (primary pipeline) */}
       <DealStageTable pipeline={dealStageConversion && dealStageConversion[0]} />
+
+      {showOnboarding && (
+        <Onboarding
+          onClose={() => setShowOnboarding(false)}
+          onComplete={() => { setShowOnboarding(false); setData(null); load(); }}
+        />
+      )}
     </div>
   );
 }

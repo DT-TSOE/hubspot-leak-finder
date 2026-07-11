@@ -9,6 +9,9 @@ import LaJefaChat from '../components/LaJefaChat';
 import UpgradePrompt from '../components/UpgradePrompt';
 import NotificationBell from '../components/NotificationBell';
 import GmDashboard from '../components/GmDashboard';
+import Scorecard from '../components/Scorecard';
+import MarketingPipeline from '../components/MarketingPipeline';
+import SalesPipeline from '../components/SalesPipeline';
 import StageAging from '../components/StageAging';
 import SpeedToLead from '../components/SpeedToLead';
 import PipelineReport from '../components/PipelineReport';
@@ -23,10 +26,11 @@ import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 const SIDEBAR_W = 220;
 
 const NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: '▦', standalone: true },
+  { id: 'dashboard', label: 'Scorecard', icon: '▦', standalone: true },
   {
     type: 'group', label: 'Analyze', items: [
-      { id: 'pipeline',      label: 'Pipeline',      feature: 'funnel',       dateFilter: true },
+      { id: 'marketing',     label: 'Marketing',     feature: 'funnel',       dateFilter: true },
+      { id: 'sales',         label: 'Sales',         feature: 'funnel',       dateFilter: true },
       { id: 'at-risk',       label: 'At Risk',       feature: 'stageAging' },
       { id: 'lead-sources',  label: 'Lead Sources',  feature: 'sourceQuality' },
       { id: 'lead-response', label: 'Lead Response', feature: 'speedToLead' },
@@ -43,7 +47,7 @@ const NAV = [
 ];
 
 const ALL_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', standalone: true },
+  { id: 'dashboard', label: 'Scorecard', standalone: true },
   { id: 'integrations', label: 'Integrations' },
   ...NAV.filter(n => n.type === 'group').flatMap(g => g.items),
 ];
@@ -91,7 +95,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
         {/* Dashboard — with live health score badge */}
         <button data-tour="nav-dashboard" onClick={() => onSection('dashboard')}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
-          <span style={{ fontSize: 14, color: section === 'dashboard' ? '#111' : '#333', fontWeight: 700 }}>Dashboard</span>
+          <span style={{ fontSize: 14, color: section === 'dashboard' ? '#111' : '#333', fontWeight: 700 }}>Scorecard</span>
           {healthScore ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
               <span style={{ fontSize: 16, fontWeight: 800, lineHeight: 1, color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626' }}>
@@ -223,7 +227,7 @@ function InsightFilters({ activeType, activeSeverity, onTypeChange, onSeverityCh
   );
 }
 
-const VALID_SECTIONS = new Set(['dashboard','pipeline','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations']);
+const VALID_SECTIONS = new Set(['dashboard','marketing','sales','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations']);
 
 export default function DashboardPage({ onDisconnect }) {
   const [section, setSection] = useState(() => {
@@ -384,33 +388,18 @@ export default function DashboardPage({ onDisconnect }) {
           {!loading && !error && funnelData && (
 
             <>
-              {/* PIPELINE */}
-              {section === 'pipeline' && (() => {
-                const { funnel } = funnelData;
-                const total = funnel.funnelStages[0]?.count || 0;
-                const customers = funnel.funnelStages[funnel.funnelStages.length - 1]?.count || 0;
-                const overall = total > 0 ? ((customers / total) * 100).toFixed(1) : 0;
-                return <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 12 }}>
-                    <Metric label="Contacts Analyzed" value={total.toLocaleString()} />
-                    <Metric label="Overall Conversion" value={`${overall}%`} color={parseFloat(overall) < 5 ? '#EF4444' : '#059669'} sub={{ t: parseFloat(overall) < 5 ? 'Below benchmark' : 'On track', c: parseFloat(overall) < 5 ? '#EF4444' : '#059669' }} />
-                    <Metric label="Customers" value={customers.toLocaleString()} color="#FF7A59" />
-                  </div>
-                  {funnel.biggestLeak && (
-                    <div style={{ background: '#fff', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444', borderRadius: 10, padding: '12px 16px', marginBottom: 12, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>📉</div>
-                      <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>Biggest leak detected</div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{funnel.biggestLeak.description}</div>
-                      </div>
-                    </div>
-                  )}
-                  <Card title="Lifecycle funnel"><FunnelChart funnelStages={funnel.funnelStages} biggestLeak={funnel.biggestLeak} /></Card>
-                  <Card title="Time between stages"><StageTimingTable stageTimes={funnel.stageTimes} /></Card>
+              {/* MARKETING (acquisition funnel) */}
+              {section === 'marketing' && (
+                <MarketingPipeline funnelData={funnelData} onNavigate={navigateTo} />
+              )}
+
+              {/* SALES (SQL → deal stages) */}
+              {section === 'sales' && (
+                <>
+                  <SalesPipeline funnelData={funnelData} />
                   <PipelineInsights stageInsights={funnelData.stageInsights} trend={funnelData.trend} />
-                  <IntegrationHint icon="🔍" name="Search Console" feature="Keyword to Pipeline Attribution" benefit="See which organic search keywords are generating leads that actually close into customers." onConnect={() => navigateTo('integrations')} preview="rows" />
-                </>;
-              })()}
+                </>
+              )}
 
               {/* AT RISK — Stage Aging + Lead Risk merged */}
               {section === 'at-risk' && (() => {
@@ -455,7 +444,10 @@ export default function DashboardPage({ onDisconnect }) {
 
               {/* EXPORTS — scrollable pipeline report + download/email */}
               {section === 'exports' && (
-                <PipelineReport funnelData={funnelData} insightsData={insightsData} />
+                <>
+                  <Scorecard onTabChange={navigateTo} />
+                  <PipelineReport funnelData={funnelData} insightsData={insightsData} />
+                </>
               )}
 
               {/* placeholder — integrations rendered outside funnelData gate below */}

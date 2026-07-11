@@ -53,9 +53,9 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
     high:     { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', label: 'High' },
     medium:   { color: '#059669', bg: '#F0FDF4', border: '#BBF7D0', label: 'Medium' },
   };
-  const OPP_TAB = { uncontacted: 'lead-response', stuck_deals: 'at-risk', funnel: 'pipeline', speed: 'lead-response', activity: 'lead-response' };
-  const DIM_TAB = { conversion: 'pipeline', speed: 'lead-response', activity: 'lead-response', winRate: 'revenue', flow: 'at-risk' };
-  const METRIC_TAB = { win_rate: 'revenue', sales_cycle: 'revenue', speed: 'lead-response', biggest_leak: 'pipeline' };
+  const OPP_TAB = { uncontacted: 'lead-response', stuck_deals: 'at-risk', funnel: 'marketing', speed: 'lead-response', activity: 'lead-response' };
+  const DIM_TAB = { conversion: 'marketing', speed: 'lead-response', activity: 'lead-response', winRate: 'revenue', flow: 'at-risk' };
+  const METRIC_TAB = { win_rate: 'revenue', sales_cycle: 'revenue', speed: 'lead-response', biggest_leak: 'marketing' };
 
   return (
     <div>

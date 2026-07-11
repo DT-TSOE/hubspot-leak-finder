@@ -151,9 +151,88 @@ function calculateDealStageConversion(dealsWithHistory, pipelines) {
   return results.sort((a, b) => b.dealCount - a.dealCount);
 }
 
+// --- Adaptive weights from onboarding profile --------------------------------
+// Not per-portal statistics — banded presets driven by a few onboarding answers.
+// The point is a credible, explainable "tuned for your business" methodology.
+const DEFAULT_WEIGHTS = {
+  split: { marketing: 50, sales: 50 },
+  marketing: { leadToSql: 45, followUpCoverage: 30, sourceConcentration: 25 },
+  sales: { dealStageConversion: 30, winRate: 25, stalledDeals: 20, speedToLead: 15, salesCycle: 10 },
+};
+
+const BT_LABEL = { services: 'B2B services', saas: 'B2B SaaS', ecommerce: 'B2C ecommerce', local: 'Local & retail' };
+const HUB_LABEL = { both: 'Marketing + Sales', sales: 'Sales-led', marketing: 'Marketing-led' };
+const GOAL_LABEL = { more_leads: 'more leads', higher_close: 'higher close rate', faster_cycle: 'faster cycle', bigger_deals: 'bigger deals' };
+
+function _normalize(obj) {
+  const sum = Object.values(obj).reduce((a, b) => a + b, 0);
+  if (sum <= 0) return;
+  for (const k of Object.keys(obj)) obj[k] = Math.round((obj[k] / sum) * 100);
+}
+function _tiltSplit(split, funnel, amt) {
+  if (split.marketing === 0 || split.sales === 0) return; // a funnel is locked
+  const other = funnel === 'marketing' ? 'sales' : 'marketing';
+  split[funnel] = Math.min(80, split[funnel] + amt);
+  split[other] = 100 - split[funnel];
+}
+
+function resolveScoreProfile(profile) {
+  const w = {
+    split: { ...DEFAULT_WEIGHTS.split },
+    marketing: { ...DEFAULT_WEIGHTS.marketing },
+    sales: { ...DEFAULT_WEIGHTS.sales },
+  };
+  if (!profile || !profile.businessType) {
+    return { ...w, tunedFor: null, methodology: [], locked: null, personalized: false };
+  }
+  const notes = [];
+  let locked = null;
+  const damp = profile.revenue === 'lt500k' ? 0.5 : 1; // trust defaults more for tiny orgs
+  const bump = (obj, key, mult) => { if (obj[key] != null) obj[key] = obj[key] * (1 + (mult - 1) * damp); };
+
+  // 1. Business type → cycle expectation
+  if (profile.businessType === 'ecommerce' || profile.businessType === 'local') {
+    bump(w.sales, 'speedToLead', 1.6); bump(w.sales, 'salesCycle', 1.3); bump(w.sales, 'dealStageConversion', 0.7);
+    notes.push({ factor: 'Speed-to-lead', reason: 'Short, transactional sales — fast response drives revenue more than stage progression.' });
+  } else if (profile.businessType === 'services' || profile.businessType === 'saas') {
+    bump(w.sales, 'dealStageConversion', 1.4); bump(w.sales, 'salesCycle', 0.7); bump(w.sales, 'speedToLead', 0.85);
+    notes.push({ factor: 'Deal-stage conversion', reason: 'Considered B2B sale — how deals move through stages predicts wins more than raw speed.' });
+  }
+
+  // 2. Hubs → split + which funnel is locked (blurred)
+  if (profile.hubs === 'sales') { locked = 'marketing'; w.split = { marketing: 0, sales: 100 }; notes.push({ factor: 'Sales-only', reason: 'You run Sales Hub only — the Marketing grade is locked (unlock by adding Marketing Hub).' }); }
+  else if (profile.hubs === 'marketing') { locked = 'sales'; w.split = { marketing: 100, sales: 0 }; notes.push({ factor: 'Marketing-only', reason: 'You run Marketing Hub only — the Sales grade is locked.' }); }
+
+  // 3. Growth challenge → main weight booster
+  const BOOST = 1.5;
+  switch (profile.challenge) {
+    case 'not_enough_leads': bump(w.marketing, 'leadToSql', BOOST); _tiltSplit(w.split, 'marketing', 10); notes.push({ factor: 'Lead generation', reason: 'Your biggest challenge is lead volume — the marketing funnel is weighted up.' }); break;
+    case 'leads_dont_convert': bump(w.marketing, 'leadToSql', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Lead → SQL conversion', reason: 'Your challenge is leads not converting — qualification is weighted up.' }); break;
+    case 'deals_stall': bump(w.sales, 'dealStageConversion', BOOST); bump(w.sales, 'stalledDeals', 1.4); notes.push({ factor: 'Deal-stage & stalled deals', reason: 'Your challenge is deals stalling — pipeline movement is weighted up.' }); break;
+    case 'slow_follow_up': bump(w.sales, 'speedToLead', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Speed-to-lead', reason: 'Your challenge is follow-up speed — response time is weighted up.' }); break;
+    case 'losing_competitors': bump(w.sales, 'winRate', BOOST); bump(w.sales, 'dealStageConversion', 1.2); notes.push({ factor: 'Win rate', reason: 'Your challenge is losing deals — close rate is weighted up.' }); break;
+    default: break;
+  }
+
+  // 4. Primary goal → tilt the grade toward that funnel/factor
+  switch (profile.goal) {
+    case 'more_leads': _tiltSplit(w.split, 'marketing', 10); break;
+    case 'higher_close': bump(w.sales, 'winRate', 1.2); _tiltSplit(w.split, 'sales', 10); break;
+    case 'faster_cycle': bump(w.sales, 'salesCycle', 1.3); bump(w.sales, 'speedToLead', 1.2); break;
+    default: break;
+  }
+
+  _normalize(w.marketing); _normalize(w.sales);
+  if (!locked) _normalize(w.split);
+
+  const tunedFor = [BT_LABEL[profile.businessType], HUB_LABEL[profile.hubs], profile.goal && `goal: ${GOAL_LABEL[profile.goal]}`].filter(Boolean).join(' · ');
+  return { ...w, tunedFor, methodology: notes, locked, personalized: true };
+}
+
 // --- The scorecard -----------------------------------------------------------
-function buildScorecard(data) {
+function buildScorecard(data, profile) {
   const { contacts = [], deals = [], dealsWithHistory = [], pipelines = [] } = data;
+  const W = resolveScoreProfile(profile);
 
   const avgDeal = calc.calculateAverageDealSize(deals);
   const avgDealSize = avgDeal.value || 0;
@@ -192,37 +271,38 @@ function buildScorecard(data) {
     ? Math.round(clamp(100 - (stalledValue / openPipeline.value) * 100))
     : null;
 
-  // ---- Marketing dimensions ----
+  // ---- Marketing dimensions (weights from resolved profile) ----
   const marketingDims = [
-    { key: 'leadToSql', weight: 45, score: leadToSql.value !== null ? scoreToPar(leadToSql.value, BENCHMARKS.leadToSql.par) : null,
+    { key: 'leadToSql', weight: W.marketing.leadToSql, score: leadToSql.value !== null ? scoreToPar(leadToSql.value, BENCHMARKS.leadToSql.par) : null,
       value: leadToSql.value, benchmark: `${BENCHMARKS.leadToSql.par}%`, ...BENCHMARKS.leadToSql, sample: leadToSql.sample },
-    { key: 'followUpCoverage', weight: 30, score: noTouch.total > 0 ? Math.round(clamp(100 - noTouch.pct)) : null,
+    { key: 'followUpCoverage', weight: W.marketing.followUpCoverage, score: noTouch.total > 0 ? Math.round(clamp(100 - noTouch.pct)) : null,
       value: noTouch.total > 0 ? 100 - noTouch.pct : null, benchmark: `>${BENCHMARKS.followUpCoverage.par}%`, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
-    { key: 'sourceConcentration', weight: 25, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
+    { key: 'sourceConcentration', weight: W.marketing.sourceConcentration, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
       value: topSourceShare, benchmark: `<${BENCHMARKS.sourceConcentration.max}% from one source`, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
   ];
 
-  // ---- Sales dimensions ----
+  // ---- Sales dimensions (weights from resolved profile) ----
   const salesDims = [
-    { key: 'dealStageConversion', weight: 30, score: dealStageScore,
+    { key: 'dealStageConversion', weight: W.sales.dealStageConversion, score: dealStageScore,
       value: dealStageScore, benchmark: 'per-stage vs history', ...BENCHMARKS.dealStageConversion, sample: primary?.dealCount || 0 },
-    { key: 'winRate', weight: 25, score: winRate.value !== null ? scoreToPar(winRate.value, BENCHMARKS.winRate.par) : null,
+    { key: 'winRate', weight: W.sales.winRate, score: winRate.value !== null ? scoreToPar(winRate.value, BENCHMARKS.winRate.par) : null,
       value: winRate.value, benchmark: `${BENCHMARKS.winRate.par}%`, ...BENCHMARKS.winRate, sample: winRate.sample },
-    { key: 'stalledDeals', weight: 20, score: stalledScore,
+    { key: 'stalledDeals', weight: W.sales.stalledDeals, score: stalledScore,
       value: stalledValue, benchmark: 'minimize stuck $', ...BENCHMARKS.stalledDeals, sample: stuck.length },
-    { key: 'speedToLead', weight: 15, score: scoreSpeedToLead(speed.value),
+    { key: 'speedToLead', weight: W.sales.speedToLead, score: scoreSpeedToLead(speed.value),
       value: speed.value, benchmark: '<1h', ...BENCHMARKS.speedToLead, sample: speed.sample },
-    { key: 'salesCycle', weight: 10, score: cycle.value !== null ? scoreSalesCycle(cycle.value, avgDealSize) : null,
+    { key: 'salesCycle', weight: W.sales.salesCycle, score: cycle.value !== null ? scoreSalesCycle(cycle.value, avgDealSize) : null,
       value: cycle.value, benchmark: 'deal-size adjusted', ...BENCHMARKS.salesCycle, sample: cycle.sample },
   ];
 
   const marketingScore = blend(marketingDims);
   const salesScore = blend(salesDims);
 
-  // Headline overall grade = weighted blend of the two funnels (50/50 of what exists).
+  // Headline overall grade = funnels blended by the profile's split. A locked
+  // funnel (weight 0) is excluded from the grade but still computed for display.
   const overall = blend([
-    { score: marketingScore, weight: 50 },
-    { score: salesScore, weight: 50 },
+    { score: marketingScore, weight: W.split.marketing },
+    { score: salesScore, weight: W.split.sales },
   ]);
 
   const revenueImpact = estimateRevenueImpact({
@@ -232,11 +312,14 @@ function buildScorecard(data) {
 
   return {
     overall: { score: overall, grade: letterGrade(overall) },
-    marketing: { score: marketingScore, grade: letterGrade(marketingScore), dimensions: marketingDims },
-    sales: { score: salesScore, grade: letterGrade(salesScore), dimensions: salesDims },
+    marketing: { score: marketingScore, grade: letterGrade(marketingScore), dimensions: marketingDims, weight: W.split.marketing, locked: W.locked === 'marketing' },
+    sales: { score: salesScore, grade: letterGrade(salesScore), dimensions: salesDims, weight: W.split.sales, locked: W.locked === 'sales' },
     dealStageConversion,
     revenueImpact,
     context: { avgDealSize },
+    tunedFor: W.tunedFor,
+    methodology: W.methodology,
+    personalized: W.personalized,
   };
 }
 

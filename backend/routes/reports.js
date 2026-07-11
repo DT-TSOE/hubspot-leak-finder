@@ -53,12 +53,23 @@ router.get('/scorecard', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts, deals, dealsWithHistory, pipelines } = await hs.getCachedData();
-    const scorecard = buildScorecard({ contacts, deals, dealsWithHistory, pipelines });
+    const scorecard = buildScorecard({ contacts, deals, dealsWithHistory, pipelines }, req.session.onboarding);
     res.json({ ...scorecard, generatedAt: new Date().toISOString() });
   } catch (err) {
     console.error('Scorecard error:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Onboarding profile (business type, hubs, revenue, challenge, goal) — used to
+// tune the scorecard weights. Stored in the signed session cookie (no DB).
+router.get('/onboarding', requireAuth, (req, res) => {
+  res.json({ onboarding: req.session.onboarding || null });
+});
+router.post('/onboarding', requireAuth, (req, res) => {
+  const { businessType, hubs, revenue, challenge, goal } = req.body || {};
+  req.session.onboarding = { businessType, hubs, revenue, challenge, goal };
+  res.json({ onboarding: req.session.onboarding });
 });
 
 // GM Dashboard
