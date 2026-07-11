@@ -173,7 +173,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn’t build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Grading your pipeline…</div>;
 
-  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized, trend } = data;
+  const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized, trend, recommendations } = data;
   const scoreDelta = trend?.overallScoreDelta;
   const headline = overall.score === null ? 'Not enough data to grade yet'
     : overall.score >= 80 ? 'Your pipeline is performing well'
@@ -267,6 +267,40 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         <FunnelCard title="Sales" subtitle="SQL → opportunity → customer" score={sales.score} grade={sales.grade} dimensions={sales.dimensions}
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate." />
       </div>
+
+      {/* What to do next — gap → fix → HubSpot upgrade */}
+      {recommendations?.length > 0 && (
+        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>What to do next</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>Your biggest gaps — what's happening, and how to close them.</div>
+          {recommendations.map(r => {
+            const sev = {
+              critical: { c: '#DC2626', bg: '#FEF2F2', b: '#FECACA', label: 'Critical' },
+              high: { c: '#D97706', bg: '#FFFBEB', b: '#FDE68A', label: 'High' },
+              medium: { c: '#059669', bg: '#F0FDF4', b: '#BBF7D0', label: 'Medium' },
+            }[r.severity] || { c: '#888', bg: '#F7F8FA', b: '#E2E5EA', label: 'Note' };
+            return (
+              <div key={r.key} style={{ border: '1px solid #F0F1F4', borderRadius: 10, padding: '14px', marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 8, background: sev.bg, color: sev.c, border: `1px solid ${sev.b}`, textTransform: 'uppercase', letterSpacing: '.04em' }}>{sev.label}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: '#111' }}>{r.funnel} · {r.label}</span>
+                  {r.impact > 0 && <span style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700, color: '#059669' }}>{fmt$(r.impact)} opportunity</span>}
+                </div>
+                <div style={{ fontSize: 12.5, color: '#444', lineHeight: 1.5, marginBottom: 8 }}>{r.whatsHappening}</div>
+                <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, marginBottom: 10 }}><strong style={{ color: '#111' }}>Do it now:</strong> {r.diy}</div>
+                <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 8, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#C2410C', marginBottom: 2 }}>⬆ Upgrade: {r.upgrade.tier} · {r.upgrade.feature}</div>
+                  <div style={{ fontSize: 11.5, color: '#7C2D12', lineHeight: 1.5 }}>{r.upgrade.why}</div>
+                </div>
+                <button onClick={() => window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: r.coachMessage } }))}
+                  style={{ marginTop: 10, fontSize: 11, fontWeight: 700, color: '#fff', background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
+                  Ask PipeCoach how →
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Deal-stage conversion table (primary pipeline) */}
       <DealStageTable pipeline={dealStageConversion && dealStageConversion[0]} />

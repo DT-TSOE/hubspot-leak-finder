@@ -5,6 +5,7 @@ const HubSpotService = require('../services/hubspot');
 const calc = require('../services/metricCalculations');
 const health = require('../services/pipelineHealth');
 const { buildScorecard } = require('../services/scoring');
+const { buildRecommendations } = require('../services/recommendations');
 const db = require('../services/db');
 
 function applyDateFilter(items, days, dateField = 'createdate', startDate, endDate) {
@@ -55,6 +56,7 @@ router.get('/scorecard', requireAuth, async (req, res) => {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
     const { contacts, deals, dealsWithHistory, pipelines } = await hs.getCachedData();
     const scorecard = buildScorecard({ contacts, deals, dealsWithHistory, pipelines }, req.session.onboarding);
+    scorecard.recommendations = buildRecommendations(scorecard);
 
     // Monthly snapshot + "vs last month" trend (no-ops until DB is provisioned).
     let trend = null;

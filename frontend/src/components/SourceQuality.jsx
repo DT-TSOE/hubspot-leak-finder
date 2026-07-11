@@ -38,6 +38,7 @@ export default function SourceQuality({ days, onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [property, setProperty] = useState('hs_analytics_source');
+  const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -166,8 +167,10 @@ export default function SourceQuality({ days, onNavigate }) {
           </thead>
           <tbody>
             {sourcesWithRevLead.map(s => (
-              <tr key={s.source} style={{ borderBottom:'1px solid #F9FAFB' }}>
-                <td style={{ padding:'8px', fontWeight:500, color:'#111' }}>{fmtSrc(s.source)}</td>
+              <React.Fragment key={s.source}>
+              <tr onClick={() => setExpanded(expanded === s.source ? null : s.source)}
+                style={{ borderBottom:'1px solid #F9FAFB', cursor:'pointer', background: expanded === s.source ? '#F7F8FA' : 'transparent' }}>
+                <td style={{ padding:'8px', fontWeight:500, color:'#111' }}>{expanded === s.source ? '▾ ' : '▸ '}{fmtSrc(s.source)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.contacts}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.opportunities || 0}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.deals}</td>
@@ -180,10 +183,42 @@ export default function SourceQuality({ days, onNavigate }) {
                 </td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{fmt$(s.avgDealSize)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.avgSalesCycle ? `${s.avgSalesCycle}d` : '—'}</td>
-                <td onClick={() => onNavigate?.('integrations')} title="Connect Google Ads to see real cost per acquisition" style={{ padding:'8px', textAlign:'right', cursor:'pointer' }}>
+                <td onClick={e => { e.stopPropagation(); onNavigate?.('integrations'); }} title="Connect Google Ads to see real cost per acquisition" style={{ padding:'8px', textAlign:'right', cursor:'pointer' }}>
                   <span style={{ filter:'blur(3.5px)', color:'#F97316', fontWeight:700, userSelect:'none' }}>${30 + (s.source.length * 17) % 90}</span>
                 </td>
               </tr>
+              {expanded === s.source && (
+                <tr>
+                  <td colSpan={12} style={{ padding:'12px 14px', background:'#FAFBFC', borderBottom:'1px solid #F0F1F4' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:10 }}>
+                      {[
+                        { l:'Contacts', v:s.contacts }, { l:'MQLs', v:s.mqls }, { l:'SQLs', v:s.sqls },
+                        { l:'Opportunities', v:s.opportunities }, { l:'Customers', v:s.customers },
+                      ].map((st, i, arr) => (
+                        <React.Fragment key={st.l}>
+                          <div style={{ textAlign:'center', minWidth:64 }}>
+                            <div style={{ fontSize:16, fontWeight:800, color:'#111' }}>{st.v ?? 0}</div>
+                            <div style={{ fontSize:10, color:'#888', textTransform:'uppercase', letterSpacing:'.04em' }}>{st.l}</div>
+                          </div>
+                          {i < arr.length - 1 && <span style={{ color:'#CBD5E1', fontSize:14 }}>→</span>}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                    <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                      {[
+                        `Win rate ${s.winRate}%`,
+                        `Contact→customer ${s.conversionRate}%`,
+                        `Avg deal ${fmt$(s.avgDealSize)}`,
+                        s.avgSalesCycle ? `Avg cycle ${s.avgSalesCycle}d` : null,
+                        `Revenue ${fmt$(s.revenue)}`,
+                      ].filter(Boolean).map(chip => (
+                        <span key={chip} style={{ fontSize:11.5, color:'#555', background:'#fff', border:'1px solid #E2E5EA', borderRadius:12, padding:'3px 10px' }}>{chip}</span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>
