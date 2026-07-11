@@ -130,8 +130,7 @@ free/starter/pro gating once billing exists. Note: tier gating is **frontend-onl
 
 ## Known TODOs
 
-- **Rotate the GitHub token** currently stored in plaintext in the git remote URL,
-  and reconnect the remote with the new token.
+- GitHub auth is via **SSH** (`git@github.com:DT-TSOE/hubspot-leak-finder.git`), no token in the remote — the old plaintext PAT was rotated out and deleted (2026-07-11).
 - Vercel CLI auth token is expired locally (`vercel` commands fail until re-login);
   does not affect git-push deploys.
 - Add billing (Stripe) and re-enable tiering by flipping `BETA_ALL_ACCESS`.
