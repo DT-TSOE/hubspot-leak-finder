@@ -130,12 +130,20 @@ function calculateDealStageConversion(dealsWithHistory, pipelines) {
         };
       });
 
+    // How skip-heavy is this pipeline? If few deals ever touched the middle
+    // stages, the org isn't diligent with HubSpot stages and created→won is the
+    // only number to trust (Dan's point: most SMB deals go created→closed).
+    const middleStages = stages.slice(1);
+    const touchedMiddle = middleStages.some(s => s.everReached >= 3);
+
     results.push({
       pipelineId: pipeline.id,
       pipelineLabel: pipeline.label,
       dealCount: pipelineDeals.length,
-      // Baseline: of all deals created in this pipeline, % won.
+      won: totalWon,
+      // Baseline: of all deals created in this pipeline, % won. The reliable metric.
       createdToWon: Math.round((totalWon / pipelineDeals.length) * 1000) / 10,
+      skipHeavy: !touchedMiddle,
       stages,
     });
   }

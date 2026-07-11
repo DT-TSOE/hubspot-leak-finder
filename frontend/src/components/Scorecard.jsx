@@ -70,18 +70,30 @@ function FunnelCard({ title, subtitle, score, grade, dimensions }) {
   );
 }
 
-// Deal-stage conversion table for the primary pipeline (Dan's flagship view).
+// Deal-stage conversion for the primary pipeline (Dan's flagship view).
+// Created→won is the HERO number: most SMB deals skip stages and go straight
+// created→closed, so it's the only reliably-populated metric. Per-stage detail
+// is secondary and shown only where enough deals actually passed through.
 function DealStageTable({ pipeline }) {
   if (!pipeline) return null;
+  const c2wColor = scoreColor(pipeline.createdToWon);
   return (
     <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Deal-stage conversion — {pipeline.pipelineLabel}</div>
-        <div style={{ fontSize: 11, color: '#888' }}>{pipeline.createdToWon}% created → won · {pipeline.dealCount} deals</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal-stage conversion — {pipeline.pipelineLabel}</div>
+
+      {/* HERO: created -> won */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
+        <span style={{ fontSize: 34, fontWeight: 800, color: c2wColor, lineHeight: 1 }}>{pipeline.createdToWon}%</span>
+        <span style={{ fontSize: 13, color: '#555', fontWeight: 600 }}>created → won</span>
+        <span style={{ fontSize: 12, color: '#999' }}>· {pipeline.won} of {pipeline.dealCount} deals created have closed won</span>
       </div>
-      <div style={{ fontSize: 11, color: '#999', marginBottom: 10 }}>
-        Of every deal that <strong>ever reached</strong> a stage, the share that went on to close won.
+      <div style={{ fontSize: 11.5, color: '#888', lineHeight: 1.55, marginBottom: 14 }}>
+        {pipeline.skipHeavy
+          ? 'Most of your deals jump straight from created to closed without moving through the stages in between — so created → won is the number to trust. There isn’t enough stage-by-stage movement logged to break it down reliably.'
+          : 'Created → won is your most reliable number. Below: of every deal that ever reached a stage, the share that went on to win.'}
       </div>
+
+      {!pipeline.skipHeavy && (
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
           <thead>
@@ -106,6 +118,25 @@ function DealStageTable({ pipeline }) {
           </tbody>
         </table>
       </div>
+      )}
+    </div>
+  );
+}
+
+// Hover popover that actually shows (native title tooltips were unreliable/
+// undiscoverable). Reveals the itemized revenue math on hover.
+function HoverCard({ children, popover }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: 'relative' }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      {children}
+      {open && popover && (
+        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, zIndex: 30, width: 300,
+          background: '#111', color: '#fff', borderRadius: 10, padding: '12px 14px', fontSize: 11.5, lineHeight: 1.5,
+          textAlign: 'left', boxShadow: '0 8px 28px rgba(0,0,0,.22)' }}>
+          {popover}
+        </div>
+      )}
     </div>
   );
 }
@@ -150,12 +181,24 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
           </div>
         </div>
         {revenueImpact?.total > 0 && (
-          <div title={revenueImpact.items.map(i => `${i.title}: ${fmt$(i.amount)} — ${i.how}`).join('\n\n')}
-            style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 12, borderLeft: '1px solid #F0F1F4' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Revenue Opportunity</div>
-            <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(revenueImpact.total)}</div>
-            <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>if gaps closed · hover for math</div>
-          </div>
+          <HoverCard popover={
+            <div>
+              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>How this is calculated</div>
+              {revenueImpact.items.map(i => (
+                <div key={i.key} style={{ marginBottom: 9 }}>
+                  <div style={{ fontWeight: 700 }}>{i.title} — {fmt$(i.amount)}</div>
+                  <div style={{ opacity: 0.82 }}>{i.how}</div>
+                </div>
+              ))}
+              <div style={{ opacity: 0.6, marginTop: 4, fontSize: 10.5 }}>Grounded in your own avg deal size and record counts — not a generic multiplier.</div>
+            </div>
+          }>
+            <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 12, borderLeft: '1px solid #F0F1F4' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Revenue Opportunity</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(revenueImpact.total)}</div>
+              <div style={{ fontSize: 11, color: '#888', marginTop: 3, textDecoration: 'underline dotted', textUnderlineOffset: 3 }}>if gaps closed · hover for math</div>
+            </div>
+          </HoverCard>
         )}
       </div>
 
