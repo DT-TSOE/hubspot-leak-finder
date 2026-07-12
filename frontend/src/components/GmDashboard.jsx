@@ -2,27 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import Scorecard from './Scorecard';
 
-const fmtSource = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
-
-const URGENCY_COLORS = {
-  critical: { bg: '#FEF2F2', border: '#FECACA', text: '#DC2626', dot: '#EF4444' },
-  high: { bg: '#FEF3C7', border: '#FDE68A', text: '#D97706', dot: '#F59E0B' },
-  medium: { bg: '#FFFBEB', border: '#FDE68A', text: '#92400E', dot: '#F59E0B' },
-};
-
-function MetricCard({ label, value, sub }) {
-  return (
-    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-      <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, fontWeight: 600 }}>
-        {label}
-      </div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 2, lineHeight: 1.2 }}>
-        {value}
-      </div>
-      {sub && <div style={{ fontSize: 11, color: '#888' }}>{sub}</div>}
-    </div>
-  );
-}
 
 export default function GmDashboard({ onScoreLoad, onTabChange }) {
   const [data, setData] = useState(null);
@@ -46,15 +25,12 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 
-  const score = data.pipelineHealthScore;
-
   const URGENCY_STYLE = {
     critical: { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', label: 'Critical' },
     high:     { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', label: 'High' },
     medium:   { color: '#059669', bg: '#F0FDF4', border: '#BBF7D0', label: 'Medium' },
   };
   const OPP_TAB = { uncontacted: 'lead-response', stuck_deals: 'at-risk', funnel: 'marketing', speed: 'lead-response', activity: 'lead-response' };
-  const DIM_TAB = { conversion: 'marketing', speed: 'lead-response', activity: 'lead-response', winRate: 'revenue', flow: 'at-risk' };
   const METRIC_TAB = { win_rate: 'revenue', sales_cycle: 'revenue', speed: 'lead-response', biggest_leak: 'marketing' };
 
   return (
@@ -62,87 +38,9 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
       {/* Two-funnel scorecard: overall grade + marketing/sales + deal-stage conversion */}
       <Scorecard onScoreLoad={onScoreLoad} onTabChange={onTabChange} />
 
-      {/* Top Opportunities */}
-      {data.topOpportunities?.length > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, marginBottom: 14, overflow: 'hidden' }}>
-          <div style={{ padding: '14px 20px 10px', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Top Opportunities</div>
-            <div style={{ fontSize: 11, color: '#888', marginLeft: 2 }}>- ranked by impact</div>
-          </div>
-          {data.topOpportunities.map((opp, i) => {
-            const u = URGENCY_STYLE[opp.urgency] || URGENCY_STYLE.medium;
-            const destTab = OPP_TAB[opp.type];
-            return (
-              <div key={i} style={{ display: 'flex', gap: 14, padding: '14px 20px', borderBottom: i < data.topOpportunities.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'flex-start', cursor: destTab ? 'pointer' : 'default' }}
-                onClick={() => destTab && onTabChange?.(destTab)}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#555', flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 8, background: u.bg, color: u.color, border: `1px solid ${u.border}`, textTransform: 'uppercase', letterSpacing: '.04em' }}>{u.label}</span>
-                    {opp.metric && <span style={{ fontSize: 11, color: '#888' }}>{opp.metric}</span>}
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 3 }}>{opp.title}</div>
-                  <div style={{ fontSize: 12, color: '#666', lineHeight: 1.5 }}>{opp.action}</div>
-                </div>
-                <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 2 }}>
-                  {destTab && <span style={{ fontSize: 11, color: '#aaa', alignSelf: 'center' }}>→</span>}
-                  <button
-                    onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: opp.coachMessage } })); }}
-                    style={{ background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>Ask PipeCoach</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* What to improve + key metrics side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-
-        {/* Weakest areas in plain English */}
-        {score?.dimensions && (() => {
-          const DIM_LABELS = {
-            conversion: { label: 'Lead Conversion', desc: 'How many leads make it through each stage of your funnel' },
-            speed:      { label: 'Response Time',   desc: 'How fast your team contacts new leads after they come in' },
-            activity:   { label: 'Outreach Activity', desc: 'How many active contacts have actually been worked vs sitting untouched' },
-            winRate:    { label: 'Deal Win Rate',   desc: 'Percentage of deals you\'re closing vs losing' },
-            flow:       { label: 'Pipeline Flow',   desc: 'How smoothly deals move through stages without getting stuck' },
-          };
-          const sorted = Object.entries(score.dimensions).sort(([,a],[,b]) => a.score - b.score);
-          const weakest = sorted.slice(0, 2);
-          const hasIssues = weakest.some(([,d]) => d.score < 70);
-          return (
-            <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 12 }}>
-                {hasIssues ? 'Where to focus' : 'All areas healthy'}
-              </div>
-              {weakest.map(([key, dim]) => {
-                const info = DIM_LABELS[key] || { label: key, desc: '' };
-                const color = dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444';
-                const status = dim.score >= 70 ? '✓ Good' : dim.score >= 50 ? '⚠ Needs work' : '✗ Critical';
-                const dest = DIM_TAB[key];
-                return (
-                  <div key={key} onClick={() => dest && onTabChange?.(dest)}
-                    style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6', cursor: dest ? 'pointer' : 'default', borderRadius: 6, padding: '8px', margin: '-8px -8px 6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{info.label}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color, background: `${color}15`, padding: '2px 8px', borderRadius: 8 }}>{status}</span>
-                        {dest && <span style={{ fontSize: 12, color: '#ccc' }}>→</span>}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 11, color: '#888', lineHeight: 1.5 }}>{dim.detail || info.desc}</div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
-
-        {/* Key metrics - each clickable */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignContent: 'start' }}>
+      {/* Key metrics -- 4-up row */}
+      {data.metricCards?.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
           {data.metricCards.filter(c => ['win_rate','sales_cycle','speed','biggest_leak'].includes(c.id)).map(card => {
             const dest = METRIC_TAB[card.id];
             return (
@@ -156,37 +54,65 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
             );
           })}
         </div>
-      </div>
-
-      {/* Uncontacted + stuck callouts */}
-      {(data.uncontactedCount > 0 || data.stuckCount > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: data.uncontactedCount > 0 && data.stuckCount > 0 ? '1fr 1fr' : '1fr', gap: 10 }}>
-          {data.uncontactedCount > 0 && (
-            <button onClick={() => onTabChange?.('lead-response')}
-              style={{ background: '#fff', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', cursor: 'pointer', textAlign: 'left' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🚨</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Uncontacted leads</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} new leads, no outreach yet</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>These leads have had zero outreach — tap to see who and act now</div>
-              </div>
-              <span style={{ fontSize: 16, color: '#DC2626' }}>→</span>
-            </button>
-          )}
-          {data.stuckCount > 0 && (
-            <button onClick={() => onTabChange?.('at-risk')}
-              style={{ background: '#fff', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', cursor: 'pointer', textAlign: 'left' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFFBEB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚠️</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Stuck records</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.stuckCount} contacts & deals haven't moved</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>They've been in the same stage too long - tap to see who</div>
-              </div>
-              <span style={{ fontSize: 16, color: '#D97706' }}>→</span>
-            </button>
-          )}
-        </div>
       )}
+
+      {/* Priority actions -- uncontacted leads + stuck deals + top opportunities in one list */}
+      {(data.uncontactedCount > 0 || data.stuckCount > 0 || data.topOpportunities?.length > 0) && (() => {
+        const items = [];
+        if (data.uncontactedCount > 0) items.push({
+          urgency: 'critical',
+          title: `${data.uncontactedCount} leads with zero outreach`,
+          action: 'New contacts that have never been called, emailed, or messaged.',
+          destTab: 'lead-response',
+          coachMessage: `I have ${data.uncontactedCount} leads with no outreach. What should I prioritize and how?`,
+        });
+        if (data.stuckCount > 0) items.push({
+          urgency: 'high',
+          title: `${data.stuckCount} contacts and deals are stuck`,
+          action: "They've been in the same stage too long and are going cold.",
+          destTab: 'at-risk',
+          coachMessage: `${data.stuckCount} of my deals and contacts are stuck. How do I get them moving again?`,
+        });
+        (data.topOpportunities || []).forEach(opp => items.push({
+          urgency: opp.urgency,
+          title: opp.title,
+          action: opp.action,
+          destTab: OPP_TAB[opp.type],
+          coachMessage: opp.coachMessage,
+          metric: opp.metric,
+        }));
+        return (
+          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid #F3F4F6' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Priority actions</div>
+            </div>
+            {items.map((item, i) => {
+              const u = URGENCY_STYLE[item.urgency] || URGENCY_STYLE.medium;
+              return (
+                <div key={i} style={{ display: 'flex', gap: 14, padding: '14px 20px', borderBottom: i < items.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'flex-start', cursor: item.destTab ? 'pointer' : 'default' }}
+                  onClick={() => item.destTab && onTabChange?.(item.destTab)}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 8, background: u.bg, color: u.color, border: `1px solid ${u.border}`, textTransform: 'uppercase', letterSpacing: '.04em' }}>{u.label}</span>
+                      {item.metric && <span style={{ fontSize: 11, color: '#888' }}>{item.metric}</span>}
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 3 }}>{item.title}</div>
+                    <div style={{ fontSize: 12, color: '#666', lineHeight: 1.5 }}>{item.action}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 2, alignItems: 'center' }}>
+                    {item.destTab && <span style={{ fontSize: 11, color: '#aaa' }}>→</span>}
+                    <button
+                      onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: item.coachMessage } })); }}
+                      style={{ background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>Ask PipeCoach</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
     </div>
   );
 }

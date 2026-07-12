@@ -102,7 +102,7 @@ export function DealStageTable({ pipeline }) {
   if (!pipeline) return null;
   return (
     <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal conversion — {pipeline.pipelineLabel}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal conversion -- {pipeline.pipelineLabel}</div>
 
       {/* HERO: created -> won */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
@@ -277,7 +277,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
                   <div style={{ opacity: 0.75, fontWeight: 400 }}>{i.how}</div>
                 </div>
               ))}
-              <div style={{ opacity: 0.5, marginTop: 6, fontSize: 10, borderTop: '1px solid rgba(255,255,255,.15)', paddingTop: 6 }}>Based on your own data — not industry averages.</div>
+              <div style={{ opacity: 0.5, marginTop: 6, fontSize: 10, borderTop: '1px solid rgba(255,255,255,.15)', paddingTop: 6 }}>Calculated from your actual deals and contacts.</div>
             </div>
           }>
             <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 12, borderLeft: '1px solid #F0F1F4' }}>
@@ -370,51 +370,6 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         <FunnelCard title="Sales" subtitle="SQL → opportunity → customer" score={sales.score} grade={sales.grade} dimensions={sales.dimensions}
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate." />
       </div>
-
-      {/* What to do next - gap → fix → HubSpot upgrade */}
-      {recommendations?.length > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>What to do next</div>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>Your biggest gaps - what's happening, and how to close them.</div>
-          {recommendations.map(r => {
-            const sev = {
-              critical: { c: '#DC2626', bg: '#FEF2F2', b: '#FECACA', label: 'Critical' },
-              high: { c: '#D97706', bg: '#FFFBEB', b: '#FDE68A', label: 'High' },
-              medium: { c: '#059669', bg: '#F0FDF4', b: '#BBF7D0', label: 'Medium' },
-            }[r.severity] || { c: '#888', bg: '#F7F8FA', b: '#E2E5EA', label: 'Note' };
-            return (
-              <div key={r.key} style={{ border: '1px solid #F0F1F4', borderRadius: 10, padding: '14px', marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 8, background: sev.bg, color: sev.c, border: `1px solid ${sev.b}`, textTransform: 'uppercase', letterSpacing: '.04em' }}>{sev.label}</span>
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: '#111' }}>{r.funnel} · {r.label}</span>
-                  {r.impact > 0 && <span style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700, color: '#059669' }}>{fmt$(r.impact)} opportunity</span>}
-                </div>
-                <div style={{ fontSize: 12.5, color: '#444', lineHeight: 1.5, marginBottom: 8 }}>{r.whatsHappening}</div>
-                <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, marginBottom: 10 }}><strong style={{ color: '#111' }}>Do it now:</strong> {r.diy}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <button onClick={() => window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: r.coachMessage } }))}
-                    style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
-                    Ask PipeCoach how →
-                  </button>
-                  <span style={{ fontSize: 11, color: '#aaa' }}>⚡ Or automate it with <a href="https://app.hubspot.com/pricing/282298/marketing" target="_blank" rel="noopener noreferrer" style={{ color: '#FF7A59', fontWeight: 600, textDecoration: 'none' }}>{r.upgrade.tier}</a></span>
-                </div>
-              </div>
-            );
-          })}
-          {/* One soft, consolidated upgrade note instead of per-card pitches */}
-          {(() => {
-            const tiers = {};
-            recommendations.forEach(r => { (tiers[r.upgrade.tier] = tiers[r.upgrade.tier] || []).push(r.label); });
-            return (
-              <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid #F3F4F6', fontSize: 11.5, color: '#999', lineHeight: 1.6 }}>
-                {Object.entries(tiers).map(([tier, labels]) => (
-                  <div key={tier}>⚡ <a href="https://app.hubspot.com/pricing/282298/marketing" target="_blank" rel="noopener noreferrer" style={{ color: '#C2410C', fontWeight: 700, textDecoration: 'none' }}>{tier}</a> could automate {labels.length > 1 ? `${labels.length} of these` : 'this'} ({labels.slice(0, 3).join(', ')}{labels.length > 3 ? '…' : ''}).</div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
-      )}
 
       {/* Your best deals look like this - behavioral winning-deal profiles */}
       {dealProfiles && !dealProfiles.insufficient && (
