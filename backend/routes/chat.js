@@ -83,7 +83,7 @@ router.post('/', requireAuth, chatLimiter, async (req, res) => {
       'https://api.anthropic.com/v1/messages',
       {
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
+        max_tokens: 600,
         system: `${LA_JEFA_SYSTEM_PROMPT}\n\n${pipelineContext}`,
         messages
       },

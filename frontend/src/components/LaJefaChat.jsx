@@ -15,7 +15,7 @@ function ChatMessages({ messages, loading, error, bottomRef }) {
           </div>
           <div style={{ maxWidth:'78%' }}>
             {msg.role==='assistant' && <div style={{ fontSize:9, fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:1, marginBottom:2 }}>{COACH_NAME}</div>}
-            <div style={{ padding:'8px 11px', borderRadius:10, fontSize:13, lineHeight:1.6, borderBottomLeftRadius:msg.role==='assistant'?3:10, borderBottomRightRadius:msg.role==='user'?3:10, background:msg.role==='user'?'#111':'#F7F8FA', color:msg.role==='user'?'#fff':'#333', border:msg.role==='user'?'none':'1px solid #E2E5EA' }}>
+            <div style={{ padding:'8px 11px', borderRadius:10, fontSize:13, lineHeight:1.6, borderBottomLeftRadius:msg.role==='assistant'?3:10, borderBottomRightRadius:msg.role==='user'?3:10, background:msg.role==='user'?'#111':'#F7F8FA', color:msg.role==='user'?'#fff':'#333', border:msg.role==='user'?'none':'1px solid #E2E5EA', whiteSpace:'pre-wrap' }}>
               {msg.content}
             </div>
           </div>
