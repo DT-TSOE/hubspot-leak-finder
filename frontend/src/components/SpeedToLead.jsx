@@ -35,6 +35,16 @@ export default function SpeedToLead({ days }) {
   const [selectedBucket, setSelectedBucket] = useState(null);
   const [marking, setMarking] = useState(false);
   const [showTriage, setShowTriage] = useState(false);
+  const triageRef = React.useRef(null);
+
+  useEffect(() => {
+    const handler = () => {
+      setShowTriage(true);
+      setTimeout(() => triageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    };
+    window.addEventListener('speedtolead:openTriage', handler);
+    return () => window.removeEventListener('speedtolead:openTriage', handler);
+  }, []);
 
   const load = useCallback((withSpinner = true) => {
     if (withSpinner) setLoading(true);
@@ -149,7 +159,7 @@ export default function SpeedToLead({ days }) {
 
       {/* Spam cleanup - junk form-fills skew response time; let the user filter them out */}
       {triageCandidates?.length > 0 && (
-        <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderLeft:'4px solid #F59E0B', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
+        <div ref={triageRef} style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderLeft:'4px solid #F59E0B', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
             <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
               <span style={{ fontSize:20, flexShrink:0 }}>🧹</span>

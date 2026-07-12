@@ -281,7 +281,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
       </div>
 
       {/* Data quality - spam cleanup skews every number below, so lead with it */}
-      <div onClick={() => onTabChange?.('lead-response')}
+      <div onClick={() => { onTabChange?.('lead-response'); setTimeout(() => window.dispatchEvent(new CustomEvent('speedtolead:openTriage')), 100); }}
         style={{ cursor: 'pointer', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
         <span style={{ fontSize: 20, flexShrink: 0 }}>🧹</span>
         <div style={{ flex: 1 }}>
