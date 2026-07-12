@@ -20,10 +20,10 @@ const BENCHMARKS = {
     source: 'Median time from when a lead is created to when your team first reached out. Faster is better -- leads go cold quickly.',
     label: 'Median first-response time',
   },
-  leadToSql: {
-    par: 13,
-    source: 'Of all leads in your CRM, the percentage that have ever reached Sales Qualified Lead stage.',
-    label: 'Lead → SQL conversion',
+  leadToDeal: {
+    par: 30,
+    source: 'Of all contacts in your CRM, the percentage that have at least one associated deal created.',
+    label: 'Lead -> Deal created',
   },
   followUpCoverage: {
     par: 90,
@@ -154,7 +154,7 @@ function calculateDealStageConversion(dealsWithHistory, pipelines) {
 // The point is a credible, explainable "tuned for your business" methodology.
 const DEFAULT_WEIGHTS = {
   split: { marketing: 50, sales: 50 },
-  marketing: { leadToSql: 45, followUpCoverage: 30, sourceConcentration: 25 },
+  marketing: { leadToDeal: 45, followUpCoverage: 30, sourceConcentration: 25 },
   sales: { dealStageConversion: 30, winRate: 25, stalledDeals: 20, speedToLead: 15, salesCycle: 10 },
 };
 
@@ -204,8 +204,8 @@ function resolveScoreProfile(profile) {
   // 3. Growth challenge → main weight booster
   const BOOST = 1.5;
   switch (profile.challenge) {
-    case 'not_enough_leads': bump(w.marketing, 'leadToSql', BOOST); _tiltSplit(w.split, 'marketing', 10); notes.push({ factor: 'Lead generation', reason: 'Your biggest challenge is lead volume - the marketing funnel is weighted up.' }); break;
-    case 'leads_dont_convert': bump(w.marketing, 'leadToSql', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Lead → SQL conversion', reason: 'Your challenge is leads not converting - qualification is weighted up.' }); break;
+    case 'not_enough_leads': bump(w.marketing, 'leadToDeal', BOOST); _tiltSplit(w.split, 'marketing', 10); notes.push({ factor: 'Lead generation', reason: 'Your biggest challenge is lead volume - the marketing funnel is weighted up.' }); break;
+    case 'leads_dont_convert': bump(w.marketing, 'leadToDeal', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Lead -> Deal created', reason: 'Your challenge is leads not converting - deal creation rate is weighted up.' }); break;
     case 'deals_stall': bump(w.sales, 'dealStageConversion', BOOST); bump(w.sales, 'stalledDeals', 1.4); notes.push({ factor: 'Deal-stage & stalled deals', reason: 'Your challenge is deals stalling - pipeline movement is weighted up.' }); break;
     case 'slow_follow_up': bump(w.sales, 'speedToLead', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Speed-to-lead', reason: 'Your challenge is follow-up speed - response time is weighted up.' }); break;
     case 'losing_competitors': bump(w.sales, 'winRate', BOOST); bump(w.sales, 'dealStageConversion', 1.2); notes.push({ factor: 'Win rate', reason: 'Your challenge is losing deals - close rate is weighted up.' }); break;
@@ -306,17 +306,27 @@ function buildScorecard(data, profile) {
   const speed = calc.calculateTimeToFirstTouch(contacts);
   const cycle = calc.calculateSalesCycle(deals);
 
-  // Lead -> SQL conversion (ever-reached lifecycle stages)
-  const leadToSql = calc.calculateStageConversion(contacts, 'lead', 'salesqualifiedlead');
-  // Overall lead -> customer rate, used for revenue-impact estimates.
+  // Lead -> Deal created: of all contacts, % who have at least one associated deal
+  const contactsWithDealIds = new Set();
+  for (const d of dealsWithContacts) {
+    (d._contactIds || []).forEach(id => contactsWithDealIds.add(id));
+  }
+  const leadToDealPct = contacts.length > 0
+    ? Math.round((contactsWithDealIds.size / contacts.length) * 100)
+    : null;
+  // Overall lead -> customer rate (lifecycle-based), used for revenue-impact estimates only.
   const leadToCustomer = calc.calculateStageConversion(contacts, 'lead', 'customer');
 
   // Source concentration: largest single source share of active leads.
   const sources = calc.calculateSourceQuality(contacts, deals);
   const totalSourceContacts = sources.reduce((s, x) => s + x.contacts, 0);
-  const topSourceShare = totalSourceContacts > 0
-    ? Math.round((Math.max(0, ...sources.map(s => s.contacts)) / totalSourceContacts) * 100)
+  const topSourceEntry = sources.length > 0
+    ? sources.reduce((best, s) => s.contacts > best.contacts ? s : best)
     : null;
+  const topSourceShare = totalSourceContacts > 0 && topSourceEntry
+    ? Math.round((topSourceEntry.contacts / totalSourceContacts) * 100)
+    : null;
+  const topSourceName = topSourceEntry?.label || null;
 
   const dealStageConversion = calculateDealStageConversion(dealsWithHistory, pipelines);
   // Sales-side deal-stage score: weakest open-stage conversion in the primary pipeline.
@@ -342,35 +352,45 @@ function buildScorecard(data, profile) {
 
   // Leads captured in the last 90 days (informational -- no score, doesn't affect grade).
   const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
+  const oneEightyDaysAgo = Date.now() - 180 * 24 * 3600 * 1000;
   const recentLeads = contacts.filter(c => {
     const cd = c.properties?.createdate;
     return cd && new Date(cd).getTime() > ninetyDaysAgo;
+  }).length;
+  const prevRecentLeads = contacts.filter(c => {
+    const cd = c.properties?.createdate;
+    const t = new Date(cd).getTime();
+    return cd && t > oneEightyDaysAgo && t <= ninetyDaysAgo;
   }).length;
 
   // ---- Marketing dimensions (weights from resolved profile) ----
   const marketingDims = [
     { key: 'leadsCapt', weight: 0, score: null,
-      value: recentLeads, displayValue: recentLeads > 0 ? `${recentLeads} new leads` : `${contacts.length} contacts`,
+      value: recentLeads, prevValue: prevRecentLeads,
+      displayValue: recentLeads > 0 ? `${recentLeads} new leads` : `${contacts.length} contacts`,
       label: 'Leads captured', source: 'Contacts created in the last 90 days.', sample: recentLeads || contacts.length },
     { key: 'followUpCoverage', weight: W.marketing.followUpCoverage, score: noTouch.total > 0 ? Math.round(clamp(100 - noTouch.pct)) : null,
-      value: noTouch.total > 0 ? 100 - noTouch.pct : null, displayValue: noTouch.total > 0 ? fmtPct(100 - noTouch.pct) : null, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
+      value: noTouch.total > 0 ? 100 - noTouch.pct : null, displayValue: noTouch.total > 0 ? fmtPct(100 - noTouch.pct) : null,
+      showMeter: true, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
     { key: 'sourceConcentration', weight: W.marketing.sourceConcentration, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
-      value: topSourceShare, displayValue: topSourceShare !== null ? `${topSourceShare}% top source` : null, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
-    { key: 'leadToSql', weight: W.marketing.leadToSql, score: leadToSql.value !== null ? scoreToPar(leadToSql.value, BENCHMARKS.leadToSql.par) : null,
-      value: leadToSql.value, displayValue: fmtPct(leadToSql.value), ...BENCHMARKS.leadToSql, sample: leadToSql.sample },
+      value: topSourceShare, displayValue: topSourceShare !== null ? `${topSourceShare}% ${topSourceName || 'top source'}` : null, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
+    { key: 'leadToDeal', weight: W.marketing.leadToDeal, score: leadToDealPct !== null ? scoreToPar(leadToDealPct, BENCHMARKS.leadToDeal.par) : null,
+      value: leadToDealPct, displayValue: fmtPct(leadToDealPct), ...BENCHMARKS.leadToDeal, sample: contacts.length },
   ];
 
   // ---- Sales dimensions (weights from resolved profile) ----
   const winRateNote = winRate.value === 100 && winRate.sample < 10 ? ` (${winRate.sample} closed, no losses yet)` : '';
   const salesDims = [
-    { key: 'dealStageConversion', weight: W.sales.dealStageConversion, score: dealStageScore,
+    { key: 'dealStageConversion', weight: W.sales.dealStageConversion, score: dealStageScore, hidden: true,
       value: dealStageScore, displayValue: dealStageScore !== null ? `${dealStageScore}% avg stage conversion` : null, ...BENCHMARKS.dealStageConversion, sample: primary?.dealCount || 0 },
     { key: 'winRate', weight: W.sales.winRate, score: winRate.value !== null ? scoreToPar(winRate.value, BENCHMARKS.winRate.par) : null,
-      value: winRate.value, displayValue: winRate.value !== null ? `${Math.round(winRate.value)}%${winRateNote}` : null, ...BENCHMARKS.winRate, sample: winRate.sample },
+      value: winRate.value, displayValue: winRate.value !== null ? `${Math.round(winRate.value)}%${winRateNote}` : null,
+      showMeter: true, ...BENCHMARKS.winRate, sample: winRate.sample },
     { key: 'stalledDeals', weight: W.sales.stalledDeals, score: stalledScore,
-      value: stalledValue, displayValue: stuck.length > 0 ? `${stuck.length} stalled deal${stuck.length !== 1 ? 's' : ''}` : 'none stalled', ...BENCHMARKS.stalledDeals, sample: stuck.length },
+      value: stalledValue, displayValue: stuck.length > 0 ? `${stuck.length} stalled deal${stuck.length !== 1 ? 's' : ''}` : 'none stalled',
+      showMeter: true, ...BENCHMARKS.stalledDeals, sample: stuck.length },
     { key: 'speedToLead', weight: W.sales.speedToLead, score: scoreSpeedToLead(speed.value),
-      value: speed.value, displayValue: fmtHours(speed.value) ? `${fmtHours(speed.value)} median` : null, ...BENCHMARKS.speedToLead, sample: speed.sample },
+      value: speed.value, displayValue: fmtHours(speed.value) ? `${fmtHours(speed.value)} avg` : null, ...BENCHMARKS.speedToLead, sample: speed.sample },
     { key: 'salesCycle', weight: W.sales.salesCycle, score: cycle.value !== null ? scoreSalesCycle(cycle.value, avgDealSize) : null,
       value: cycle.value, displayValue: fmtDays(cycle.value) ? `${fmtDays(cycle.value)} median` : null, ...BENCHMARKS.salesCycle, sample: cycle.sample },
   ];

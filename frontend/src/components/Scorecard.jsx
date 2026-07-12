@@ -35,7 +35,24 @@ function dimStatus(score) {
 function DimensionRow({ dim, comparison }) {
   const status = dimStatus(dim.score);
   const s = status ? STATUS_STYLE[status] : null;
+  const mc = meterColor(dim.score);
   const tip = (dim.source || '') + (dim.sample ? `\nBased on ${dim.sample} records.` : '');
+
+  if (dim.showMeter && dim.score != null) {
+    return (
+      <div title={tip} style={{ padding: '10px 0', borderBottom: '1px solid #F7F8FA', cursor: 'help' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+          <div style={{ fontSize: 11.5, color: '#888' }}>{dim.label}</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{dim.displayValue || 'No data'}</div>
+        </div>
+        <div style={{ height: 5, borderRadius: 3, background: '#F0F1F4', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${dim.score}%`, background: mc, borderRadius: 3, transition: 'width .6s ease' }} />
+        </div>
+        {comparison && <div style={{ fontSize: 11, color: '#aaa', marginTop: 4 }}>{comparison}</div>}
+      </div>
+    );
+  }
+
   return (
     <div title={tip} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: '1px solid #F7F8FA', cursor: 'help' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -72,7 +89,7 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
         )}
       </div>
       <div style={{ filter: locked ? 'blur(5px)' : 'none', userSelect: locked ? 'none' : 'auto', pointerEvents: locked ? 'none' : 'auto' }} aria-hidden={locked}>
-        {dimensions.map(d => <DimensionRow key={d.key} dim={d} comparison={comparisons?.[d.key]} />)}
+        {dimensions.filter(d => !d.hidden).map(d => <DimensionRow key={d.key} dim={d} comparison={comparisons?.[d.key]} />)}
       </div>
       {locked && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', background: 'rgba(255,255,255,.45)' }}>
@@ -83,7 +100,7 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
       )}
       {showGa4Cta && (
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #F0F1F4', position: 'relative' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#bbb', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Website traffic</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#bbb', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Lead generation</div>
           <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
             {GA4_PREVIEW_ROWS.map(row => (
               <div key={row.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid #F7F8FA' }}>
@@ -220,12 +237,21 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   const mc = meterColor(overall.score);
   const lastMonthScore = (scoreDelta != null && overall.score != null) ? overall.score - scoreDelta : null;
 
+  // Period-over-period comparisons for marketing dimension rows
+  const marketingComparisons = {};
+  const leadsCaptDim = marketing?.dimensions?.find(d => d.key === 'leadsCapt');
+  if (leadsCaptDim?.prevValue != null && leadsCaptDim?.value != null) {
+    const diff = leadsCaptDim.value - leadsCaptDim.prevValue;
+    const sign = diff > 0 ? '+' : '';
+    marketingComparisons.leadsCapt = `${leadsCaptDim.prevValue} last 90d (${sign}${diff})`;
+  }
+
   // Best-customer comparisons for sales dimension rows
   const salesComparisons = {};
   if (dealProfiles && !dealProfiles.insufficient) {
     const fc = dealProfiles.fastestClose;
-    if (fc?.speedHours?.median != null) salesComparisons.speed = `Your fast wins: ${fmtH(fc.speedHours.median)}`;
-    if (fc?.cycleRange?.median != null) salesComparisons.cycleLength = `Your fast wins: ${fmtDays(fc.cycleRange.median)}`;
+    if (fc?.speedHours?.median != null) salesComparisons.speedToLead = `Your fast wins: ${fmtH(fc.speedHours.median)}`;
+    if (fc?.cycleRange?.median != null) salesComparisons.salesCycle = `Your fast wins: ${fmtDays(fc.cycleRange.median)}`;
   }
 
   return (
@@ -395,10 +421,10 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
 
       {/* Marketing vs Sales funnel cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-        <FunnelCard title="Marketing" subtitle="Leads captured → qualified" grade={marketing.grade} dimensions={marketing.dimensions}
+        <FunnelCard title="Marketing" subtitle="Leads captured -> qualified" grade={marketing.grade} dimensions={marketing.dimensions}
           locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification."
-          showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
-        <FunnelCard title="Sales" subtitle="Qualified lead → closed deal" grade={sales.grade} dimensions={sales.dimensions}
+          comparisons={marketingComparisons} showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
+        <FunnelCard title="Sales" subtitle="Qualified lead -> closed deal" grade={sales.grade} dimensions={sales.dimensions}
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate."
           comparisons={salesComparisons} />
       </div>
