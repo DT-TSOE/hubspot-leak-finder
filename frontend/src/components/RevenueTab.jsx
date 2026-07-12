@@ -23,10 +23,10 @@ export default function RevenueTab({ data, loading, onNavigate }) {
   if (!data || data.insufficient) return (
     <div>
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'2rem', textAlign:'center', marginBottom:14 }}>
-        <div style={{ fontSize:15, fontWeight:600, color:'#111', marginBottom:6 }}>Not enough closed deals yet</div>
-        <div style={{ fontSize:13, color:'#888', maxWidth:320, margin:'0 auto', lineHeight:1.6 }}>
-          Once you have at least 3 closed-won deals with amounts in HubSpot, revenue insights will appear here.
-          {data?.sampleSize > 0 && <span style={{ display:'block', marginTop:6, color:'#aaa' }}>{data.sampleSize} deals found so far</span>}
+        <div style={{ fontSize:15, fontWeight:600, color:'#111', marginBottom:6 }}>Not enough closed deals in this date range</div>
+        <div style={{ fontSize:13, color:'#888', maxWidth:360, margin:'0 auto', lineHeight:1.6 }}>
+          There aren't enough closed-won deals with amounts in the selected window. If you know there are more, <strong style={{ color:'#111' }}>widen the date range using the picker at the top right</strong> - revenue insights need at least 3 closed-won deals.
+          {data?.sampleSize > 0 && <span style={{ display:'block', marginTop:6, color:'#aaa' }}>{data.sampleSize} in this range</span>}
         </div>
       </div>
       <IntegrationHint
@@ -40,18 +40,39 @@ export default function RevenueTab({ data, loading, onNavigate }) {
   return (
     <div>
       {/* Headline metrics */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:14 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:14 }}>
         {[
           { label:'Total Revenue', value:fmt$(data.overview.totalRevenue), color:'#059669' },
-          { label:'Avg Deal Size', value:fmt$(data.overview.avgDealSize), color:'#111' },
+          { label:'Avg Customer LTV', value:fmt$(data.customerLtv?.avgLtv), color:'#059669', sub:'all deals per customer' },
+          { label:'Avg Deal Size', value:fmt$(data.overview.avgDealSize), color:'#111', sub:'per individual deal' },
           { label:'Closed-Won Deals', value:data.overview.totalWonDeals, color:'#111' },
         ].map(m => (
           <div key={m.label} style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'13px 16px', textAlign:'center' }}>
             <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>{m.label}</div>
             <div style={{ fontSize:22, fontWeight:700, color:m.color }}>{m.value}</div>
+            {m.sub && <div style={{ fontSize:9.5, color:'#bbb', marginTop:2 }}>{m.sub}</div>}
           </div>
         ))}
       </div>
+
+      {/* Customer lifetime value (accounts for multiple deals per customer) */}
+      {data.customerLtv?.distinctCustomers > 0 && (
+        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
+          <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Customer lifetime value</div>
+          <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>
+            Total won revenue per customer across <strong>all</strong> their deals (not just one). {data.customerLtv.distinctCustomers} customers · <strong style={{ color: data.customerLtv.repeatRate > 0 ? '#059669' : '#888' }}>{data.customerLtv.repeatRate}% bought more than once</strong>.
+          </div>
+          {data.customerLtv.topCustomers?.map((c, i) => (
+            <div key={c.label + i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0', borderBottom:i < data.customerLtv.topCustomers.length-1 ? '1px solid #F9FAFB' : 'none' }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:500, color:'#222' }}>{c.label}</div>
+                <div style={{ fontSize:11, color:'#999' }}>{c.deals} deal{c.deals !== 1 ? 's' : ''}</div>
+              </div>
+              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#059669' : '#333' }}>{fmt$(c.revenue)}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Monthly revenue trend */}
       {data.revenueTrend?.length > 1 && (

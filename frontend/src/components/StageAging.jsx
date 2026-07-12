@@ -90,8 +90,10 @@ export default function StageAging({ days }) {
     return (
       <div style={{ background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:10, padding:'2rem', textAlign:'center' }}>
         <div style={{ fontSize:28, marginBottom:12 }}>✅</div>
-        <div style={{ fontSize:15, fontWeight:600, color:'#059669', marginBottom:6 }}>No stuck records - your pipeline is moving</div>
-        <div style={{ fontSize:13, color:'#666', maxWidth:380, margin:'0 auto', lineHeight:1.6 }}>Every active contact and deal is within healthy stage thresholds. Keep it up.</div>
+        <div style={{ fontSize:15, fontWeight:600, color:'#059669', marginBottom:6 }}>Nothing's stuck - your pipeline is moving</div>
+        <div style={{ fontSize:13, color:'#666', maxWidth:440, margin:'0 auto', lineHeight:1.65 }}>
+          This tab watches for contacts and deals that have sat in the same stage <strong>longer than expected</strong> - the ones quietly going cold and costing you revenue. Right now none of yours are aging past a healthy window. The moment any start to stall, they'll show up here ranked by the dollars at risk, so you can chase them before they die.
+        </div>
       </div>
     );
   }

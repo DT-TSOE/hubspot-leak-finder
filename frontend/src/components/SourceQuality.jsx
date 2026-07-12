@@ -39,6 +39,7 @@ export default function SourceQuality({ days, onNavigate }) {
   const [error, setError] = useState(null);
   const [property, setProperty] = useState('hs_analytics_source');
   const [expanded, setExpanded] = useState(null);
+  const [conns, setConns] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -46,6 +47,11 @@ export default function SourceQuality({ days, onNavigate }) {
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
   }, [property, days]);
+
+  useEffect(() => {
+    Promise.all([api.ga4Status().catch(() => ({})), api.gscStatus().catch(() => ({}))])
+      .then(([g, s]) => setConns({ ga4: !!g.connected, gsc: !!s.connected }));
+  }, []);
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Analyzing your sources…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
@@ -94,13 +100,13 @@ export default function SourceQuality({ days, onNavigate }) {
       {/* Rev per Lead chart + Fastest to Close side by side */}
       <div style={{ display:'grid', gridTemplateColumns: data.fastestCycle ? '1fr 240px' : '1fr', gap:12, marginBottom:14 }}>
 
-        {/* Revenue per Lead bar chart */}
-        {revLeadData.length > 0 && (
-          <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px' }}>
+        {/* Revenue per Lead bar chart (always shown; blank when no data) */}
+        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px' }}>
             <div style={{ marginBottom:4 }}>
               <div style={{ fontSize:13, fontWeight:700, color:'#111' }}>Revenue per Lead by source</div>
               <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Total revenue divided by total leads from that channel. Shows true ROI - best to worst.</div>
             </div>
+            {revLeadData.length > 0 ? (
             <div style={{ height: revLeadData.length * 44 + 20, marginTop:12 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={revLeadData} layout="vertical" margin={{ left:0, right:60, top:4, bottom:4 }}>
@@ -114,8 +120,12 @@ export default function SourceQuality({ days, onNavigate }) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
-        )}
+            ) : (
+            <div style={{ height: 120, marginTop:12, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', color:'#bbb', fontSize:12, border:'1px dashed #E2E5EA', borderRadius:8, padding:'0 20px' }}>
+              No revenue-per-lead data yet. It appears once you have won deals with amounts, or try widening the date range.
+            </div>
+            )}
+        </div>
 
         {/* Speed to Close by channel */}
         {(() => {
@@ -147,15 +157,37 @@ export default function SourceQuality({ days, onNavigate }) {
         })()}
       </div>
 
+      {/* Get the full picture - gamified data-source completeness */}
+      <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+          <div>
+            <div style={{ fontSize:13, fontWeight:700, color:'#111' }}>Get the full picture</div>
+            <div style={{ fontSize:11.5, color:'#888', marginTop:2 }}>Connect your other data sources to unlock traffic, spend, ROI and CPA on top of HubSpot.</div>
+          </div>
+          <button onClick={() => onNavigate?.('integrations')} style={{ fontSize:12, fontWeight:700, color:'#fff', background:'#111', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', flexShrink:0 }}>Connect data sources →</button>
+        </div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:12 }}>
+          {[
+            { label:'HubSpot', on:true },
+            { label:'Analytics (GA4)', on:conns.ga4 },
+            { label:'Search Console', on:conns.gsc },
+            { label:'Google Ads', on:false },
+            { label:'Meta Ads', on:false },
+            { label:'Stripe', on:false },
+          ].map(b => (
+            <span key={b.label} onClick={() => !b.on && onNavigate?.('integrations')}
+              style={{ fontSize:11.5, fontWeight:600, padding:'4px 11px', borderRadius:20, cursor: b.on ? 'default' : 'pointer',
+                background: b.on ? '#F0FDF4' : '#F3F4F6', color: b.on ? '#059669' : '#aaa', border:`1px solid ${b.on ? '#BBF7D0' : '#E2E5EA'}` }}>
+              {b.on ? '✓ ' : '+ '}{b.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Source table */}
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px', overflowX:'auto' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Source breakdown</div>
-          <button onClick={() => onNavigate?.('integrations')}
-            style={{ fontSize:11, fontWeight:600, color:'#FF7A59', background:'#FFF4F0', border:'1px solid #FFD9CC', borderRadius:6, padding:'5px 10px', cursor:'pointer', display:'flex', alignItems:'center', gap:5 }}>
-            <span style={{ fontSize:13 }}>⚡</span>
-            Connect Google Ads to unlock Cost per Acquisition →
-          </button>
         </div>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
           <thead>

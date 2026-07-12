@@ -80,10 +80,37 @@ function analyzeLTV(contacts, deals) {
     .slice(-12)
     .map(m => ({ ...m, revenue: Math.round(m.revenue), lostRevenue: Math.round(m.lostRevenue) }));
 
+  // Customer LTV - clients often have multiple deals/contracts over time, so
+  // group won deals by company (falls back to contact when company is blank).
+  const contactById = {}; contacts.forEach(c => { contactById[c.id] = c; });
+  const byCustomer = {};
+  for (const deal of wonDeals) {
+    const cId = deal._contactIds?.[0];
+    const contact = cId ? contactById[cId] : null;
+    const company = (contact?.properties?.company || '').trim();
+    const key = company || (cId ? `contact:${cId}` : 'Unknown');
+    const label = company || [contact?.properties?.firstname, contact?.properties?.lastname].filter(Boolean).join(' ') || 'Unknown';
+    const amount = parseFloat(deal.properties.amount || '0') || 0;
+    if (!byCustomer[key]) byCustomer[key] = { label, deals: 0, revenue: 0 };
+    byCustomer[key].deals++;
+    byCustomer[key].revenue += amount;
+  }
+  const customerList = Object.values(byCustomer).filter(c => c.revenue > 0);
+  const distinctCustomers = customerList.length;
+  const avgLtv = distinctCustomers ? Math.round(customerList.reduce((s, c) => s + c.revenue, 0) / distinctCustomers) : 0;
+  const repeatCustomers = customerList.filter(c => c.deals > 1).length;
+  const customerLtv = {
+    avgLtv,
+    distinctCustomers,
+    repeatRate: distinctCustomers ? Math.round((repeatCustomers / distinctCustomers) * 100) : 0,
+    topCustomers: [...customerList].sort((a, b) => b.revenue - a.revenue).slice(0, 6)
+      .map(c => ({ label: c.label, deals: c.deals, revenue: Math.round(c.revenue) })),
+  };
+
   return {
     insufficient: false,
     overview: { totalWonDeals: wonDeals.length, totalRevenue: Math.round(totalRevenue), avgDealSize: Math.round(avgDealSize) },
-    ltvBySource, salesCycleBySource, repPerformance, revenueTrend
+    ltvBySource, salesCycleBySource, repPerformance, revenueTrend, customerLtv
   };
 }
 
