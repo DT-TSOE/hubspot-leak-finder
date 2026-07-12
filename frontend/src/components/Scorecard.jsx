@@ -3,18 +3,18 @@ import { api } from '../utils/api';
 import Onboarding from './Onboarding';
 
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
+const fmt$k = n => n >= 1000 ? '$' + Math.round(n / 1000) + 'k' : '$' + Math.round(n);
 const fmtH = h => h == null ? '-' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
+const fmtDays = d => d < 7 ? `${d}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
 
-// Rows describing a winning-deal segment (behavioral only).
 function profileRows(p) {
   return [
-    { l: 'Top source', v: p.source ? `${p.source.pct}% ${p.source.label}` : '-' },
-    { l: 'First response', v: p.speedHours ? `${fmtH(p.speedHours.p25)}–${fmtH(p.speedHours.p75)}` : '-' },
-    { l: 'Follow-up', v: p.touches ? `${p.touches.p25}–${p.touches.p75} touches` : '-' },
-    { l: 'Stage discipline', v: p.stagesEntered ? `moved through ${p.stagesEntered} stages` : '-' },
-    { l: 'Deal size', v: p.valueRange ? `${fmt$(p.valueRange.p25)}–${fmt$(p.valueRange.p90)}` : '-' },
-    { l: 'Time to close', v: p.cycleRange ? `${p.cycleRange.p25}–${p.cycleRange.p75} days` : '-' },
-  ];
+    p.valueRange?.median != null && { l: 'Avg deal size', v: fmt$k(p.valueRange.median) },
+    p.cycleRange?.median != null && { l: 'Avg time to close', v: fmtDays(p.cycleRange.median) },
+    p.touches?.median != null && { l: 'Avg touches', v: `${p.touches.median} touches` },
+    p.speedHours?.median != null && { l: 'First response', v: fmtH(p.speedHours.median) },
+    p.source && { l: 'Top source', v: `${p.source.pct}% ${p.source.label}` },
+  ].filter(Boolean);
 }
 
 const GRADE_COLOR = { A: '#10B981', B: '#34D399', C: '#F59E0B', D: '#F97316', F: '#EF4444' };
@@ -43,15 +43,15 @@ function GradeRing({ score, grade }) {
   );
 }
 
-// A single dimension row with a score bar; benchmark + source on hover (title).
+// A single dimension row with a score bar; what it means on hover.
 function DimensionRow({ dim }) {
   const color = scoreColor(dim.score);
-  const tip = `Benchmark: ${dim.benchmark}\nSource: ${dim.source}` + (dim.sample ? `\nBased on ${dim.sample} records` : '');
+  const tip = dim.source + (dim.sample ? `\nBased on ${dim.sample} records.` : '');
   return (
     <div title={tip} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid #F7F8FA', cursor: 'help' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 12.5, color: '#333', fontWeight: 500 }}>{dim.label}</div>
-        <div style={{ fontSize: 10.5, color: '#aaa', marginTop: 1 }}>benchmark {dim.benchmark}</div>
+        <div style={{ fontSize: 10.5, color: '#aaa', marginTop: 1 }}>{dim.displayValue || (dim.sample ? `${dim.sample} records` : 'no data')}</div>
       </div>
       <div style={{ width: 90, height: 6, background: '#F0F1F4', borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
         <div style={{ width: `${dim.score ?? 0}%`, height: '100%', background: color, borderRadius: 4, transition: 'width .6s ease' }} />
@@ -99,21 +99,20 @@ function FunnelCard({ title, subtitle, score, grade, dimensions, locked, unlockH
 // is secondary and shown only where enough deals actually passed through.
 export function DealStageTable({ pipeline }) {
   if (!pipeline) return null;
-  const c2wColor = scoreColor(pipeline.createdToWon);
   return (
-    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal-stage conversion - {pipeline.pipelineLabel}</div>
+    <div style={{ background: ‘#fff’, border: ‘1px solid #E2E5EA’, borderRadius: 12, padding: ‘16px 18px’, marginBottom: 12 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: ‘#111’, marginBottom: 12 }}>Deal conversion — {pipeline.pipelineLabel}</div>
 
       {/* HERO: created -> won */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
-        <span style={{ fontSize: 34, fontWeight: 800, color: c2wColor, lineHeight: 1 }}>{pipeline.createdToWon}%</span>
-        <span style={{ fontSize: 13, color: '#555', fontWeight: 600 }}>created → won</span>
-        <span style={{ fontSize: 12, color: '#999' }}>· {pipeline.won} of {pipeline.dealCount} deals created have closed won</span>
+      <div style={{ display: ‘flex’, alignItems: ‘baseline’, gap: 12, marginBottom: 6 }}>
+        <span style={{ fontSize: 34, fontWeight: 800, color: ‘#111’, lineHeight: 1 }}>{pipeline.createdToWon}%</span>
+        <span style={{ fontSize: 13, color: ‘#555’, fontWeight: 600 }}>of deals created become customers</span>
+        <span style={{ fontSize: 12, color: ‘#999’ }}>· {pipeline.won} won out of {pipeline.dealCount} created</span>
       </div>
-      <div style={{ fontSize: 11.5, color: '#888', lineHeight: 1.55, marginBottom: 14 }}>
+      <div style={{ fontSize: 11.5, color: ‘#888’, lineHeight: 1.55, marginBottom: 14 }}>
         {pipeline.skipHeavy
-          ? 'Most of your deals jump straight from created to closed without moving through the stages in between - so created → won is the number to trust. There isn’t enough stage-by-stage movement logged to break it down reliably.'
-          : 'Created → won is your most reliable number. Below: of every deal that ever reached a stage, the share that went on to win.'}
+          ? "Your deals aren’t moving through HubSpot stages consistently, so created → won is your most reliable number. The stage breakdown below needs more data to be meaningful."
+          : ‘Your overall win rate. Below: of every deal that entered each stage, the share that eventually won.’}
       </div>
 
       {!pipeline.skipHeavy && (

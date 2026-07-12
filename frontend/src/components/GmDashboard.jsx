@@ -168,7 +168,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Uncontacted leads</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} new leads, no outreach yet</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Contacting within 1 hour makes you ~7× more likely to qualify a lead (HBR) - tap to see who</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>These leads have had zero outreach — tap to see who and act now</div>
               </div>
               <span style={{ fontSize: 16, color: '#DC2626' }}>→</span>
             </button>

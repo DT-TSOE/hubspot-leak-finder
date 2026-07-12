@@ -83,7 +83,7 @@ export default function SpeedToLead({ days }) {
               {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with zero outreach
               {data.criticalCount > 0 && <span style={{ marginLeft:10, fontSize:13, fontWeight:600, color:'#EF4444' }}>({data.criticalCount} over 24h)</span>}
             </div>
-            <div style={{ fontSize:12, color:'rgba(255,255,255,.6)' }}>Contacting a lead within 1 hour makes you ~7x more likely to qualify it (HBR research). Every hour you wait, the odds drop.</div>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,.6)' }}>These leads have had zero outreach. The longer they wait, the colder they get.</div>
           </div>
           <div style={{ textAlign:'right', flexShrink:0 }}>
             <div style={{ fontSize:36, fontWeight:900, color:'#EF4444', lineHeight:1 }}>{data.uncontactedCount}</div>

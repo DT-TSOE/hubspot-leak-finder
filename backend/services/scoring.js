@@ -17,41 +17,39 @@ const { findStuckRecords } = require('./pipelineHealth');
 // --- Benchmarks (v1 published defaults; swap for per-industry data later) ----
 const BENCHMARKS = {
   speedToLead: {
-    // median hours to first touch -> score
-    source: 'Lead Response Management Study (Oldroyd, Kellogg/MIT); HBR "The Short Life of Online Sales Leads" (2011) - odds of qualifying drop ~10x after the first hour.',
+    source: 'Median time from when a lead is created to when your team first reached out. Faster is better — leads go cold quickly.',
     label: 'Median first-response time',
   },
   leadToSql: {
-    par: 13, // % of leads that reach SQL
-    source: 'Aggregated B2B funnel benchmarks (Salesforce/Implisit): ~13% of leads reach sales-qualified.',
+    par: 13,
+    source: 'Of all leads in your CRM, the percentage that have ever reached Sales Qualified Lead stage.',
     label: 'Lead → SQL conversion',
   },
   followUpCoverage: {
-    par: 90, // % of active contacts with >=1 logged touch
-    source: 'Activity-hygiene target: >90% of active contacts should have at least one logged touch.',
+    par: 90,
+    source: 'Of your active contacts, the percentage that have at least one logged touch (call, email, or meeting).',
     label: 'Lead follow-up coverage',
   },
   sourceConcentration: {
-    max: 70, // single source should not exceed this % of leads
-    source: 'Diversification guardrail: no single source above ~70% of lead volume (concentration risk).',
+    max: 70,
+    source: 'How spread out your lead sources are. Heavy reliance on a single source is a risk if that channel dries up.',
     label: 'Lead source diversity',
   },
   dealStageConversion: {
-    source: "Of all deals that ever entered a stage, the % that reach closed-won, measured from your dealstage history (not linear stage-to-stage).",
+    source: 'Average conversion rate across your active pipeline stages — of deals that entered each stage, how many went on to win.',
     label: 'Deal-stage conversion',
   },
   winRate: {
-    par: 20, // % of closed deals won
-    source: 'Aggregate B2B close-rate benchmarks: ~20% of closed deals won is a common par.',
+    par: 20,
+    source: 'Of all deals marked closed (won or lost), the percentage you won.',
     label: 'Win rate',
   },
   stalledDeals: {
-    source: 'Stage-aging: share of open pipeline value sitting past its expected stage duration. Lower is better.',
+    source: 'Percentage of your open pipeline value sitting in a stage longer than expected. Lower is better.',
     label: 'Stalled deals',
   },
   salesCycle: {
-    // scored relative to deal size; days
-    source: 'Sales-cycle length vs a deal-size-adjusted norm (small deals should close faster).',
+    source: 'Median days from deal created to closed-won. Compared against your own average deal size — bigger deals naturally take longer.',
     label: 'Sales cycle length',
   },
 };
@@ -338,28 +336,33 @@ function buildScorecard(data, profile) {
     ? Math.round(clamp(100 - (stalledValue / openPipeline.value) * 100))
     : null;
 
+  const fmtHours = h => h == null ? null : h < 1 ? `${Math.round(h * 60)}m` : h < 24 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
+  const fmtDays = d => d == null ? null : d < 7 ? `${Math.round(d)}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
+  const fmtPct = v => v == null ? null : `${Math.round(v)}%`;
+
   // ---- Marketing dimensions (weights from resolved profile) ----
   const marketingDims = [
     { key: 'leadToSql', weight: W.marketing.leadToSql, score: leadToSql.value !== null ? scoreToPar(leadToSql.value, BENCHMARKS.leadToSql.par) : null,
-      value: leadToSql.value, benchmark: `${BENCHMARKS.leadToSql.par}%`, ...BENCHMARKS.leadToSql, sample: leadToSql.sample },
+      value: leadToSql.value, displayValue: fmtPct(leadToSql.value), ...BENCHMARKS.leadToSql, sample: leadToSql.sample },
     { key: 'followUpCoverage', weight: W.marketing.followUpCoverage, score: noTouch.total > 0 ? Math.round(clamp(100 - noTouch.pct)) : null,
-      value: noTouch.total > 0 ? 100 - noTouch.pct : null, benchmark: `>${BENCHMARKS.followUpCoverage.par}%`, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
+      value: noTouch.total > 0 ? 100 - noTouch.pct : null, displayValue: noTouch.total > 0 ? fmtPct(100 - noTouch.pct) : null, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
     { key: 'sourceConcentration', weight: W.marketing.sourceConcentration, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
-      value: topSourceShare, benchmark: `<${BENCHMARKS.sourceConcentration.max}% from one source`, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
+      value: topSourceShare, displayValue: topSourceShare !== null ? `${topSourceShare}% top source` : null, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
   ];
 
   // ---- Sales dimensions (weights from resolved profile) ----
+  const winRateNote = winRate.value === 100 && winRate.sample < 10 ? ` (${winRate.sample} closed, no losses yet)` : '';
   const salesDims = [
     { key: 'dealStageConversion', weight: W.sales.dealStageConversion, score: dealStageScore,
-      value: dealStageScore, benchmark: 'per-stage vs history', ...BENCHMARKS.dealStageConversion, sample: primary?.dealCount || 0 },
+      value: dealStageScore, displayValue: dealStageScore !== null ? `${dealStageScore}% avg stage conversion` : null, ...BENCHMARKS.dealStageConversion, sample: primary?.dealCount || 0 },
     { key: 'winRate', weight: W.sales.winRate, score: winRate.value !== null ? scoreToPar(winRate.value, BENCHMARKS.winRate.par) : null,
-      value: winRate.value, benchmark: `${BENCHMARKS.winRate.par}%`, ...BENCHMARKS.winRate, sample: winRate.sample },
+      value: winRate.value, displayValue: winRate.value !== null ? `${Math.round(winRate.value)}%${winRateNote}` : null, ...BENCHMARKS.winRate, sample: winRate.sample },
     { key: 'stalledDeals', weight: W.sales.stalledDeals, score: stalledScore,
-      value: stalledValue, benchmark: 'minimize stuck $', ...BENCHMARKS.stalledDeals, sample: stuck.length },
+      value: stalledValue, displayValue: stuck.length > 0 ? `${stuck.length} stalled deal${stuck.length !== 1 ? 's' : ''}` : 'none stalled', ...BENCHMARKS.stalledDeals, sample: stuck.length },
     { key: 'speedToLead', weight: W.sales.speedToLead, score: scoreSpeedToLead(speed.value),
-      value: speed.value, benchmark: '<1h', ...BENCHMARKS.speedToLead, sample: speed.sample },
+      value: speed.value, displayValue: fmtHours(speed.value) ? `${fmtHours(speed.value)} median` : null, ...BENCHMARKS.speedToLead, sample: speed.sample },
     { key: 'salesCycle', weight: W.sales.salesCycle, score: cycle.value !== null ? scoreSalesCycle(cycle.value, avgDealSize) : null,
-      value: cycle.value, benchmark: 'deal-size adjusted', ...BENCHMARKS.salesCycle, sample: cycle.sample },
+      value: cycle.value, displayValue: fmtDays(cycle.value) ? `${fmtDays(cycle.value)} median` : null, ...BENCHMARKS.salesCycle, sample: cycle.sample },
   ];
 
   const marketingScore = blend(marketingDims);
