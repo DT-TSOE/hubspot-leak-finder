@@ -175,6 +175,8 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   const [triageLoading, setTriageLoading] = useState(false);
   const [spamCount, setSpamCount] = useState(0);
   const [marking, setMarking] = useState(false);
+  const [triageSort, setTriageSort] = useState('suspicious');
+  const [triageFilter, setTriageFilter] = useState(null);
 
   const loadTriage = async () => {
     if (triageContacts) { setShowTriage(v => !v); return; }
@@ -320,19 +322,59 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         {showTriage && (
           <div style={{ borderTop: '1px solid #FDE68A', padding: '10px 16px', opacity: marking ? 0.6 : 1, transition: 'opacity .15s' }}>
             {triageLoading && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>Loading contacts…</div>}
-            {triageContacts && triageContacts.length === 0 && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>No suspicious contacts found.</div>}
-            {triageContacts && triageContacts.map((c, i) => (
-              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < triageContacts.length - 1 ? '1px solid #FEF3C7' : 'none' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: c.isSpam ? '#bbb' : '#111', textDecoration: c.isSpam ? 'line-through' : 'none' }}>{c.name}</div>
-                  <div style={{ fontSize: 11, color: '#999' }}>{[c.email, c.source, c.stage].filter(Boolean).join(' · ')}</div>
-                </div>
-                <button disabled={marking} onClick={() => handleSpam(c.id, c.isSpam)}
-                  style={{ fontSize: 10.5, fontWeight: 700, borderRadius: 6, padding: '4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink: 0, minWidth: 78, textAlign: 'center', background: c.isSpam ? '#F0FDF4' : '#FEF2F2', color: c.isSpam ? '#059669' : '#DC2626', border: `1px solid ${c.isSpam ? '#BBF7D0' : '#FECACA'}` }}>
-                  {c.isSpam ? '↩ Not spam' : 'Mark spam'}
-                </button>
-              </div>
-            ))}
+            {triageContacts && (() => {
+              const SIGNAL_LABELS = { noEmail: 'No email', noName: 'No name', suspiciousEmail: 'Suspicious email', consumerEmail: 'Consumer email', neverTouched: 'Never touched', unknownSource: 'Unknown source' };
+              const FILTERS = ['noEmail', 'noName', 'neverTouched', 'consumerEmail', 'suspiciousEmail'];
+              const sorted = [...triageContacts].sort((a, b) => {
+                if (triageSort === 'suspicious') return b.spamScore - a.spamScore;
+                if (triageSort === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+              });
+              const visible = triageFilter ? sorted.filter(c => c.signals?.includes(triageFilter)) : sorted;
+              return (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                    <select value={triageSort} onChange={e => setTriageSort(e.target.value)}
+                      style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, border: '1px solid #FDE68A', background: '#fff', color: '#92400E', cursor: 'pointer' }}>
+                      <option value="suspicious">Most suspicious first</option>
+                      <option value="newest">Newest first</option>
+                      <option value="oldest">Oldest first</option>
+                    </select>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {FILTERS.map(f => (
+                        <button key={f} onClick={() => setTriageFilter(triageFilter === f ? null : f)}
+                          style={{ fontSize: 10, padding: '3px 8px', borderRadius: 10, border: `1px solid ${triageFilter === f ? '#C2410C' : '#FDE68A'}`, background: triageFilter === f ? '#C2410C' : '#fff', color: triageFilter === f ? '#fff' : '#92400E', cursor: 'pointer', fontWeight: 500 }}>
+                          {SIGNAL_LABELS[f]}
+                        </button>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 11, color: '#aaa', marginLeft: 'auto' }}>{visible.length} contacts</span>
+                  </div>
+                  {visible.length === 0 && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>No contacts match this filter.</div>}
+                  {visible.map((c, i) => (
+                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < visible.length - 1 ? '1px solid #FEF3C7' : 'none' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, color: c.isSpam ? '#bbb' : '#111', textDecoration: c.isSpam ? 'line-through' : 'none' }}>{c.name}</div>
+                        <div style={{ fontSize: 11, color: '#999', marginBottom: c.signals?.length ? 3 : 0 }}>{[c.email, c.source, c.stage].filter(Boolean).join(' · ')}</div>
+                        {c.signals?.length > 0 && (
+                          <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                            {c.signals.map(s => (
+                              <span key={s} style={{ fontSize: 9.5, padding: '1px 6px', borderRadius: 8, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', fontWeight: 500 }}>
+                                {SIGNAL_LABELS[s]}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button disabled={marking} onClick={() => handleSpam(c.id, c.isSpam)}
+                        style={{ fontSize: 10.5, fontWeight: 700, borderRadius: 6, padding: '4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink: 0, minWidth: 78, textAlign: 'center', background: c.isSpam ? '#F0FDF4' : '#FEF2F2', color: c.isSpam ? '#059669' : '#DC2626', border: `1px solid ${c.isSpam ? '#BBF7D0' : '#FECACA'}` }}>
+                        {c.isSpam ? '↩ Not spam' : 'Mark spam'}
+                      </button>
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

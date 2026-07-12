@@ -317,26 +317,47 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
     const speed = calc.calculateTimeToFirstTouch(contacts);
     const uncontacted = health.findUncontactedLeads(contacts);
 
-    // Triage list: most recent contacts to review & mark spam. Newest first.
+    // Triage list: score every contact for spam signals, sort worst first.
     const stageLbl = { lead: 'Lead', marketingqualifiedlead: 'MQL', salesqualifiedlead: 'SQL', opportunity: 'Opportunity', customer: 'Customer' };
+    const CONSUMER_DOMAINS = new Set(['gmail.com','yahoo.com','hotmail.com','outlook.com','icloud.com','me.com','aol.com','live.com','msn.com','protonmail.com','mail.com']);
+    const SUSPICIOUS_PAT = /^(test|fake|asdf|qwerty|admin|noreply|no-reply|info|hello|user|demo|sample|spam|junk|temp|null|undefined|\d+)[^@]*@/i;
+
     const triageCandidates = [...dateContacts]
-      .sort((a, b) => new Date(b.properties.createdate || 0) - new Date(a.properties.createdate || 0))
-      .slice(0, 40)
       .map(c => {
+        const email = c.properties.email || null;
+        const firstName = c.properties.firstname || '';
+        const lastName = c.properties.lastname || '';
+        const name = [firstName, lastName].filter(Boolean).join(' ') || '(no name)';
         const created = new Date(c.properties.createdate).getTime();
         const firstTouch = c.properties.notes_last_contacted ? new Date(c.properties.notes_last_contacted).getTime() : null;
         const respHours = firstTouch && !isNaN(created) ? Math.round(((firstTouch - created) / 3600000) * 10) / 10 : null;
+        const touched = parseInt(c.properties.num_contacted_notes || '0') > 0;
+        const domain = email ? email.split('@')[1]?.toLowerCase() : null;
+
+        const signals = [];
+        if (!email) signals.push('noEmail');
+        if (name === '(no name)') signals.push('noName');
+        if (email && SUSPICIOUS_PAT.test(email)) signals.push('suspiciousEmail');
+        if (domain && CONSUMER_DOMAINS.has(domain)) signals.push('consumerEmail');
+        if (!touched) signals.push('neverTouched');
+        if (!c.properties.hs_analytics_source || c.properties.hs_analytics_source === 'UNKNOWN') signals.push('unknownSource');
+
         return {
           id: c.id,
-          name: [c.properties.firstname, c.properties.lastname].filter(Boolean).join(' ') || '(no name)',
-          email: c.properties.email || null,
+          name,
+          email,
           source: c.properties.hs_analytics_source || null,
           stage: stageLbl[c.properties.lifecyclestage] || c.properties.lifecyclestage || '-',
+          createdAt: c.properties.createdate || null,
           respHours,
-          touched: parseInt(c.properties.num_contacted_notes || '0') > 0,
+          touched,
+          signals,
+          spamScore: signals.length,
           isSpam: spam.has(c.id),
         };
-      });
+      })
+      .sort((a, b) => b.spamScore - a.spamScore || new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+      .slice(0, 200);
 
     // Won vs lost speed comparison
     const contactMap = {};
