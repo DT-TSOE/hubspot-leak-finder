@@ -101,19 +101,19 @@ function FunnelCard({ title, subtitle, score, grade, dimensions, locked, unlockH
 export function DealStageTable({ pipeline }) {
   if (!pipeline) return null;
   return (
-    <div style={{ background: ‘#fff’, border: ‘1px solid #E2E5EA’, borderRadius: 12, padding: ‘16px 18px’, marginBottom: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: ‘#111’, marginBottom: 12 }}>Deal conversion — {pipeline.pipelineLabel}</div>
+    <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal conversion — {pipeline.pipelineLabel}</div>
 
       {/* HERO: created -> won */}
-      <div style={{ display: ‘flex’, alignItems: ‘baseline’, gap: 12, marginBottom: 6 }}>
-        <span style={{ fontSize: 34, fontWeight: 800, color: ‘#111’, lineHeight: 1 }}>{pipeline.createdToWon}%</span>
-        <span style={{ fontSize: 13, color: ‘#555’, fontWeight: 600 }}>of deals created become customers</span>
-        <span style={{ fontSize: 12, color: ‘#999’ }}>· {pipeline.won} won out of {pipeline.dealCount} created</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
+        <span style={{ fontSize: 34, fontWeight: 800, color: '#111', lineHeight: 1 }}>{pipeline.createdToWon}%</span>
+        <span style={{ fontSize: 13, color: '#555', fontWeight: 600 }}>of deals created become customers</span>
+        <span style={{ fontSize: 12, color: '#999' }}>· {pipeline.won} won out of {pipeline.dealCount} created</span>
       </div>
-      <div style={{ fontSize: 11.5, color: ‘#888’, lineHeight: 1.55, marginBottom: 14 }}>
+      <div style={{ fontSize: 11.5, color: '#888', lineHeight: 1.55, marginBottom: 14 }}>
         {pipeline.skipHeavy
-          ? "Your deals aren’t moving through HubSpot stages consistently, so created → won is your most reliable number. The stage breakdown below needs more data to be meaningful."
-          : ‘Your overall win rate. Below: of every deal that entered each stage, the share that eventually won.’}
+          ? "Your deals aren't moving through HubSpot stages consistently, so created → won is your most reliable number. The stage breakdown below needs more data to be meaningful."
+          : 'Your overall win rate. Below: of every deal that entered each stage, the share that eventually won.'}
       </div>
 
       {!pipeline.skipHeavy && (
@@ -211,7 +211,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
 
   useEffect(() => { load(); }, [load]);
 
-  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn’t build scorecard: {error}</div>;
+  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn't build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Grading your pipeline…</div>;
 
   const { overall, marketing, sales, revenueImpact, dealStageConversion, tunedFor, methodology, personalized, trend, recommendations, dealProfiles, dataDriven, lifecycleMaintained } = data;
@@ -442,7 +442,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
               <strong style={{ color: '#111' }}>Want to know who these buyers actually are - and where to find more like them?</strong> Job titles, company profiles, and lookalike targeting.
             </div>
             {interested ? (
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669', flexShrink: 0 }}>✓ We’ll be in touch</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669', flexShrink: 0 }}>✓ We'll be in touch</span>
             ) : (
               <button onClick={() => { api.recordInterest('customer-profiles').catch(() => {}); setInterested(true); }}
                 style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#fff', background: '#C2410C', border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}>
