@@ -6,8 +6,6 @@ const STEPS = [
   {
     id: 'welcome',
     target: null,
-    character: '/el-pipeador-headshot.png',
-    characterFallback: '🤼',
     title: 'Welcome to PipeChamp',
     body: "We've already scanned your HubSpot pipeline. Here's a quick look at where everything lives - takes about 30 seconds.",
     cta: "Let's go",
@@ -15,8 +13,6 @@ const STEPS = [
   {
     id: 'dashboard',
     target: '[data-tour="nav-dashboard"]',
-    character: '/el-pipeador-headshot.png',
-    characterFallback: '🤼',
     title: 'Your Scorecard',
     body: 'Your command center. Your pipeline grade, revenue opportunity, what your best deals look like, and exactly what to do next - all in one view. Check it weekly.',
     cta: 'Got it',
@@ -25,8 +21,6 @@ const STEPS = [
   {
     id: 'analyze',
     target: '[data-tour="nav-analyze"]',
-    character: '/el-pipeador-headshot.png',
-    characterFallback: '🤼',
     title: 'Dig Deeper',
     body: 'Growth Funnel, At Risk, Lead Sources, Lead Response, Revenue. Click any section to see the full picture behind your numbers.',
     cta: 'Makes sense',
@@ -35,18 +29,14 @@ const STEPS = [
   {
     id: 'at-risk',
     target: '[data-tour="nav-at-risk"]',
-    character: '/rojo-headshot.png',
-    characterFallback: '🔴',
-    title: 'Watch for Rojo',
-    body: 'Whenever you see the red luchador, something needs attention. At Risk shows contacts and deals going cold - with the revenue on the line.',
+    title: 'At Risk',
+    body: 'This is where contacts and deals going cold show up, flagged before they die, with the revenue on the line.',
     cta: 'On it',
     tooltipSide: 'right',
   },
   {
     id: 'pipecoach',
     target: '[data-tour="nav-ask-coach"]',
-    character: '/pipecoach.png',
-    characterFallback: 'PC',
     title: 'Ask PipeCoach Anything',
     body: 'PipeCoach already knows your pipeline data. Ask why you\'re losing deals, which leads to call, or what any metric means. She gives you step-by-step HubSpot instructions - not generic advice.',
     cta: 'Love it',
@@ -55,8 +45,6 @@ const STEPS = [
   {
     id: 'done',
     target: null,
-    character: '/el-pipeador-headshot.png',
-    characterFallback: '🏆',
     title: "You're all set",
     body: "Start with the Scorecard. Everything links to where you need to go next. PipeCoach is always one click away if you get stuck.",
     cta: 'Take me to my Scorecard',
@@ -172,13 +160,9 @@ export default function TourOverlay({ onComplete }) {
           <div style={{ height:'100%', width:`${progress * 100}%`, background:'linear-gradient(90deg,#43A047,#66BB6A)', transition:'width .3s ease' }} />
         </div>
 
-        {/* Character + title */}
-        <div style={{ padding:'18px 18px 12px', display:'flex', alignItems:'center', gap:12 }}>
-          <div style={{ width:44, height:44, borderRadius:11, overflow:'hidden', border:'2px solid #E2E5EA', flexShrink:0 }}>
-            <img src={current.character} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
-              onError={e => { e.target.style.display='none'; e.target.parentElement.style.display='flex'; e.target.parentElement.style.alignItems='center'; e.target.parentElement.style.justifyContent='center'; e.target.parentElement.style.fontSize='20px'; e.target.parentElement.innerHTML=current.characterFallback; }} />
-          </div>
-          <div style={{ fontSize:15, fontWeight:700, color:'#111', letterSpacing:'-0.2px', lineHeight:1.25 }}>{current.title}</div>
+        {/* Title */}
+        <div style={{ padding:'18px 18px 12px' }}>
+          <div style={{ fontSize:16, fontWeight:700, color:'#111', letterSpacing:'-0.2px', lineHeight:1.25 }}>{current.title}</div>
         </div>
 
         {/* Body */}

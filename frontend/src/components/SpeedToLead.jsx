@@ -66,10 +66,7 @@ export default function SpeedToLead({ days }) {
       {/* Hero alert when uncontacted leads exist */}
       {data.uncontactedCount > 0 && (
         <div style={{ background:'linear-gradient(135deg,#1a1a1a,#2d1a1a)', borderRadius:12, padding:'16px 20px', marginBottom:14, display:'flex', alignItems:'center', gap:16 }}>
-          <div style={{ width:44, height:44, borderRadius:10, overflow:'hidden', border:'2px solid #EF4444', flexShrink:0 }}>
-            <img src="/rojo.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
-              onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🚨'; }} />
-          </div>
+          <div style={{ width:44, height:44, borderRadius:10, background:'rgba(239,68,68,.15)', border:'2px solid #EF4444', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>🚨</div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:10, fontWeight:700, color:'#EF4444', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:3 }}>Needs Immediate Attention</div>
             <div style={{ fontSize:18, fontWeight:700, color:'#fff', marginBottom:3 }}>

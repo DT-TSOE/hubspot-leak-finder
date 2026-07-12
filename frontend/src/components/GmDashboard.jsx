@@ -66,10 +66,6 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
       {data.topOpportunities?.length > 0 && (
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, marginBottom: 14, overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px 10px', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-              <img src="/el-pipeador.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-                onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🎯'; }} />
-            </div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Top Opportunities</div>
             <div style={{ fontSize: 11, color: '#888', marginLeft: 2 }}>- ranked by impact</div>
           </div>
@@ -92,11 +88,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
                   {destTab && <span style={{ fontSize: 11, color: '#aaa', alignSelf: 'center' }}>→</span>}
                   <button
                     onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: opp.coachMessage } })); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
-                    <div style={{ width: 18, height: 18, borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
-                      <img src="/pipecoach.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-                        onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:9px">PC</span>'; }} />
-                    </div>
+                    style={{ background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>Ask PipeCoach</span>
                   </button>
                 </div>
@@ -172,10 +164,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
           {data.uncontactedCount > 0 && (
             <button onClick={() => onTabChange?.('lead-response')}
               style={{ background: '#fff', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', cursor: 'pointer', textAlign: 'left' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-                <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🚨'; }} />
-              </div>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🚨</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Uncontacted leads</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} new leads, no outreach yet</div>
@@ -187,10 +176,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
           {data.stuckCount > 0 && (
             <button onClick={() => onTabChange?.('at-risk')}
               style={{ background: '#fff', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', cursor: 'pointer', textAlign: 'left' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-                <img src="/rojo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='⚠️'; }} />
-              </div>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFFBEB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚠️</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Stuck records</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.stuckCount} contacts & deals haven't moved</div>

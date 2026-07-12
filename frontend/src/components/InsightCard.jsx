@@ -46,10 +46,6 @@ export default function InsightCard({ insight }) {
             <button
               onClick={e => { e.stopPropagation(); openPipeCoach(insight); }}
               style={{ display:'flex', alignItems:'center', gap:7, background:'#111', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer' }}>
-              <div style={{ width:20, height:20, borderRadius:5, overflow:'hidden', border:'1.5px solid #4CAF50', flexShrink:0 }}>
-                <img src="/pipecoach.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}
-                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;height:100%">PC</span>'; }} />
-              </div>
               <span style={{ fontSize:12, fontWeight:700, color:'#fff' }}>Ask PipeCoach how to fix this</span>
               <span style={{ color:'#4CAF50', fontSize:13 }}>→</span>
             </button>

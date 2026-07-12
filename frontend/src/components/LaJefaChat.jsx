@@ -11,7 +11,7 @@ function ChatMessages({ messages, loading, error, bottomRef }) {
       {messages.map((msg, i) => (
         <div key={i} style={{ display:'flex', gap:6, alignItems:'flex-end', flexDirection:msg.role==='user'?'row-reverse':'row' }}>
           <div style={{ width:26, height:26, borderRadius:7, overflow:'hidden', border:`1.5px solid ${msg.role==='user'?'#E2E5EA':'#4CAF50'}`, background:msg.role==='user'?'#F3F4F6':'#0F1A0F', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#555' }}>
-            <img src={msg.role==='user'?'/el-pipeador.png':'/pipecoach.png'} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML=msg.role==='user'?'U':'PC';}} />
+            <span style={{ color: msg.role==='user' ? '#555' : '#8BC34A' }}>{msg.role==='user' ? 'U' : 'PC'}</span>
           </div>
           <div style={{ maxWidth:'78%' }}>
             {msg.role==='assistant' && <div style={{ fontSize:9, fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:1, marginBottom:2 }}>{COACH_NAME}</div>}
@@ -100,9 +100,7 @@ export default function LaJefaChat({ inline = false }) {
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:16, overflow:'hidden', display:'flex', flexDirection:'column', height:560 }}>
         <style>{`@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}`}</style>
         <div style={{ padding:'14px 18px', borderBottom:'1px solid #E2E5EA', display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{ width:40, height:40, borderRadius:10, overflow:'hidden', border:'2px solid #4CAF50', flexShrink:0 }}>
-            <img src="/pipecoach.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:20px;display:flex;align-items:center;justify-content:center;height:100%">🤼</span>';}} />
-          </div>
+          <div style={{ width:40, height:40, borderRadius:10, border:'2px solid #4CAF50', background:'#0F1A0F', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:800, color:'#8BC34A', flexShrink:0 }}>PC</div>
           <div>
             <div style={{ fontSize:15, fontWeight:700, color:'#111' }}>{COACH_NAME}</div>
             <div style={{ fontSize:11, color:'#888' }}>Your AI pipeline advisor · already knows what's wrong</div>
@@ -122,16 +120,14 @@ export default function LaJefaChat({ inline = false }) {
     <>
       <style>{`@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}} @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}`}</style>
       {!open && (
-        <button onClick={()=>setOpen(true)} title={`Ask ${COACH_NAME}`} style={{ position:'fixed', bottom:24, right:24, width:54, height:54, borderRadius:'50%', background:'#111', border:'3px solid #4CAF50', cursor:'pointer', padding:0, boxShadow:'0 4px 16px rgba(0,0,0,0.2)', zIndex:1000, overflow:'hidden' }}>
-          <img src="/pipecoach.png" alt={COACH_NAME} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;height:100%">🤼</span>';}} />
+        <button onClick={()=>setOpen(true)} title={`Ask ${COACH_NAME}`} style={{ position:'fixed', bottom:24, right:24, width:54, height:54, borderRadius:'50%', background:'#111', border:'3px solid #4CAF50', cursor:'pointer', padding:0, boxShadow:'0 4px 16px rgba(0,0,0,0.2)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', color:'#8BC34A', fontSize:16, fontWeight:800 }}>
+          PC
         </button>
       )}
       {open && (
         <div style={{ position:'fixed', bottom:24, right:24, width:360, height:480, background:'#fff', borderRadius:16, border:'1px solid #E2E5EA', boxShadow:'0 8px 32px rgba(0,0,0,0.12)', zIndex:1000, display:'flex', flexDirection:'column', overflow:'hidden', animation:'slideUp .2s ease' }}>
           <div style={{ padding:'12px 14px', borderBottom:'1px solid #E2E5EA', display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ width:36, height:36, borderRadius:9, overflow:'hidden', border:'2px solid #4CAF50', flexShrink:0 }}>
-              <img src="/pipecoach.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="font-size:18px">🤼</span>';}} />
-            </div>
+            <div style={{ width:36, height:36, borderRadius:9, border:'2px solid #4CAF50', background:'#0F1A0F', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, color:'#8BC34A', flexShrink:0 }}>PC</div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:14, fontWeight:700, color:'#111' }}>{COACH_NAME}</div>
               <div style={{ fontSize:11, color:'#888' }}>Already knows what's wrong</div>

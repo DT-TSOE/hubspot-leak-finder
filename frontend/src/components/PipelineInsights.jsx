@@ -119,10 +119,6 @@ function StageInsightRow({ insight }) {
           <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={() => window.dispatchEvent(new CustomEvent('pipecoach:open', { detail: { message: `My ${insight.label} to ${insight.nextLabel} conversion rate is ${advRate}%. ${insight.predictor || ''} What specific actions should I take in HubSpot to improve this conversion rate?` } }))}
               style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: 'none', borderRadius: 7, padding: '6px 12px', cursor: 'pointer' }}>
-              <div style={{ width: 18, height: 18, borderRadius: 4, overflow: 'hidden', border: '1.5px solid #4CAF50', flexShrink: 0 }}>
-                <img src="/pipecoach.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-                  onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='<span style="color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;height:100%">PC</span>'; }} />
-              </div>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>Ask PipeCoach how to fix this</span>
               <span style={{ color: '#4CAF50' }}>→</span>
             </button>
