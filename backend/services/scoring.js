@@ -28,7 +28,7 @@ const BENCHMARKS = {
   followUpCoverage: {
     par: 90,
     source: 'Of your active contacts, the percentage that have at least one logged touch (call, email, or meeting).',
-    label: 'Lead follow-up coverage',
+    label: 'Lead Outreach Rate',
   },
   sourceConcentration: {
     max: 70,
@@ -371,6 +371,7 @@ function buildScorecard(data, profile) {
       label: 'Leads captured', source: 'Contacts created in the last 90 days.', sample: recentLeads || contacts.length },
     { key: 'followUpCoverage', weight: W.marketing.followUpCoverage, score: noTouch.total > 0 ? Math.round(clamp(100 - noTouch.pct)) : null,
       value: noTouch.total > 0 ? 100 - noTouch.pct : null, displayValue: noTouch.total > 0 ? fmtPct(100 - noTouch.pct) : null,
+      meterFill: noTouch.total > 0 ? Math.round(100 - noTouch.pct) : null,
       showMeter: true, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
     { key: 'sourceConcentration', weight: W.marketing.sourceConcentration, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
       value: topSourceShare, displayValue: topSourceShare !== null ? `${topSourceShare}% ${topSourceName || 'top source'}` : null, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
@@ -385,12 +386,14 @@ function buildScorecard(data, profile) {
       value: dealStageScore, displayValue: dealStageScore !== null ? `${dealStageScore}% avg stage conversion` : null, ...BENCHMARKS.dealStageConversion, sample: primary?.dealCount || 0 },
     { key: 'winRate', weight: W.sales.winRate, score: winRate.value !== null ? scoreToPar(winRate.value, BENCHMARKS.winRate.par) : null,
       value: winRate.value, displayValue: winRate.value !== null ? `${Math.round(winRate.value)}%${winRateNote}` : null,
+      meterFill: winRate.value !== null ? Math.min(100, Math.round(winRate.value)) : null,
       showMeter: true, ...BENCHMARKS.winRate, sample: winRate.sample },
     { key: 'stalledDeals', weight: W.sales.stalledDeals, score: stalledScore,
       value: stalledValue, displayValue: stuck.length > 0 ? `${stuck.length} stalled deal${stuck.length !== 1 ? 's' : ''}` : 'none stalled',
+      meterFill: stalledScore,
       showMeter: true, ...BENCHMARKS.stalledDeals, sample: stuck.length },
-    { key: 'speedToLead', weight: W.sales.speedToLead, score: scoreSpeedToLead(speed.value),
-      value: speed.value, displayValue: fmtHours(speed.value) ? `${fmtHours(speed.value)} avg` : null, ...BENCHMARKS.speedToLead, sample: speed.sample },
+    { key: 'speedToLead', weight: W.sales.speedToLead, score: scoreSpeedToLead(speed.mean ?? speed.value),
+      value: speed.mean ?? speed.value, displayValue: fmtHours(speed.mean ?? speed.value) ? `${fmtHours(speed.mean ?? speed.value)} avg` : null, ...BENCHMARKS.speedToLead, sample: speed.sample },
     { key: 'salesCycle', weight: W.sales.salesCycle, score: cycle.value !== null ? scoreSalesCycle(cycle.value, avgDealSize) : null,
       value: cycle.value, displayValue: fmtDays(cycle.value) ? `${fmtDays(cycle.value)} median` : null, ...BENCHMARKS.salesCycle, sample: cycle.sample },
   ];

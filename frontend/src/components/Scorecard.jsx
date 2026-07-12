@@ -39,14 +39,18 @@ function DimensionRow({ dim, comparison }) {
   const tip = (dim.source || '') + (dim.sample ? `\nBased on ${dim.sample} records.` : '');
 
   if (dim.showMeter && dim.score != null) {
+    const fill = dim.meterFill != null ? dim.meterFill : dim.score;
     return (
       <div title={tip} style={{ padding: '10px 0', borderBottom: '1px solid #F7F8FA', cursor: 'help' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
           <div style={{ fontSize: 11.5, color: '#888' }}>{dim.label}</div>
           <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{dim.displayValue || 'No data'}</div>
         </div>
-        <div style={{ height: 5, borderRadius: 3, background: '#F0F1F4', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${dim.score}%`, background: mc, borderRadius: 3, transition: 'width .6s ease' }} />
+        <div style={{ position: 'relative', height: 6, borderRadius: 4, background: '#F0F1F4', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(239,68,68,.13)' }} />
+          <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(217,119,6,.13)' }} />
+          <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(16,185,129,.13)' }} />
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${fill}%`, background: mc, borderRadius: 4, transition: 'width .6s ease' }} />
         </div>
         {comparison && <div style={{ fontSize: 11, color: '#aaa', marginTop: 4 }}>{comparison}</div>}
       </div>
@@ -101,7 +105,7 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
       {showGa4Cta && (
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #F0F1F4', position: 'relative' }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: '#bbb', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Lead generation</div>
-          <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+          <div style={{ filter: 'blur(2px)', userSelect: 'none', pointerEvents: 'none' }}>
             {GA4_PREVIEW_ROWS.map(row => (
               <div key={row.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid #F7F8FA' }}>
                 <div style={{ flex: 1 }}>
