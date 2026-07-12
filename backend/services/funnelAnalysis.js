@@ -1,3 +1,4 @@
+const { isLifecycleMaintained } = require('./metricCalculations');
 const LIFECYCLE_STAGES = ['lead','marketingqualifiedlead','salesqualifiedlead','opportunity','customer'];
 const STAGE_LABELS = { lead:'Lead', marketingqualifiedlead:'MQL', salesqualifiedlead:'SQL', opportunity:'Opportunity', customer:'Customer' };
 const STAGE_DATE_PROPS = {
@@ -95,7 +96,7 @@ function analyzeFunnel(contacts) {
     description: `Only ${lowestConversionStage.conversionRate}% of ${funnelStages[LIFECYCLE_STAGES.indexOf(lowestConversionStage.stage)-1]?.label || 'leads'} convert to ${lowestConversionStage.label}`
   } : null;
 
-  return { totalContacts: contacts.length, funnelStages, stageContacts, stageTimes, biggestLeak, lowestConversionStage, highestDropOffStage, longestDelayTransition, meta: { generatedAt: new Date().toISOString() } };
+  return { totalContacts: contacts.length, funnelStages, stageContacts, stageTimes, biggestLeak, lowestConversionStage, highestDropOffStage, longestDelayTransition, lifecycleMaintained: isLifecycleMaintained(contacts), meta: { generatedAt: new Date().toISOString() } };
 }
 
 module.exports = { analyzeFunnel, LIFECYCLE_STAGES, STAGE_LABELS };

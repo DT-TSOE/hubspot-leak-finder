@@ -115,6 +115,20 @@ function calculateNoTouchCount(contacts) {
   return { value: noTouch.length, total: active.length, pct: active.length ? Math.round((noTouch.length / active.length) * 100) : 0 };
 }
 
+// Does this account actually maintain HubSpot lifecycle stages? Many SMBs don't
+// (they run on deals), which makes lifecycle-based funnel/conversion metrics
+// look empty. Detect it so the UI can be honest instead of showing a broken funnel.
+const MID_LATE_STAGES = ['marketingqualifiedlead', 'salesqualifiedlead', 'opportunity', 'customer', 'evangelist'];
+const MID_LATE_DATEPROPS = ['hs_lifecyclestage_marketingqualifiedlead_date', 'hs_lifecyclestage_salesqualifiedlead_date', 'hs_lifecyclestage_opportunity_date', 'hs_lifecyclestage_customer_date'];
+function isLifecycleMaintained(contacts) {
+  if (!contacts || contacts.length < 20) return true; // too small to judge; don't flag
+  const progressed = contacts.filter(c =>
+    MID_LATE_STAGES.includes(c.properties.lifecyclestage) ||
+    MID_LATE_DATEPROPS.some(p => c.properties[p])
+  ).length;
+  return (progressed / contacts.length) >= 0.03; // <3% ever left "lead" => stages unused
+}
+
 function calculateTouchesPerDeal(deals, contacts, outcome = 'all') {
   const contactMap = {};
   contacts.forEach(c => { contactMap[c.id] = c; });
@@ -231,6 +245,6 @@ function detectSourceProperties(contacts) {
 module.exports = {
   calculateWinRate, calculateAverageDealSize, calculateSalesCycle, calculateOpenPipelineValue,
   calculateNewDealsCount, calculateStageConversion, calculateBiggestDropoff,
-  calculateTimeToFirstTouch, calculateNoTouchCount, calculateTouchesPerDeal,
+  calculateTimeToFirstTouch, calculateNoTouchCount, calculateTouchesPerDeal, isLifecycleMaintained,
   calculateRevenueBySource, calculateSourceQuality, detectSourceProperties, median, mean,
 };

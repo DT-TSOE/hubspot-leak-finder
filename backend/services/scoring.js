@@ -388,6 +388,7 @@ function buildScorecard(data, profile) {
     methodology: W.methodology,
     personalized: W.personalized,
     dataDriven: !!W.dataDriven,
+    lifecycleMaintained: calc.isLifecycleMaintained(contacts),
   };
 }
 

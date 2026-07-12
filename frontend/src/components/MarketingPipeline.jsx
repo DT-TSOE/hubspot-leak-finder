@@ -75,6 +75,13 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
 
   return (
     <div>
+      {/* Honest note: this account doesn't tag lifecycle stages */}
+      {funnel.lifecycleMaintained === false && (
+        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 14px', marginBottom: 12, fontSize: 12.5, color: '#92400E', lineHeight: 1.55 }}>
+          <strong style={{ color: '#111' }}>This account doesn't tag HubSpot lifecycle stages,</strong> so the Lead → MQL → SQL funnel below will look sparse. That's a data-tagging gap, not a real marketing problem. Your deal-based metrics (win rate, revenue, deal-stage conversion) are the reliable view.
+        </div>
+      )}
+
       {/* Connect prompt when neither Google source is connected */}
       {nothingConnected && (
         <div style={{ ...CARD, borderStyle: 'dashed', display: 'flex', alignItems: 'center', gap: 16 }}>
