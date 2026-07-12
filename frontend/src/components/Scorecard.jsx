@@ -280,6 +280,17 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         )}
       </div>
 
+      {/* Data quality - spam cleanup skews every number below, so lead with it */}
+      <div onClick={() => onTabChange?.('lead-response')}
+        style={{ cursor: 'pointer', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 20, flexShrink: 0 }}>🧹</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Clean your data first</div>
+          <div style={{ fontSize: 11.5, color: '#92400E', lineHeight: 1.5 }}>Junk form-fills and spam contacts quietly skew every number here - response time, conversion, source quality. Clearing them is the fastest way to sharpen your whole scorecard.</div>
+        </div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#C2410C', flexShrink: 0, whiteSpace: 'nowrap' }}>Review &amp; remove spam →</span>
+      </div>
+
       {/* Marketing vs Sales breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
         <FunnelCard title="Marketing" subtitle="Generate leads → SQL" score={marketing.score} grade={marketing.grade} dimensions={marketing.dimensions}

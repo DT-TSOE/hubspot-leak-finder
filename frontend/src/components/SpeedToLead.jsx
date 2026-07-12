@@ -152,14 +152,17 @@ export default function SpeedToLead({ days }) {
 
       {/* Spam cleanup - junk form-fills skew response time; let the user filter them out */}
       {triageCandidates?.length > 0 && (
-        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 16px', marginBottom:14 }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <div>
-              <div style={{ fontSize:12.5, fontWeight:600, color:'#111' }}>Cleaning up spam? {spamCount > 0 && <span style={{ color:'#059669' }}>{spamCount} filtered out</span>}</div>
-              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Junk form-fills drag your response time down. Mark them spam and every metric here recalculates without them.</div>
+        <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderLeft:'4px solid #F59E0B', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
+            <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+              <span style={{ fontSize:20, flexShrink:0 }}>🧹</span>
+              <div>
+                <div style={{ fontSize:13.5, fontWeight:700, color:'#111' }}>Clean up spam &amp; junk contacts {spamCount > 0 && <span style={{ color:'#059669' }}>· {spamCount} filtered out</span>}</div>
+                <div style={{ fontSize:11.5, color:'#92400E', marginTop:2, lineHeight:1.5 }}>Junk form-fills skew response time, conversion, and source quality across the whole app. Mark them spam and every metric recalculates without them - one of the highest-impact things you can do.</div>
+              </div>
             </div>
-            <button onClick={() => setShowTriage(v => !v)} style={{ fontSize:11, fontWeight:600, color:'#3B82F6', background:'#EFF6FF', border:'none', borderRadius:6, padding:'6px 12px', cursor:'pointer', flexShrink:0 }}>
-              {showTriage ? 'Hide' : 'Review recent contacts'}
+            <button onClick={() => setShowTriage(v => !v)} style={{ fontSize:12, fontWeight:700, color:'#fff', background:'#C2410C', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
+              {showTriage ? 'Hide' : 'Review contacts →'}
             </button>
           </div>
           {showTriage && (
