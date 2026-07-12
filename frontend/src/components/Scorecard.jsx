@@ -170,6 +170,31 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showWhy, setShowWhy] = useState(false);
   const [interested, setInterested] = useState(false);
+  const [showTriage, setShowTriage] = useState(false);
+  const [triageContacts, setTriageContacts] = useState(null);
+  const [triageLoading, setTriageLoading] = useState(false);
+  const [spamCount, setSpamCount] = useState(0);
+  const [marking, setMarking] = useState(false);
+
+  const loadTriage = async () => {
+    if (triageContacts) { setShowTriage(v => !v); return; }
+    setShowTriage(true);
+    setTriageLoading(true);
+    try {
+      const d = await api.getSpeedToLead();
+      setTriageContacts(d.triageCandidates || []);
+      setSpamCount(d.spamCount || 0);
+    } catch {} finally { setTriageLoading(false); }
+  };
+
+  const handleSpam = async (id, currentlySpam) => {
+    setMarking(true);
+    try {
+      const res = await api.markSpam([id], currentlySpam ? 'remove' : 'add');
+      setSpamCount(res.spamCount || 0);
+      setTriageContacts(prev => prev.map(c => c.id === id ? { ...c, isSpam: !currentlySpam } : c));
+    } catch {} finally { setMarking(false); }
+  };
 
   const load = useCallback(() => {
     return api.getScorecard()
@@ -281,14 +306,35 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
       </div>
 
       {/* Data quality - spam cleanup skews every number below, so lead with it */}
-      <div onClick={() => { onTabChange?.('lead-response'); setTimeout(() => window.dispatchEvent(new CustomEvent('speedtolead:openTriage')), 100); }}
-        style={{ cursor: 'pointer', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 20, flexShrink: 0 }}>🧹</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Clean your data first</div>
-          <div style={{ fontSize: 11.5, color: '#92400E', lineHeight: 1.5 }}>Junk form-fills and spam contacts quietly skew every number here - response time, conversion, source quality. Clearing them is the fastest way to sharpen your whole scorecard.</div>
+      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
+        <div onClick={loadTriage} style={{ cursor: 'pointer', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>🧹</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Clean your data first {spamCount > 0 && <span style={{ color: '#059669', fontWeight: 600 }}>· {spamCount} filtered out</span>}</div>
+            <div style={{ fontSize: 11.5, color: '#92400E', lineHeight: 1.5 }}>Junk form-fills and spam contacts quietly skew every number here - response time, conversion, source quality. Clearing them is the fastest way to sharpen your whole scorecard.</div>
+          </div>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#C2410C', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            {showTriage ? 'Hide ↑' : 'Review & remove →'}
+          </span>
         </div>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#C2410C', flexShrink: 0, whiteSpace: 'nowrap' }}>Review &amp; remove spam →</span>
+        {showTriage && (
+          <div style={{ borderTop: '1px solid #FDE68A', padding: '10px 16px', opacity: marking ? 0.6 : 1, transition: 'opacity .15s' }}>
+            {triageLoading && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>Loading contacts…</div>}
+            {triageContacts && triageContacts.length === 0 && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>No suspicious contacts found.</div>}
+            {triageContacts && triageContacts.map((c, i) => (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < triageContacts.length - 1 ? '1px solid #FEF3C7' : 'none' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: c.isSpam ? '#bbb' : '#111', textDecoration: c.isSpam ? 'line-through' : 'none' }}>{c.name}</div>
+                  <div style={{ fontSize: 11, color: '#999' }}>{[c.email, c.source, c.stage].filter(Boolean).join(' · ')}</div>
+                </div>
+                <button disabled={marking} onClick={() => handleSpam(c.id, c.isSpam)}
+                  style={{ fontSize: 10.5, fontWeight: 700, borderRadius: 6, padding: '4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink: 0, minWidth: 78, textAlign: 'center', background: c.isSpam ? '#F0FDF4' : '#FEF2F2', color: c.isSpam ? '#059669' : '#DC2626', border: `1px solid ${c.isSpam ? '#BBF7D0' : '#FECACA'}` }}>
+                  {c.isSpam ? '↩ Not spam' : 'Mark spam'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Marketing vs Sales breakdown */}
