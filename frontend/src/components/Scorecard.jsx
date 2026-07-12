@@ -52,7 +52,13 @@ function DimensionRow({ dim, comparison }) {
   );
 }
 
-function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, comparisons }) {
+const GA4_PREVIEW_ROWS = [
+  { label: 'Website sessions', value: '1,240 / mo' },
+  { label: 'Session → lead rate', value: '2.4%' },
+  { label: 'Top traffic channel', value: 'Organic search' },
+];
+
+function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, comparisons, showGa4Cta, onTabChange }) {
   const color = grade ? (GRADE_COLOR[grade] || '#ccc') : '#ccc';
   return (
     <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', position: 'relative', overflow: 'hidden' }}>
@@ -73,6 +79,27 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
           <div style={{ fontSize: 22, marginBottom: 6 }}>🔒</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 4 }}>Your {title} grade is locked</div>
           <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, maxWidth: 260 }}>{unlockHint}</div>
+        </div>
+      )}
+      {showGa4Cta && (
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #F0F1F4', position: 'relative' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#bbb', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Website traffic</div>
+          <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+            {GA4_PREVIEW_ROWS.map(row => (
+              <div key={row.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid #F7F8FA' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11.5, color: '#888', marginBottom: 2 }}>{row.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{row.value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => onTabChange?.('marketing')}
+              style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,.18)' }}>
+              Connect GA4 to unlock →
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -263,7 +290,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={() => setShowOnboarding(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#888', background: 'none', border: '1px solid #E2E5EA', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="13" y2="12"/><circle cx="6" cy="4" r="1.5" fill="white"/><circle cx="10" cy="8" r="1.5" fill="white"/><circle cx="6" cy="12" r="1.5" fill="white"/></svg>
-              Adjust for your business
+              Adjust to your business goals
             </button>
             <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#C2410C' : '#888', background: 'none', border: `1px solid ${showTriage ? '#FDE68A' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
               🧹 Clean your data{spamCount > 0 && <span style={{ color: '#059669', fontWeight: 600 }}> · {spamCount} filtered</span>}
@@ -368,9 +395,10 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
 
       {/* Marketing vs Sales funnel cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-        <FunnelCard title="Marketing" subtitle="Generate leads → SQL" grade={marketing.grade} dimensions={marketing.dimensions}
-          locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification." />
-        <FunnelCard title="Sales" subtitle="SQL → opportunity → customer" grade={sales.grade} dimensions={sales.dimensions}
+        <FunnelCard title="Marketing" subtitle="Leads captured → qualified" grade={marketing.grade} dimensions={marketing.dimensions}
+          locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification."
+          showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
+        <FunnelCard title="Sales" subtitle="Qualified lead → closed deal" grade={sales.grade} dimensions={sales.dimensions}
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate."
           comparisons={salesComparisons} />
       </div>

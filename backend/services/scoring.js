@@ -17,7 +17,7 @@ const { findStuckRecords } = require('./pipelineHealth');
 // --- Benchmarks (v1 published defaults; swap for per-industry data later) ----
 const BENCHMARKS = {
   speedToLead: {
-    source: 'Median time from when a lead is created to when your team first reached out. Faster is better — leads go cold quickly.',
+    source: 'Median time from when a lead is created to when your team first reached out. Faster is better -- leads go cold quickly.',
     label: 'Median first-response time',
   },
   leadToSql: {
@@ -36,7 +36,7 @@ const BENCHMARKS = {
     label: 'Lead source diversity',
   },
   dealStageConversion: {
-    source: 'Average conversion rate across your active pipeline stages — of deals that entered each stage, how many went on to win.',
+    source: 'Average conversion rate across your active pipeline stages -- of deals that entered each stage, how many went on to win.',
     label: 'Deal-stage conversion',
   },
   winRate: {
@@ -49,7 +49,7 @@ const BENCHMARKS = {
     label: 'Stalled deals',
   },
   salesCycle: {
-    source: 'Median days from deal created to closed-won. Compared against your own average deal size — bigger deals naturally take longer.',
+    source: 'Median days from deal created to closed-won. Compared against your own average deal size -- bigger deals naturally take longer.',
     label: 'Sales cycle length',
   },
 };
@@ -340,14 +340,24 @@ function buildScorecard(data, profile) {
   const fmtDays = d => d == null ? null : d < 7 ? `${Math.round(d)}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
   const fmtPct = v => v == null ? null : `${Math.round(v)}%`;
 
+  // Leads captured in the last 90 days (informational -- no score, doesn't affect grade).
+  const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
+  const recentLeads = contacts.filter(c => {
+    const cd = c.properties?.createdate;
+    return cd && new Date(cd).getTime() > ninetyDaysAgo;
+  }).length;
+
   // ---- Marketing dimensions (weights from resolved profile) ----
   const marketingDims = [
-    { key: 'leadToSql', weight: W.marketing.leadToSql, score: leadToSql.value !== null ? scoreToPar(leadToSql.value, BENCHMARKS.leadToSql.par) : null,
-      value: leadToSql.value, displayValue: fmtPct(leadToSql.value), ...BENCHMARKS.leadToSql, sample: leadToSql.sample },
+    { key: 'leadsCapt', weight: 0, score: null,
+      value: recentLeads, displayValue: recentLeads > 0 ? `${recentLeads} new leads` : `${contacts.length} contacts`,
+      label: 'Leads captured', source: 'Contacts created in the last 90 days.', sample: recentLeads || contacts.length },
     { key: 'followUpCoverage', weight: W.marketing.followUpCoverage, score: noTouch.total > 0 ? Math.round(clamp(100 - noTouch.pct)) : null,
       value: noTouch.total > 0 ? 100 - noTouch.pct : null, displayValue: noTouch.total > 0 ? fmtPct(100 - noTouch.pct) : null, ...BENCHMARKS.followUpCoverage, sample: noTouch.total },
     { key: 'sourceConcentration', weight: W.marketing.sourceConcentration, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
       value: topSourceShare, displayValue: topSourceShare !== null ? `${topSourceShare}% top source` : null, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
+    { key: 'leadToSql', weight: W.marketing.leadToSql, score: leadToSql.value !== null ? scoreToPar(leadToSql.value, BENCHMARKS.leadToSql.par) : null,
+      value: leadToSql.value, displayValue: fmtPct(leadToSql.value), ...BENCHMARKS.leadToSql, sample: leadToSql.sample },
   ];
 
   // ---- Sales dimensions (weights from resolved profile) ----
