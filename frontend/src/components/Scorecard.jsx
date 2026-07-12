@@ -268,14 +268,16 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         {revenueImpact?.total > 0 && (
           <HoverCard popover={
             <div>
-              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>How this is calculated</div>
+              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>Where this comes from</div>
               {revenueImpact.items.map(i => (
                 <div key={i.key} style={{ marginBottom: 9 }}>
-                  <div style={{ fontWeight: 700 }}>{i.title} - {fmt$(i.amount)}</div>
-                  <div style={{ opacity: 0.82 }}>{i.how}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontWeight: 700, marginBottom: 3 }}>
+                    <span>{i.title}</span><span style={{ color: '#34D399' }}>{fmt$(i.amount)}</span>
+                  </div>
+                  <div style={{ opacity: 0.75, fontWeight: 400 }}>{i.how}</div>
                 </div>
               ))}
-              <div style={{ opacity: 0.6, marginTop: 4, fontSize: 10.5 }}>Grounded in your own avg deal size and record counts - not a generic multiplier.</div>
+              <div style={{ opacity: 0.5, marginTop: 6, fontSize: 10, borderTop: '1px solid rgba(255,255,255,.15)', paddingTop: 6 }}>Based on your own data — not industry averages.</div>
             </div>
           }>
             <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 12, borderLeft: '1px solid #F0F1F4' }}>

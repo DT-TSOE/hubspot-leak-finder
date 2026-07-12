@@ -415,20 +415,20 @@ function estimateRevenueImpact({ avgDealSize, winRate, closedDeals, leadToCustom
     const recoverable = Math.round(extraWins * avgDealSize);
     if (recoverable > 0) items.push({
       key: 'winRate',
-      title: `Win rate ${winRate}% vs ${BENCHMARKS.winRate.par}% benchmark`,
+      title: 'Low win rate',
       amount: recoverable,
-      how: `At a ${BENCHMARKS.winRate.par}% win rate instead of ${winRate}%, you'd win about ${Math.round(extraWins)} more of your ${closedDeals} closed deals, worth ${fmt(avgDealSize)} each.`,
+      how: `You're winning ${winRate}% of closed deals. Closing ${Math.round(extraWins)} more per cycle at your avg deal size of ${fmt(avgDealSize)} adds up to this.`,
     });
   }
 
-  // 2. Uncontacted/slow leads -> leads that should have closed at your own rate.
+  // 2. Uncontacted leads -> leads that should have closed at your own rate.
   if (noTouch.value > 0 && leadToCustomer) {
     const recoverable = Math.round(noTouch.value * (leadToCustomer / 100) * avgDealSize);
     if (recoverable > 0) items.push({
       key: 'followUp',
-      title: `${noTouch.value} un-touched leads`,
+      title: 'Leads with no outreach',
       amount: recoverable,
-      how: `${noTouch.value} active leads have no logged touch. At your ${leadToCustomer}% lead-to-customer rate and ${fmt(avgDealSize)} average deal, that's the upside of working them.`,
+      how: `${noTouch.value} active leads have never been contacted. Based on your own conversion rate, these are worth this if worked.`,
     });
   }
 
@@ -437,9 +437,9 @@ function estimateRevenueImpact({ avgDealSize, winRate, closedDeals, leadToCustom
     const recoverable = Math.round(stalledValue * (winRate / 100));
     if (recoverable > 0) items.push({
       key: 'stalled',
-      title: `${fmt(stalledValue)} in stalled deals`,
+      title: 'Stuck deals',
       amount: recoverable,
-      how: `${fmt(stalledValue)} of open deals are sitting past their stage window. At your ${winRate}% win rate, that's what's recoverable.`,
+      how: `${fmt(stalledValue)} in deals that have been sitting too long. Based on your win rate, this is what's at stake if they close.`,
     });
   }
 
