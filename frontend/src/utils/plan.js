@@ -1,7 +1,7 @@
 /**
  * PipeChamp Plan Management
  * Controls feature access based on user plan
- * Billing not yet implemented — plan stored in localStorage for now
+ * Billing not yet implemented - plan stored in localStorage for now
  * Replace with real subscription check when Stripe is added
  */
 

@@ -102,7 +102,7 @@ function buildEmailHTML(digest, appUrl = 'https://hubspot-leak-finder.vercel.app
 
 async function sendDigestEmail(toEmail, digest, appUrl) {
   if (!process.env.RESEND_API_KEY) {
-    console.log('RESEND_API_KEY not set — skipping email send');
+    console.log('RESEND_API_KEY not set - skipping email send');
     return { skipped: true };
   }
 

@@ -72,7 +72,7 @@ export default function FunnelChart({ funnelStages, biggestLeak, stageContacts }
                       <span style={{ fontSize:11, fontWeight:600, color:'#FF7A59', flexShrink:0 }}>Open →</span>
                     </a>
                   ))}
-                  {accounts.length >= 60 && <div style={{ padding:'8px 12px', fontSize:11, color:'#999', textAlign:'center' }}>Showing first 60 — narrow the date range to refine.</div>}
+                  {accounts.length >= 60 && <div style={{ padding:'8px 12px', fontSize:11, color:'#999', textAlign:'center' }}>Showing first 60 - narrow the date range to refine.</div>}
                 </div>
               )}
             </div>

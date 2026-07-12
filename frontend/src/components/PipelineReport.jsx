@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
 
-const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
-const fmtPct = n => n != null ? `${n}%` : '—';
+const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
+const fmtPct = n => n != null ? `${n}%` : '-';
 const fmtSource = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
 
 function ReportSection({ title, children }) {
@@ -36,7 +36,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
   const [showEmailBox, setShowEmailBox] = useState(false);
   const reportRef = useRef(null);
 
-  // Report customization — pick which modules appear (persisted).
+  // Report customization - pick which modules appear (persisted).
   const [sections, setSections] = useState(() => {
     try { return JSON.parse(localStorage.getItem('pipechamp_report_sections')) || {}; } catch { return {}; }
   });
@@ -71,21 +71,21 @@ export default function PipelineReport({ funnelData, insightsData }) {
     const score = dashData?.pipelineHealthScore;
     const funnel = funnelData?.funnel;
     const metrics = dashData?.metricCards || [];
-    const winRate = metrics.find(m => m.id === 'win_rate')?.value || '—';
-    const atRisk = metrics.find(m => m.id === 'at_risk')?.value || '—';
+    const winRate = metrics.find(m => m.id === 'win_rate')?.value || '-';
+    const atRisk = metrics.find(m => m.id === 'at_risk')?.value || '-';
 
-    const subject = encodeURIComponent(`PipeChamp Pipeline Report — ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`);
+    const subject = encodeURIComponent(`PipeChamp Pipeline Report - ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`);
     const body = encodeURIComponent([
       `PIPECHAMP PIPELINE HEALTH REPORT`,
       `Generated: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`,
       ``,
-      `Pipeline Health Score: ${score?.score ?? '—'}/100 (Grade ${score?.grade ?? '—'})`,
+      `Pipeline Health Score: ${score?.score ?? '-'}/100 (Grade ${score?.grade ?? '-'})`,
       ``,
       `KEY METRICS`,
       `Win Rate: ${winRate}`,
       `Records At Risk: ${atRisk}`,
-      `Total Contacts: ${funnelData?.summary?.totalContacts?.toLocaleString() ?? '—'}`,
-      `Total Deals: ${funnelData?.summary?.totalDeals?.toLocaleString() ?? '—'}`,
+      `Total Contacts: ${funnelData?.summary?.totalContacts?.toLocaleString() ?? '-'}`,
+      `Total Deals: ${funnelData?.summary?.totalDeals?.toLocaleString() ?? '-'}`,
       ``,
       `BIGGEST LEAK`,
       funnel?.biggestLeak ? funnel.biggestLeak.description : 'No significant leaks detected',
@@ -134,7 +134,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
       `}</style>
 
       <div className="pipe-report-root">
-        {/* Action bar — hidden on print */}
+        {/* Action bar - hidden on print */}
         <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#111', letterSpacing: '-0.3px' }}>Pipeline Health Report</div>
@@ -167,7 +167,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           </div>
         </div>
 
-        {/* Customize which modules appear — hidden on print */}
+        {/* Customize which modules appear - hidden on print */}
         <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16, padding: '10px 12px', background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>Include:</span>
           {SECTIONS.map(sec => {
@@ -194,8 +194,8 @@ export default function PipelineReport({ funnelData, insightsData }) {
             </div>
             {score && (
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 48, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{score.score ?? '—'}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: scoreColor }}>Grade {score.grade || '—'} · /100</div>
+                <div style={{ fontSize: 48, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{score.score ?? '-'}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: scoreColor }}>Grade {score.grade || '-'} · /100</div>
                 <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Pipeline Health Score</div>
               </div>
             )}
@@ -222,16 +222,16 @@ export default function PipelineReport({ funnelData, insightsData }) {
           {/* Key metrics */}
           {show('metrics') && <ReportSection title="Key Metrics">
             <MetricRow items={[
-              { label: 'Win Rate', value: getMetric('win_rate')?.value || '—', color: '#111' },
-              { label: 'Avg Sales Cycle', value: getMetric('sales_cycle')?.value || '—', color: '#111' },
-              { label: 'Revenue at Risk', value: getMetric('at_risk') ? `${getMetric('at_risk').value} records` : '—', alert: true },
-              { label: 'Speed to Lead', value: getMetric('speed')?.value || '—', color: '#111' },
+              { label: 'Win Rate', value: getMetric('win_rate')?.value || '-', color: '#111' },
+              { label: 'Avg Sales Cycle', value: getMetric('sales_cycle')?.value || '-', color: '#111' },
+              { label: 'Revenue at Risk', value: getMetric('at_risk') ? `${getMetric('at_risk').value} records` : '-', alert: true },
+              { label: 'Speed to Lead', value: getMetric('speed')?.value || '-', color: '#111' },
             ]} />
             <MetricRow items={[
-              { label: 'Total Contacts', value: funnelData?.summary?.totalContacts?.toLocaleString() || '—' },
-              { label: 'Total Deals', value: funnelData?.summary?.totalDeals?.toLocaleString() || '—' },
-              { label: 'Top Revenue Source', value: fmtSource(getMetric('top_revenue_source')?.value) || '—', color: '#059669' },
-              { label: 'Worst Conversion Source', value: fmtSource(getMetric('worst_source')?.value) || '—', alert: true },
+              { label: 'Total Contacts', value: funnelData?.summary?.totalContacts?.toLocaleString() || '-' },
+              { label: 'Total Deals', value: funnelData?.summary?.totalDeals?.toLocaleString() || '-' },
+              { label: 'Top Revenue Source', value: fmtSource(getMetric('top_revenue_source')?.value) || '-', color: '#059669' },
+              { label: 'Worst Conversion Source', value: fmtSource(getMetric('worst_source')?.value) || '-', alert: true },
             ]} />
           </ReportSection>}
 

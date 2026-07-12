@@ -88,7 +88,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
-        {/* Dashboard — with live health score badge */}
+        {/* Dashboard - with live health score badge */}
         <button data-tour="nav-dashboard" onClick={() => onSection('dashboard')}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
           <span style={{ fontSize: 14, color: section === 'dashboard' ? '#111' : '#333', fontWeight: 700 }}>Scorecard</span>
@@ -161,7 +161,7 @@ function TopBar({ section, loading, onRefresh, insightsData }) {
   );
 }
 
-// Date filter bar — sits at the top of content area, below the sticky nav
+// Date filter bar - sits at the top of content area, below the sticky nav
 function ContentDateBar({ section, days, onDays, onLockedDays }) {
   const features = getPlanFeatures();
   if (NO_DATE_SECTIONS.has(section)) return null;
@@ -272,7 +272,7 @@ export default function DashboardPage({ onDisconnect }) {
     finally { setRevenueLoading(false); }
   }, [revenueData, days]);
 
-  // URL routing — back/forward browser navigation
+  // URL routing - back/forward browser navigation
   const navigateTo = useCallback((sectionId) => {
     setSection(sectionId);
     const url = `/${sectionId}`;
@@ -384,12 +384,12 @@ export default function DashboardPage({ onDisconnect }) {
           {!loading && !error && funnelData && (
 
             <>
-              {/* GROWTH FUNNEL — Marketing / Sales sub-tabs */}
+              {/* GROWTH FUNNEL - Marketing / Sales sub-tabs */}
               {section === 'growth-funnel' && (
                 <GrowthFunnel funnelData={funnelData} onNavigate={navigateTo} />
               )}
 
-              {/* AT RISK — Stage Aging + Lead Risk merged */}
+              {/* AT RISK - Stage Aging + Lead Risk merged */}
               {section === 'at-risk' && (() => {
                 if (!features.stageAging) return <div style={{ marginTop: 20 }}><UpgradePrompt feature="stageAging" requiredPlan="starter">Unlock At Risk analysis</UpgradePrompt></div>;
                 return <>
@@ -430,7 +430,7 @@ export default function DashboardPage({ onDisconnect }) {
                   : <div style={{ marginTop: 20 }}><UpgradePrompt feature="revenue" requiredPlan="pro">Unlock Revenue & LTV analysis</UpgradePrompt></div>
               )}
 
-              {/* EXPORTS — scrollable pipeline report + download/email */}
+              {/* EXPORTS - scrollable pipeline report + download/email */}
               {section === 'exports' && (
                 <>
                   <Scorecard onTabChange={navigateTo} />
@@ -438,7 +438,7 @@ export default function DashboardPage({ onDisconnect }) {
                 </>
               )}
 
-              {/* placeholder — integrations rendered outside funnelData gate below */}
+              {/* placeholder - integrations rendered outside funnelData gate below */}
 
               {/* INSIGHTS */}
               {section === 'insights' && (() => {
@@ -478,7 +478,7 @@ export default function DashboardPage({ onDisconnect }) {
                     <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 16px', textAlign: 'center', marginTop: 8 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#92400E', marginBottom: 6 }}>+{filteredInsights.length - features.insightLimit} more insights locked</div>
                       <div style={{ fontSize: 12, color: '#92400E', marginBottom: 12 }}>Upgrade to Pro to see all insights and ask PipeCoach for personalised fixes.</div>
-                      <button onClick={() => setShowUpgrade(true)} style={{ background: '#F59E0B', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Upgrade to Pro — $49/mo</button>
+                      <button onClick={() => setShowUpgrade(true)} style={{ background: '#F59E0B', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Upgrade to Pro - $49/mo</button>
                     </div>
                   )}
                 </>;
@@ -488,14 +488,14 @@ export default function DashboardPage({ onDisconnect }) {
               {section === 'ask-coach' && (
                 features.pipeCoach
                   ? <div style={{ maxWidth: 700, margin: '0 auto' }}><LaJefaChat inline /></div>
-                  : <div style={{ marginTop: 20 }}><UpgradePrompt feature="pipeCoach" requiredPlan="pro">Unlock PipeCoach — your AI pipeline advisor</UpgradePrompt></div>
+                  : <div style={{ marginTop: 20 }}><UpgradePrompt feature="pipeCoach" requiredPlan="pro">Unlock PipeCoach - your AI pipeline advisor</UpgradePrompt></div>
               )}
             </>
           )}
         </main>
       </div>
 
-      {/* INTEGRATIONS — outside funnelData gate so it always renders */}
+      {/* INTEGRATIONS - outside funnelData gate so it always renders */}
       {section === 'integrations' && (
         <div style={{ marginLeft: SIDEBAR_W, flex: 1 }}>
           <div style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px' }}>

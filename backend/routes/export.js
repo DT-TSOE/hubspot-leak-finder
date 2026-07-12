@@ -42,7 +42,7 @@ router.get('/insights-text', requireAuth, async (req, res) => {
     const funnelData = analyzeFunnel(contacts);
     const insights = generateInsights(funnelData, analyzeBySource(contacts,dealsWithContacts), analyzeActivityLevels(contacts,dealsWithContacts), analyzeSpeedToLead(contacts,dealsWithContacts));
     const date = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-    let text = `PIPECHAMP — Revenue Intelligence Digest\n${date}\n${'='.repeat(50)}\n\nSUMMARY\nTotal Contacts: ${contacts.length} | Total Deals: ${deals.length}\n\nINSIGHTS\n${'-'.repeat(50)}\n\n`;
+    let text = `PIPECHAMP - Revenue Intelligence Digest\n${date}\n${'='.repeat(50)}\n\nSUMMARY\nTotal Contacts: ${contacts.length} | Total Deals: ${deals.length}\n\nINSIGHTS\n${'-'.repeat(50)}\n\n`;
     insights.forEach((ins,i) => { text += `${i+1}. [${ins.type}] ${ins.title}\n   Data: ${ins.dataPoint}\n   Action: ${ins.action}\n\n`; });
     res.setHeader('Content-Type','text/plain');
     res.setHeader('Content-Disposition','attachment; filename="insights-digest.txt"');

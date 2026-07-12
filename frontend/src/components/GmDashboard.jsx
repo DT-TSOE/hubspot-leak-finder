@@ -71,7 +71,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
                 onError={e => { e.target.style.display='none'; e.target.parentElement.innerHTML='🎯'; }} />
             </div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Top Opportunities</div>
-            <div style={{ fontSize: 11, color: '#888', marginLeft: 2 }}>— ranked by impact</div>
+            <div style={{ fontSize: 11, color: '#888', marginLeft: 2 }}>- ranked by impact</div>
           </div>
           {data.topOpportunities.map((opp, i) => {
             const u = URGENCY_STYLE[opp.urgency] || URGENCY_STYLE.medium;
@@ -149,7 +149,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
           );
         })()}
 
-        {/* Key metrics — each clickable */}
+        {/* Key metrics - each clickable */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignContent: 'start' }}>
           {data.metricCards.filter(c => ['win_rate','sales_cycle','speed','biggest_leak'].includes(c.id)).map(card => {
             const dest = METRIC_TAB[card.id];
@@ -179,7 +179,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Uncontacted leads</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.uncontactedCount} new leads, no outreach yet</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Responding within 1 hour closes 7× better — tap to see who</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Contacting within 1 hour makes you ~7× more likely to qualify a lead (HBR) - tap to see who</div>
               </div>
               <span style={{ fontSize: 16, color: '#DC2626' }}>→</span>
             </button>
@@ -194,7 +194,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Stuck records</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: '#111', lineHeight: 1.2 }}>{data.stuckCount} contacts & deals haven't moved</div>
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>They've been in the same stage too long — tap to see who</div>
+                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>They've been in the same stage too long - tap to see who</div>
               </div>
               <span style={{ fontSize: 16, color: '#D97706' }}>→</span>
             </button>

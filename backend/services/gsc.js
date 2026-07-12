@@ -1,5 +1,5 @@
 /**
- * Google Search Console data access — fills the funnel's Impressions stage.
+ * Google Search Console data access - fills the funnel's Impressions stage.
  * Reuses the same Google OAuth app as GA4 (GA4_CLIENT_ID/SECRET) unless GSC-
  * specific creds are set. Tokens + selected site live in the session (no DB).
  */

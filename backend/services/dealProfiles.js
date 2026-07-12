@@ -1,8 +1,8 @@
 /**
- * "Your best deals look like this" — behavioral profiles of winning segments.
+ * "Your best deals look like this" - behavioral profiles of winning segments.
  *
  * Deliberately BEHAVIORAL only (source, speed-to-lead, touches, stage
- * discipline, value/cycle) — no personas / job titles / firmographics. Those
+ * discipline, value/cycle) - no personas / job titles / firmographics. Those
  * are held for the future customer-analysis app; here we surface an interest CTA.
  *
  * Statistically careful: percentile SEGMENTS (top ~25%, never the single top

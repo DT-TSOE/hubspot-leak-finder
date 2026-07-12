@@ -9,7 +9,7 @@ const STEPS = [
     character: '/el-pipeador-headshot.png',
     characterFallback: '🤼',
     title: 'Welcome to PipeChamp',
-    body: "We've already scanned your HubSpot pipeline. Here's a quick look at where everything lives — takes about 30 seconds.",
+    body: "We've already scanned your HubSpot pipeline. Here's a quick look at where everything lives - takes about 30 seconds.",
     cta: "Let's go",
   },
   {
@@ -18,7 +18,7 @@ const STEPS = [
     character: '/el-pipeador-headshot.png',
     characterFallback: '🤼',
     title: 'Your Dashboard',
-    body: 'Your command center. Pipeline health score, revenue at risk, and your top opportunities — all in one view. Check it weekly.',
+    body: 'Your command center. Pipeline health score, revenue at risk, and your top opportunities - all in one view. Check it weekly.',
     cta: 'Got it',
     tooltipSide: 'right',
   },
@@ -38,7 +38,7 @@ const STEPS = [
     character: '/rojo-headshot.png',
     characterFallback: '🔴',
     title: 'Watch for Rojo',
-    body: 'Whenever you see the red luchador, something needs attention. At Risk shows contacts and deals going cold — with the revenue on the line.',
+    body: 'Whenever you see the red luchador, something needs attention. At Risk shows contacts and deals going cold - with the revenue on the line.',
     cta: 'On it',
     tooltipSide: 'right',
   },
@@ -48,7 +48,7 @@ const STEPS = [
     character: '/pipecoach.png',
     characterFallback: 'PC',
     title: 'Ask PipeCoach Anything',
-    body: 'PipeCoach already knows your pipeline data. Ask why you\'re losing deals, which leads to call, or what any metric means. She gives you step-by-step HubSpot instructions — not generic advice.',
+    body: 'PipeCoach already knows your pipeline data. Ask why you\'re losing deals, which leads to call, or what any metric means. She gives you step-by-step HubSpot instructions - not generic advice.',
     cta: 'Love it',
     tooltipSide: 'right',
   },
@@ -128,7 +128,7 @@ export default function TourOverlay({ onComplete }) {
         @keyframes spotFade  { from { opacity:0; } to { opacity:1; } }
       `}</style>
 
-      {/* Backdrop — full dark overlay with spotlight cutout */}
+      {/* Backdrop - full dark overlay with spotlight cutout */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 3000, pointerEvents: 'none' }}>
         {hasSpotlight ? (
           <>

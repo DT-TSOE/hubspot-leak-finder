@@ -8,7 +8,7 @@ const URGENCY = {
   medium: { bg:'#FFFBEB', border:'#FDE68A', text:'#92400E', label:'Medium' },
 };
 
-const fmt = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
+const fmt = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
 const fmtK = n => n >= 1000 ? `$${(n/1000).toFixed(0)}k` : `$${n}`;
 
 const STAGE_LABELS = {
@@ -90,7 +90,7 @@ export default function StageAging({ days }) {
     return (
       <div style={{ background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:10, padding:'2rem', textAlign:'center' }}>
         <div style={{ fontSize:28, marginBottom:12 }}>✅</div>
-        <div style={{ fontSize:15, fontWeight:600, color:'#059669', marginBottom:6 }}>No stuck records — your pipeline is moving</div>
+        <div style={{ fontSize:15, fontWeight:600, color:'#059669', marginBottom:6 }}>No stuck records - your pipeline is moving</div>
         <div style={{ fontSize:13, color:'#666', maxWidth:380, margin:'0 auto', lineHeight:1.6 }}>Every active contact and deal is within healthy stage thresholds. Keep it up.</div>
       </div>
     );
@@ -123,11 +123,11 @@ export default function StageAging({ days }) {
         </div>
       </div>
 
-      {/* By owner — who's on top of theirs, who's letting deals rot */}
+      {/* By owner - who's on top of theirs, who's letting deals rot */}
       {data.byOwner?.length > 1 && (
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 2 }}>At-risk by owner</div>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 12 }}>Who's staying on top of their pipeline — and who needs a nudge.</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 12 }}>Who's staying on top of their pipeline - and who needs a nudge.</div>
           {data.byOwner.map((o, i) => {
             const maxCount = data.byOwner[0].count || 1;
             return (
@@ -137,8 +137,8 @@ export default function StageAging({ days }) {
                   <div style={{ width: `${(o.count / maxCount) * 100}%`, height: '100%', background: o.critical > 0 ? '#EF4444' : '#F59E0B', borderRadius: 4 }} />
                 </div>
                 <div style={{ width: 60, textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#111', flexShrink: 0 }}>{o.count}</div>
-                <div style={{ width: 70, textAlign: 'right', fontSize: 11, color: o.critical > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.critical > 0 ? `${o.critical} crit` : '—'}</div>
-                <div style={{ width: 80, textAlign: 'right', fontSize: 12, fontWeight: 600, color: o.revenueAtRisk > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.revenueAtRisk > 0 ? fmtK(o.revenueAtRisk) : '—'}</div>
+                <div style={{ width: 70, textAlign: 'right', fontSize: 11, color: o.critical > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.critical > 0 ? `${o.critical} crit` : '-'}</div>
+                <div style={{ width: 80, textAlign: 'right', fontSize: 12, fontWeight: 600, color: o.revenueAtRisk > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.revenueAtRisk > 0 ? fmtK(o.revenueAtRisk) : '-'}</div>
               </div>
             );
           })}

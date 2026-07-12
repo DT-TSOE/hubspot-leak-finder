@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 
 // 5 quick questions that tune the scorecard weights. Answers are stored in the
 // session (no account needed) and drive a credible "tuned for your business"
-// methodology — not per-portal statistics.
+// methodology - not per-portal statistics.
 const QUESTIONS = [
   { key: 'businessType', label: 'What kind of business are you?', options: [
     ['services', 'B2B services'], ['saas', 'B2B SaaS'], ['ecommerce', 'B2C ecommerce'], ['local', 'Local & retail'] ] },
@@ -39,7 +39,7 @@ export default function Onboarding({ initial, onComplete, onClose }) {
       <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 560, padding: '26px 28px', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: '#43A047', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Tune your scorecard</div>
         <div style={{ fontSize: 20, fontWeight: 800, color: '#111', marginBottom: 4 }}>5 quick questions</div>
-        <div style={{ fontSize: 13, color: '#888', marginBottom: 20, lineHeight: 1.5 }}>We weight your grade around what matters for <em>your</em> business — so speed-to-lead doesn’t sink a business where it isn’t the point.</div>
+        <div style={{ fontSize: 13, color: '#888', marginBottom: 20, lineHeight: 1.5 }}>We weight your grade around what matters for <em>your</em> business - so speed-to-lead doesn’t sink a business where it isn’t the point.</div>
 
         {QUESTIONS.map(q => (
           <div key={q.key} style={{ marginBottom: 18 }}>

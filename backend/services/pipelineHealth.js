@@ -296,7 +296,7 @@ function buildTopOpportunities(contacts, deals, healthScore, uncontacted, stuckR
     items.push({
       urgency: critical > 0 ? 'critical' : 'high',
       title: `${uncontacted.length} lead${uncontacted.length !== 1 ? 's' : ''} haven't been contacted`,
-      action: critical > 0 ? `${critical} have been waiting over 24 hours. Responding within 1 hour closes 7× better.` : 'Follow up before these leads go cold.',
+      action: critical > 0 ? `${critical} have been waiting over 24 hours. Contacting within 1 hour makes you ~7× more likely to qualify a lead.` : 'Follow up before these leads go cold.',
       metric: `${uncontacted.length} waiting`,
       type: 'uncontacted',
       coachMessage: `I have ${uncontacted.length} uncontacted leads (${critical} over 24 hours old). What's the fastest way to reach out and track this in HubSpot?`,

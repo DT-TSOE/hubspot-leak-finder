@@ -56,7 +56,7 @@ router.post('/seed', requireAuth, async (req, res) => {
   };
 
   // Create a contact then PATCH it with lifecycle stage dates
-  // (HubSpot ignores stage dates on create — must be set via update)
+  // (HubSpot ignores stage dates on create - must be set via update)
   const createContact = async (stage, createDaysAgo, source, touches) => {
     const first = rand(FIRST_NAMES);
     const last = rand(LAST_NAMES);

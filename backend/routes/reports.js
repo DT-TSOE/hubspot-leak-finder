@@ -30,7 +30,7 @@ async function loadData(req) {
 }
 
 // Per-session spam marks. In-memory (resets on redeploy / not shared across
-// instances) — durable persistence arrives with the snapshot DB. Lets a user
+// instances) - durable persistence arrives with the snapshot DB. Lets a user
 // flag junk form-fills so they don't drag down response-time metrics.
 const _spam = new Map(); // sessionId -> Set(contactId)
 function spamSet(req) {
@@ -69,7 +69,7 @@ router.get('/scorecard', requireAuth, async (req, res) => {
       if (!req.session.portalId) req.session.portalId = await hs.getPortalId();
       const portalId = req.session.portalId;
       if (portalId) {
-        // Store only aggregate numbers — never contacts/PII.
+        // Store only aggregate numbers - never contacts/PII.
         const snap = {
           overall: scorecard.overall,
           marketing: { score: scorecard.marketing.score, grade: scorecard.marketing.grade },
@@ -107,7 +107,7 @@ router.post('/interest', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// Onboarding profile (business type, hubs, revenue, challenge, goal) — used to
+// Onboarding profile (business type, hubs, revenue, challenge, goal) - used to
 // tune the scorecard weights. Stored in the signed session cookie (no DB).
 router.get('/onboarding', requireAuth, (req, res) => {
   res.json({ onboarding: req.session.onboarding || null });
@@ -170,7 +170,7 @@ router.get('/gm-dashboard', requireAuth, async (req, res) => {
   }
 });
 
-// Metric tiles — comprehensive metric grid
+// Metric tiles - comprehensive metric grid
 router.get('/metric-tiles', requireAuth, async (req, res) => {
   try {
     const { contacts, deals } = await loadData(req);
@@ -331,7 +331,7 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
           name: [c.properties.firstname, c.properties.lastname].filter(Boolean).join(' ') || '(no name)',
           email: c.properties.email || null,
           source: c.properties.hs_analytics_source || null,
-          stage: stageLbl[c.properties.lifecyclestage] || c.properties.lifecyclestage || '—',
+          stage: stageLbl[c.properties.lifecyclestage] || c.properties.lifecyclestage || '-',
           respHours,
           touched: parseInt(c.properties.num_contacted_notes || '0') > 0,
           isSpam: spam.has(c.id),

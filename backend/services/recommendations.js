@@ -1,18 +1,18 @@
 /**
- * Recommendations engine — the "so what do I do?" layer.
+ * Recommendations engine - the "so what do I do?" layer.
  *
  * Turns each weak scorecard dimension into a gap → what's happening → fix card,
  * where the fix is tiered: a DIY step, and the HubSpot upgrade that removes the
  * problem. This is what makes PipeChamp a sales tool for HubSpot upgrades.
  */
 
-const fmtHours = h => h == null ? '—' : h < 1 ? `${Math.round(h * 60)} min` : h < 24 ? `${Math.round(h)} hours` : `${Math.round(h / 24)} days`;
+const fmtHours = h => h == null ? '-' : h < 1 ? `${Math.round(h * 60)} min` : h < 24 ? `${Math.round(h)} hours` : `${Math.round(h / 24)} days`;
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
 
 // dimensionKey -> builder(value) => { whatsHappening, diy, upgrade }
 const REC = {
   speedToLead: (v) => ({
-    whatsHappening: `Your median first response is ${fmtHours(v)}. Leads contacted within an hour convert far better — every hour after that, close rates drop.`,
+    whatsHappening: `Your median first response is ${fmtHours(v)}. Leads contacted within an hour convert far better - every hour after that, close rates drop.`,
     diy: 'Build a saved view of new leads with no logged contact and clear it every morning; assign one owner to own the first response.',
     upgrade: { tier: 'Sales Hub Pro', feature: 'Workflow automation + sequences', why: 'Auto-rotate every new lead to a rep and fire an instant follow-up task and email, so nothing sits uncontacted.' },
   }),
@@ -32,7 +32,7 @@ const REC = {
     upgrade: { tier: 'Marketing Hub Pro', feature: 'Campaigns + ad management', why: 'Run and measure campaigns across channels in one place to diversify where your pipeline comes from.' },
   }),
   dealStageConversion: (v) => ({
-    whatsHappening: `Deals are converting weakly through your pipeline stages — the forecast you’re working from is softer than it looks.`,
+    whatsHappening: `Deals are converting weakly through your pipeline stages - the forecast you’re working from is softer than it looks.`,
     diy: 'Add required properties before a deal can advance a stage, so only real opportunities move forward.',
     upgrade: { tier: 'Sales Hub Pro', feature: 'Deal-stage automation', why: 'Automate stage gates, required fields, and rotting-deal alerts so the pipeline reflects reality and stalls surface early.' },
   }),
@@ -42,12 +42,12 @@ const REC = {
     upgrade: { tier: 'Sales Hub Pro', feature: 'Playbooks + guided selling', why: 'Give reps in-deal playbooks and battlecards at each stage to lift win rate on the deals you already have.' },
   }),
   stalledDeals: (v) => ({
-    whatsHappening: `${fmt$(v)} of open pipeline is sitting past its expected stage window — quietly aging toward lost.`,
+    whatsHappening: `${fmt$(v)} of open pipeline is sitting past its expected stage window - quietly aging toward lost.`,
     diy: 'Review stuck deals weekly; every one either moves a stage or gets closed lost.',
     upgrade: { tier: 'Sales Hub Pro', feature: 'Deal automation + task queues', why: 'Auto-flag rotting deals and queue the next action so nothing stalls unnoticed.' },
   }),
   salesCycle: (v) => ({
-    whatsHappening: `Your sales cycle is longer than ideal for your deal size — cash and rep capacity are tied up longer than they need to be.`,
+    whatsHappening: `Your sales cycle is longer than ideal for your deal size - cash and rep capacity are tied up longer than they need to be.`,
     diy: 'Find the single slowest stage transition and attack that handoff first.',
     upgrade: { tier: 'Sales Hub Pro', feature: 'Sequences + meeting scheduling', why: 'Cut back-and-forth with automated follow-ups and one-click booking to compress time-to-close.' },
   }),

@@ -3,17 +3,17 @@ import { api } from '../utils/api';
 import Onboarding from './Onboarding';
 
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
-const fmtH = h => h == null ? '—' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
+const fmtH = h => h == null ? '-' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
 
 // Rows describing a winning-deal segment (behavioral only).
 function profileRows(p) {
   return [
-    { l: 'Top source', v: p.source ? `${p.source.pct}% ${p.source.label}` : '—' },
-    { l: 'First response', v: p.speedHours ? `${fmtH(p.speedHours.p25)}–${fmtH(p.speedHours.p75)}` : '—' },
-    { l: 'Follow-up', v: p.touches ? `${p.touches.p25}–${p.touches.p75} touches` : '—' },
-    { l: 'Stage discipline', v: p.stagesEntered ? `moved through ${p.stagesEntered} stages` : '—' },
-    { l: 'Deal size', v: p.valueRange ? `${fmt$(p.valueRange.p25)}–${fmt$(p.valueRange.p90)}` : '—' },
-    { l: 'Time to close', v: p.cycleRange ? `${p.cycleRange.p25}–${p.cycleRange.p75} days` : '—' },
+    { l: 'Top source', v: p.source ? `${p.source.pct}% ${p.source.label}` : '-' },
+    { l: 'First response', v: p.speedHours ? `${fmtH(p.speedHours.p25)}–${fmtH(p.speedHours.p75)}` : '-' },
+    { l: 'Follow-up', v: p.touches ? `${p.touches.p25}–${p.touches.p75} touches` : '-' },
+    { l: 'Stage discipline', v: p.stagesEntered ? `moved through ${p.stagesEntered} stages` : '-' },
+    { l: 'Deal size', v: p.valueRange ? `${fmt$(p.valueRange.p25)}–${fmt$(p.valueRange.p90)}` : '-' },
+    { l: 'Time to close', v: p.cycleRange ? `${p.cycleRange.p25}–${p.cycleRange.p75} days` : '-' },
   ];
 }
 
@@ -36,7 +36,7 @@ function GradeRing({ score, grade }) {
           style={{ transition: 'stroke-dashoffset .8s ease' }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: 44, fontWeight: 800, color, lineHeight: 1 }}>{grade || '—'}</div>
+        <div style={{ fontSize: 44, fontWeight: 800, color, lineHeight: 1 }}>{grade || '-'}</div>
         <div style={{ fontSize: 12, fontWeight: 600, color: '#888', marginTop: 3 }}>{score !== null ? `${score}/100` : 'No data'}</div>
       </div>
     </div>
@@ -57,7 +57,7 @@ function DimensionRow({ dim }) {
         <div style={{ width: `${dim.score ?? 0}%`, height: '100%', background: color, borderRadius: 4, transition: 'width .6s ease' }} />
       </div>
       <div style={{ width: 34, textAlign: 'right', fontSize: 13, fontWeight: 700, color: dim.score === null ? '#ccc' : '#111', flexShrink: 0 }}>
-        {dim.score === null ? '—' : dim.score}
+        {dim.score === null ? '-' : dim.score}
       </div>
     </div>
   );
@@ -74,7 +74,7 @@ function FunnelCard({ title, subtitle, score, grade, dimensions, locked, unlockH
         </div>
         {!locked && (
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: 24, fontWeight: 800, color }}>{grade || '—'}</span>
+            <span style={{ fontSize: 24, fontWeight: 800, color }}>{grade || '-'}</span>
             <span style={{ fontSize: 12, color: '#888', fontWeight: 600 }}>{score !== null ? `${score}/100` : ''}</span>
           </div>
         )}
@@ -102,7 +102,7 @@ export function DealStageTable({ pipeline }) {
   const c2wColor = scoreColor(pipeline.createdToWon);
   return (
     <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal-stage conversion — {pipeline.pipelineLabel}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 12 }}>Deal-stage conversion - {pipeline.pipelineLabel}</div>
 
       {/* HERO: created -> won */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
@@ -112,7 +112,7 @@ export function DealStageTable({ pipeline }) {
       </div>
       <div style={{ fontSize: 11.5, color: '#888', lineHeight: 1.55, marginBottom: 14 }}>
         {pipeline.skipHeavy
-          ? 'Most of your deals jump straight from created to closed without moving through the stages in between — so created → won is the number to trust. There isn’t enough stage-by-stage movement logged to break it down reliably.'
+          ? 'Most of your deals jump straight from created to closed without moving through the stages in between - so created → won is the number to trust. There isn’t enough stage-by-stage movement logged to break it down reliably.'
           : 'Created → won is your most reliable number. Below: of every deal that ever reached a stage, the share that went on to win.'}
       </div>
 
@@ -134,7 +134,7 @@ export function DealStageTable({ pipeline }) {
                 <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.everReached}</td>
                 <td style={{ padding: '8px', textAlign: 'right', color: '#666' }}>{s.won}</td>
                 <td style={{ padding: '8px 0 8px 8px', textAlign: 'right', fontWeight: 700, color: s.conversionPct === null ? '#ccc' : scoreColor(s.conversionPct) }}>
-                  {s.conversionPct === null ? <span title="Fewer than 3 deals — not enough to report" style={{ color: '#ccc' }}>low sample</span> : `${s.conversionPct}%`}
+                  {s.conversionPct === null ? <span title="Fewer than 3 deals - not enough to report" style={{ color: '#ccc' }}>low sample</span> : `${s.conversionPct}%`}
                 </td>
               </tr>
             ))}
@@ -220,13 +220,13 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
           )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 12, background: '#F7F8FA', border: '1px solid #E2E5EA', color: '#555' }}>
-              <span style={{ color: GRADE_COLOR[marketing.grade] || '#ccc', fontWeight: 700 }}>●</span> Marketing <strong style={{ color: '#111' }}>{marketing.grade || '—'}</strong>
+              <span style={{ color: GRADE_COLOR[marketing.grade] || '#ccc', fontWeight: 700 }}>●</span> Marketing <strong style={{ color: '#111' }}>{marketing.grade || '-'}</strong>
             </span>
             <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 12, background: '#F7F8FA', border: '1px solid #E2E5EA', color: '#555' }}>
-              <span style={{ color: GRADE_COLOR[sales.grade] || '#ccc', fontWeight: 700 }}>●</span> Sales <strong style={{ color: '#111' }}>{sales.grade || '—'}</strong>
+              <span style={{ color: GRADE_COLOR[sales.grade] || '#ccc', fontWeight: 700 }}>●</span> Sales <strong style={{ color: '#111' }}>{sales.grade || '-'}</strong>
             </span>
           </div>
-          {/* Tuned-for / personalize — the visible methodology */}
+          {/* Tuned-for / personalize - the visible methodology */}
           {personalized ? (
             <div style={{ marginTop: 10, fontSize: 11.5, color: '#888', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span>Tuned for: <strong style={{ color: '#555' }}>{tunedFor}</strong></span>
@@ -259,11 +259,11 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
               <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>How this is calculated</div>
               {revenueImpact.items.map(i => (
                 <div key={i.key} style={{ marginBottom: 9 }}>
-                  <div style={{ fontWeight: 700 }}>{i.title} — {fmt$(i.amount)}</div>
+                  <div style={{ fontWeight: 700 }}>{i.title} - {fmt$(i.amount)}</div>
                   <div style={{ opacity: 0.82 }}>{i.how}</div>
                 </div>
               ))}
-              <div style={{ opacity: 0.6, marginTop: 4, fontSize: 10.5 }}>Grounded in your own avg deal size and record counts — not a generic multiplier.</div>
+              <div style={{ opacity: 0.6, marginTop: 4, fontSize: 10.5 }}>Grounded in your own avg deal size and record counts - not a generic multiplier.</div>
             </div>
           }>
             <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 12, borderLeft: '1px solid #F0F1F4' }}>
@@ -283,11 +283,11 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate." />
       </div>
 
-      {/* What to do next — gap → fix → HubSpot upgrade */}
+      {/* What to do next - gap → fix → HubSpot upgrade */}
       {recommendations?.length > 0 && (
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>What to do next</div>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>Your biggest gaps — what's happening, and how to close them.</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>Your biggest gaps - what's happening, and how to close them.</div>
           {recommendations.map(r => {
             const sev = {
               critical: { c: '#DC2626', bg: '#FEF2F2', b: '#FECACA', label: 'Critical' },
@@ -308,7 +308,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
                     style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#111', border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }}>
                     Ask PipeCoach how →
                   </button>
-                  <span style={{ fontSize: 11, color: '#aaa' }}>⚡ Or automate it with {r.upgrade.tier}</span>
+                  <span style={{ fontSize: 11, color: '#aaa' }}>⚡ Or automate it with <a href="https://app.hubspot.com/pricing/282298/marketing" target="_blank" rel="noopener noreferrer" style={{ color: '#FF7A59', fontWeight: 600, textDecoration: 'none' }}>{r.upgrade.tier}</a></span>
                 </div>
               </div>
             );
@@ -320,7 +320,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
             return (
               <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid #F3F4F6', fontSize: 11.5, color: '#999', lineHeight: 1.6 }}>
                 {Object.entries(tiers).map(([tier, labels]) => (
-                  <div key={tier}>⚡ <strong style={{ color: '#777' }}>{tier}</strong> could automate {labels.length > 1 ? `${labels.length} of these` : 'this'} ({labels.slice(0, 3).join(', ')}{labels.length > 3 ? '…' : ''}).</div>
+                  <div key={tier}>⚡ <a href="https://app.hubspot.com/pricing/282298/marketing" target="_blank" rel="noopener noreferrer" style={{ color: '#C2410C', fontWeight: 700, textDecoration: 'none' }}>{tier}</a> could automate {labels.length > 1 ? `${labels.length} of these` : 'this'} ({labels.slice(0, 3).join(', ')}{labels.length > 3 ? '…' : ''}).</div>
                 ))}
               </div>
             );
@@ -328,7 +328,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
         </div>
       )}
 
-      {/* Your best deals look like this — behavioral winning-deal profiles */}
+      {/* Your best deals look like this - behavioral winning-deal profiles */}
       {dealProfiles && !dealProfiles.insufficient && (
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best deals look like this</div>
@@ -353,7 +353,7 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
           {/* Interest CTA for the future customer-analysis app (demand test) */}
           <div style={{ marginTop: 12, background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1, fontSize: 12.5, color: '#7C2D12', lineHeight: 1.5 }}>
-              <strong style={{ color: '#111' }}>Want to know who these buyers actually are — and where to find more like them?</strong> Job titles, company profiles, and lookalike targeting.
+              <strong style={{ color: '#111' }}>Want to know who these buyers actually are - and where to find more like them?</strong> Job titles, company profiles, and lookalike targeting.
             </div>
             {interested ? (
               <span style={{ fontSize: 12, fontWeight: 700, color: '#059669', flexShrink: 0 }}>✓ We’ll be in touch</span>

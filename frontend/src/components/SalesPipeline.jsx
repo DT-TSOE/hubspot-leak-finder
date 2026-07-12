@@ -39,7 +39,7 @@ export default function SalesPipeline({ funnelData }) {
       </div>
 
       <div style={CARD}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Sales funnel — SQL → Opportunity → Customer</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Sales funnel - SQL → Opportunity → Customer</div>
         <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} stageContacts={funnel.stageContacts} />
       </div>
 

@@ -2,8 +2,8 @@
  * Postgres access for monthly scorecard snapshots.
  *
  * Gracefully no-ops when DATABASE_URL is not set, so the app runs fine before
- * the database is provisioned — snapshots simply don't record until then.
- * Stores ONLY aggregate scorecard numbers (grades, scores, metrics) — never
+ * the database is provisioned - snapshots simply don't record until then.
+ * Stores ONLY aggregate scorecard numbers (grades, scores, metrics) - never
  * contact-level data or PII.
  */
 const { Pool } = require('pg');

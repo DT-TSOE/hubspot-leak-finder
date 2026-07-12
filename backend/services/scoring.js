@@ -8,7 +8,7 @@
  *
  * Every dimension is scored 0-100 against a DOCUMENTED, SWAPPABLE benchmark.
  * Benchmarks live in BENCHMARKS below with a `source` so the UI can answer
- * "where did this number come from?" — see SCORING.md.
+ * "where did this number come from?" - see SCORING.md.
  */
 
 const calc = require('./metricCalculations');
@@ -18,7 +18,7 @@ const { findStuckRecords } = require('./pipelineHealth');
 const BENCHMARKS = {
   speedToLead: {
     // median hours to first touch -> score
-    source: 'Lead Response Management Study (Oldroyd, Kellogg/MIT); HBR "The Short Life of Online Sales Leads" (2011) — odds of qualifying drop ~10x after the first hour.',
+    source: 'Lead Response Management Study (Oldroyd, Kellogg/MIT); HBR "The Short Life of Online Sales Leads" (2011) - odds of qualifying drop ~10x after the first hour.',
     label: 'Median first-response time',
   },
   leadToSql: {
@@ -37,7 +37,7 @@ const BENCHMARKS = {
     label: 'Lead source diversity',
   },
   dealStageConversion: {
-    source: "Dan's methodology: of all deals that EVER entered a stage, the % that reach closed-won — measured from dealstage history, not linear stage-to-stage.",
+    source: "Of all deals that ever entered a stage, the % that reach closed-won, measured from your dealstage history (not linear stage-to-stage).",
     label: 'Deal-stage conversion',
   },
   winRate: {
@@ -152,7 +152,7 @@ function calculateDealStageConversion(dealsWithHistory, pipelines) {
 }
 
 // --- Adaptive weights from onboarding profile --------------------------------
-// Not per-portal statistics — banded presets driven by a few onboarding answers.
+// Not per-portal statistics - banded presets driven by a few onboarding answers.
 // The point is a credible, explainable "tuned for your business" methodology.
 const DEFAULT_WEIGHTS = {
   split: { marketing: 50, sales: 50 },
@@ -193,24 +193,24 @@ function resolveScoreProfile(profile) {
   // 1. Business type → cycle expectation
   if (profile.businessType === 'ecommerce' || profile.businessType === 'local') {
     bump(w.sales, 'speedToLead', 1.6); bump(w.sales, 'salesCycle', 1.3); bump(w.sales, 'dealStageConversion', 0.7);
-    notes.push({ factor: 'Speed-to-lead', reason: 'Short, transactional sales — fast response drives revenue more than stage progression.' });
+    notes.push({ factor: 'Speed-to-lead', reason: 'Short, transactional sales - fast response drives revenue more than stage progression.' });
   } else if (profile.businessType === 'services' || profile.businessType === 'saas') {
     bump(w.sales, 'dealStageConversion', 1.4); bump(w.sales, 'salesCycle', 0.7); bump(w.sales, 'speedToLead', 0.85);
-    notes.push({ factor: 'Deal-stage conversion', reason: 'Considered B2B sale — how deals move through stages predicts wins more than raw speed.' });
+    notes.push({ factor: 'Deal-stage conversion', reason: 'Considered B2B sale - how deals move through stages predicts wins more than raw speed.' });
   }
 
   // 2. Hubs → split + which funnel is locked (blurred)
-  if (profile.hubs === 'sales') { locked = 'marketing'; w.split = { marketing: 0, sales: 100 }; notes.push({ factor: 'Sales-only', reason: 'You run Sales Hub only — the Marketing grade is locked (unlock by adding Marketing Hub).' }); }
-  else if (profile.hubs === 'marketing') { locked = 'sales'; w.split = { marketing: 100, sales: 0 }; notes.push({ factor: 'Marketing-only', reason: 'You run Marketing Hub only — the Sales grade is locked.' }); }
+  if (profile.hubs === 'sales') { locked = 'marketing'; w.split = { marketing: 0, sales: 100 }; notes.push({ factor: 'Sales-only', reason: 'You run Sales Hub only - the Marketing grade is locked (unlock by adding Marketing Hub).' }); }
+  else if (profile.hubs === 'marketing') { locked = 'sales'; w.split = { marketing: 100, sales: 0 }; notes.push({ factor: 'Marketing-only', reason: 'You run Marketing Hub only - the Sales grade is locked.' }); }
 
   // 3. Growth challenge → main weight booster
   const BOOST = 1.5;
   switch (profile.challenge) {
-    case 'not_enough_leads': bump(w.marketing, 'leadToSql', BOOST); _tiltSplit(w.split, 'marketing', 10); notes.push({ factor: 'Lead generation', reason: 'Your biggest challenge is lead volume — the marketing funnel is weighted up.' }); break;
-    case 'leads_dont_convert': bump(w.marketing, 'leadToSql', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Lead → SQL conversion', reason: 'Your challenge is leads not converting — qualification is weighted up.' }); break;
-    case 'deals_stall': bump(w.sales, 'dealStageConversion', BOOST); bump(w.sales, 'stalledDeals', 1.4); notes.push({ factor: 'Deal-stage & stalled deals', reason: 'Your challenge is deals stalling — pipeline movement is weighted up.' }); break;
-    case 'slow_follow_up': bump(w.sales, 'speedToLead', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Speed-to-lead', reason: 'Your challenge is follow-up speed — response time is weighted up.' }); break;
-    case 'losing_competitors': bump(w.sales, 'winRate', BOOST); bump(w.sales, 'dealStageConversion', 1.2); notes.push({ factor: 'Win rate', reason: 'Your challenge is losing deals — close rate is weighted up.' }); break;
+    case 'not_enough_leads': bump(w.marketing, 'leadToSql', BOOST); _tiltSplit(w.split, 'marketing', 10); notes.push({ factor: 'Lead generation', reason: 'Your biggest challenge is lead volume - the marketing funnel is weighted up.' }); break;
+    case 'leads_dont_convert': bump(w.marketing, 'leadToSql', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Lead → SQL conversion', reason: 'Your challenge is leads not converting - qualification is weighted up.' }); break;
+    case 'deals_stall': bump(w.sales, 'dealStageConversion', BOOST); bump(w.sales, 'stalledDeals', 1.4); notes.push({ factor: 'Deal-stage & stalled deals', reason: 'Your challenge is deals stalling - pipeline movement is weighted up.' }); break;
+    case 'slow_follow_up': bump(w.sales, 'speedToLead', BOOST); bump(w.marketing, 'followUpCoverage', 1.3); notes.push({ factor: 'Speed-to-lead', reason: 'Your challenge is follow-up speed - response time is weighted up.' }); break;
+    case 'losing_competitors': bump(w.sales, 'winRate', BOOST); bump(w.sales, 'dealStageConversion', 1.2); notes.push({ factor: 'Win rate', reason: 'Your challenge is losing deals - close rate is weighted up.' }); break;
     default: break;
   }
 
@@ -261,7 +261,7 @@ function computeDataDrivers(data) {
     if (w > 0 && l > w) {
       const ratio = l / w, strength = clamp((ratio - 1) / 2, 0, 1);
       drivers.speedToLead = strength;
-      if (strength >= 0.3) notes.push({ factor: 'Speed-to-lead (from your data)', reason: `Your won deals were contacted ${Math.round(ratio * 10) / 10}× faster than the ones you lost — so speed is weighted up for you.` });
+      if (strength >= 0.3) notes.push({ factor: 'Speed-to-lead (from your data)', reason: `Your won deals were contacted ${Math.round(ratio * 10) / 10}× faster than the ones you lost - so speed is weighted up for you.` });
     }
   }
   if (wonTouch.length >= 5 && lostTouch.length >= 5) {
@@ -269,7 +269,7 @@ function computeDataDrivers(data) {
     if (w > l) {
       const ratio = l > 0 ? w / l : 2, strength = clamp((ratio - 1) / 2, 0, 1);
       drivers.followUpCoverage = strength;
-      if (strength >= 0.3) notes.push({ factor: 'Follow-up (from your data)', reason: `Won deals had ~${Math.round(w)} touches vs ~${Math.round(l)} on losses — follow-up is weighted up for you.` });
+      if (strength >= 0.3) notes.push({ factor: 'Follow-up (from your data)', reason: `Won deals had ~${Math.round(w)} touches vs ~${Math.round(l)} on losses - follow-up is weighted up for you.` });
     }
   }
   if (wonStages.length >= 5 && lostStages.length >= 5) {
@@ -277,7 +277,7 @@ function computeDataDrivers(data) {
     if (w > l) {
       const strength = clamp((w - l) / Math.max(l, 1), 0, 1);
       drivers.dealStageConversion = strength;
-      if (strength >= 0.3) notes.push({ factor: 'Stage discipline (from your data)', reason: `Deals you won moved through more stages than deals you lost — stage discipline is weighted up for you.` });
+      if (strength >= 0.3) notes.push({ factor: 'Stage discipline (from your data)', reason: `Deals you won moved through more stages than deals you lost - stage discipline is weighted up for you.` });
     }
   }
   return { sufficient: Object.keys(drivers).length > 0, drivers, notes };
@@ -403,7 +403,7 @@ function scoreSalesCycle(days, avgDealSize) {
 // Each item documents how it was derived (no HubSpot "$800M more" fantasy).
 function estimateRevenueImpact({ avgDealSize, winRate, closedDeals, leadToCustomer, noTouch, stalledValue }) {
   const items = [];
-  if (!avgDealSize) return { total: 0, items, note: 'No won deals yet — cannot estimate revenue impact.' };
+  if (!avgDealSize) return { total: 0, items, note: 'No won deals yet - cannot estimate revenue impact.' };
 
   // 1. Win-rate gap -> extra wins on the deals you already close out.
   if (winRate !== null && winRate < BENCHMARKS.winRate.par && closedDeals >= 3) {
@@ -413,7 +413,7 @@ function estimateRevenueImpact({ avgDealSize, winRate, closedDeals, leadToCustom
       key: 'winRate',
       title: `Win rate ${winRate}% vs ${BENCHMARKS.winRate.par}% benchmark`,
       amount: recoverable,
-      how: `Closing at the ${BENCHMARKS.winRate.par}% benchmark instead of ${winRate}% across your ${closedDeals} closed deals ≈ ${extraWins.toFixed(1)} more wins × ${fmt(avgDealSize)} avg deal.`,
+      how: `At a ${BENCHMARKS.winRate.par}% win rate instead of ${winRate}%, you'd win about ${Math.round(extraWins)} more of your ${closedDeals} closed deals, worth ${fmt(avgDealSize)} each.`,
     });
   }
 
@@ -424,7 +424,7 @@ function estimateRevenueImpact({ avgDealSize, winRate, closedDeals, leadToCustom
       key: 'followUp',
       title: `${noTouch.value} un-touched leads`,
       amount: recoverable,
-      how: `${noTouch.value} active leads with no logged touch × your ${leadToCustomer}% lead→customer rate × ${fmt(avgDealSize)} avg deal.`,
+      how: `${noTouch.value} active leads have no logged touch. At your ${leadToCustomer}% lead-to-customer rate and ${fmt(avgDealSize)} average deal, that's the upside of working them.`,
     });
   }
 
@@ -435,7 +435,7 @@ function estimateRevenueImpact({ avgDealSize, winRate, closedDeals, leadToCustom
       key: 'stalled',
       title: `${fmt(stalledValue)} in stalled deals`,
       amount: recoverable,
-      how: `${fmt(stalledValue)} of open deals sitting past their stage window × your ${winRate}% win rate.`,
+      how: `${fmt(stalledValue)} of open deals are sitting past their stage window. At your ${winRate}% win rate, that's what's recoverable.`,
     });
   }
 

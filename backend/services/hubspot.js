@@ -113,7 +113,7 @@ class HubSpotService {
 
   // Stage history: for each deal, the SET of dealstage values it has ever held
   // (via propertiesWithHistory). This is how we answer "did this deal EVER reach
-  // stage X" — including stages it skipped past — the reliable modern approach.
+  // stage X" - including stages it skipped past - the reliable modern approach.
   // Batched 100/call so it stays within rate limits.
   async getDealStageHistory(dealIds) {
     const history = {};
@@ -129,12 +129,12 @@ class HubSpotService {
           const versions = d.propertiesWithHistory?.dealstage || [];
           history[d.id] = [...new Set(versions.map(v => v.value).filter(Boolean))];
         }
-      } catch { /* history unavailable for chunk — leave empty */ }
+      } catch { /* history unavailable for chunk - leave empty */ }
     }));
     return history;
   }
 
-  // Cached data loader — shared across all routes in the same session
+  // Cached data loader - shared across all routes in the same session
   async getCachedData() {
     const key = this.sessionId || 'no-session';
     const cached = _cache.get(key);
@@ -236,7 +236,7 @@ class HubSpotService {
     } catch { return []; }
   }
 
-  // HubSpot portal (account) id — stable per connected account. Used to key
+  // HubSpot portal (account) id - stable per connected account. Used to key
   // monthly snapshots so they follow the account, not the browser session.
   async getPortalId() {
     try {

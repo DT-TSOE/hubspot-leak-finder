@@ -59,7 +59,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
           <div style={{ marginBottom:14, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
               <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Won vs lost by month</div>
-              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Closed revenue — won and lost — by close month</div>
+              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Closed revenue - won and lost - by close month</div>
             </div>
             <div style={{ display:'flex', gap:12, fontSize:11 }}>
               <span style={{ color:'#555' }}><span style={{ color:'#059669', fontWeight:700 }}>●</span> Won</span>
@@ -112,14 +112,14 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         </div>
       )}
 
-      {/* Deal-stage conversion — forecasting */}
+      {/* Deal-stage conversion - forecasting */}
       {(() => {
         const p = data.dealStageConversion?.[0];
         if (!p) return null;
         const c2wColor = p.createdToWon >= 25 ? '#059669' : p.createdToWon >= 12 ? '#F59E0B' : '#EF4444';
         return (
           <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
-            <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>Deal-stage conversion — forecasting</div>
+            <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>Deal-stage conversion - forecasting</div>
             <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Of every deal that ever reached a stage, the share that goes on to win. This is your forecast math.</div>
             <div style={{ display:'flex', alignItems:'baseline', gap:10, marginBottom: p.skipHeavy ? 0 : 12 }}>
               <span style={{ fontSize:30, fontWeight:800, color:c2wColor, lineHeight:1 }}>{p.createdToWon}%</span>
@@ -161,12 +161,12 @@ export default function RevenueTab({ data, loading, onNavigate }) {
           <div style={{ display:'flex', gap:10 }}>
             <div style={{ flex:1, padding:'12px 14px', background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:8 }}>
               <div style={{ fontSize:10, color:'#059669', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median to win</div>
-              <div style={{ fontSize:24, fontWeight:700, color:'#059669' }}>{data.winLoseTiming.winMedianDays != null ? `${data.winLoseTiming.winMedianDays}d` : '—'}</div>
+              <div style={{ fontSize:24, fontWeight:700, color:'#059669' }}>{data.winLoseTiming.winMedianDays != null ? `${data.winLoseTiming.winMedianDays}d` : '-'}</div>
               <div style={{ fontSize:11, color:'#666', marginTop:2 }}>{data.winLoseTiming.wonSample} won deals</div>
             </div>
             <div style={{ flex:1, padding:'12px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:8 }}>
               <div style={{ fontSize:10, color:'#DC2626', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median to lose</div>
-              <div style={{ fontSize:24, fontWeight:700, color:'#DC2626' }}>{data.winLoseTiming.loseMedianDays != null ? `${data.winLoseTiming.loseMedianDays}d` : '—'}</div>
+              <div style={{ fontSize:24, fontWeight:700, color:'#DC2626' }}>{data.winLoseTiming.loseMedianDays != null ? `${data.winLoseTiming.loseMedianDays}d` : '-'}</div>
               <div style={{ fontSize:11, color:'#666', marginTop:2 }}>{data.winLoseTiming.lostSample} lost deals</div>
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         </div>
       )}
 
-      {/* Who buys — revenue by job title */}
+      {/* Who buys - revenue by job title */}
       {data.revenueByJobTitle?.hasTitles && data.revenueByJobTitle.rows.length > 0 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>Who actually buys</div>

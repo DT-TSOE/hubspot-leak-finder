@@ -10,7 +10,7 @@ const URGENCY = {
 };
 
 const fmtH = h => {
-  if (h == null) return '—';
+  if (h == null) return '-';
   if (h < 1) return `${Math.round(h * 60)}m`;
   if (h < 24) return `${Math.round(h)}h`;
   return `${Math.round(h / 24)}d`;
@@ -76,7 +76,7 @@ export default function SpeedToLead({ days }) {
               {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with zero outreach
               {data.criticalCount > 0 && <span style={{ marginLeft:10, fontSize:13, fontWeight:600, color:'#EF4444' }}>({data.criticalCount} over 24h)</span>}
             </div>
-            <div style={{ fontSize:12, color:'rgba(255,255,255,.6)' }}>Responding within 1 hour closes 7x better. Every hour you wait, this number costs you money.</div>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,.6)' }}>Contacting a lead within 1 hour makes you ~7x more likely to qualify it (HBR research). Every hour you wait, the odds drop.</div>
           </div>
           <div style={{ textAlign:'right', flexShrink:0 }}>
             <div style={{ fontSize:36, fontWeight:900, color:'#EF4444', lineHeight:1 }}>{data.uncontactedCount}</div>
@@ -110,7 +110,7 @@ export default function SpeedToLead({ days }) {
             <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Activity (30 days)</div>
             {[
               { label:'Calls', value:activitySummary.calls, icon:'📞' },
-              { label:'Emails', value:activitySummary.emails, icon:'✉' },
+              { label:'Sales emails', value:activitySummary.emails, icon:'✉' },
               { label:'Meetings', value:activitySummary.meetings, icon:'📅' },
             ].map(a => (
               <div key={a.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
@@ -124,12 +124,12 @@ export default function SpeedToLead({ days }) {
         )}
       </div>
 
-      {/* Activity — this week vs last week ("did we book any calls last week?") */}
+      {/* Activity - this week vs last week ("did we book any calls last week?") */}
       {activityComparison && Object.keys(activityComparison).length > 0 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
-          <div style={{ fontSize:12.5, fontWeight:600, color:'#111', marginBottom:12 }}>Activity — this week vs last week</div>
+          <div style={{ fontSize:12.5, fontWeight:600, color:'#111', marginBottom:12 }}>Activity - this week vs last week</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-            {[{k:'calls',label:'Calls',icon:'📞'},{k:'emails',label:'Emails',icon:'✉'},{k:'meetings',label:'Meetings booked',icon:'📅'}].map(a => {
+            {[{k:'calls',label:'Calls',icon:'📞'},{k:'emails',label:'Sales emails',icon:'✉'},{k:'meetings',label:'Meetings booked',icon:'📅'}].map(a => {
               const c = activityComparison[a.k] || {};
               const tw = c.thisWeek, lw = c.lastWeek;
               const delta = (tw != null && lw != null) ? tw - lw : null;
@@ -139,7 +139,7 @@ export default function SpeedToLead({ days }) {
                 <div key={a.k} style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:8, padding:'12px 14px' }}>
                   <div style={{ fontSize:11, color:'#888', marginBottom:4 }}>{a.icon} {a.label}</div>
                   <div style={{ display:'flex', alignItems:'baseline', gap:8 }}>
-                    <span style={{ fontSize:24, fontWeight:800, color: tw == null ? '#ccc' : '#111' }}>{tw == null ? '—' : tw}</span>
+                    <span style={{ fontSize:24, fontWeight:800, color: tw == null ? '#ccc' : '#111' }}>{tw == null ? '-' : tw}</span>
                     {delta != null && <span style={{ fontSize:12, fontWeight:700, color:dc }}>{flat ? '→ same' : `${up ? '▲ +' : '▼ '}${delta}`}</span>}
                   </div>
                   <div style={{ fontSize:11, color:'#aaa', marginTop:2 }}>{lw == null ? '' : `${lw} last week`}</div>
@@ -150,7 +150,7 @@ export default function SpeedToLead({ days }) {
         </div>
       )}
 
-      {/* Spam cleanup — junk form-fills skew response time; let the user filter them out */}
+      {/* Spam cleanup - junk form-fills skew response time; let the user filter them out */}
       {triageCandidates?.length > 0 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 16px', marginBottom:14 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -197,7 +197,7 @@ export default function SpeedToLead({ days }) {
                 <button onClick={() => setSelectedBucket(null)} style={{ fontSize:10, color:'#3B82F6', background:'#EFF6FF', border:'none', borderRadius:5, padding:'2px 8px', cursor:'pointer', fontWeight:600 }}>Clear ✕</button>
               )}
             </div>
-            <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Click a bar to see which contacts — time from creation to first contact</div>
+            <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Click a bar to see which contacts - time from creation to first contact</div>
             <div style={{ height: 140 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={distribution} margin={{ left:0, right:8, top:4, bottom:0 }}
@@ -226,7 +226,7 @@ export default function SpeedToLead({ days }) {
             {selectedBucket && contactsByBucket?.[selectedBucket]?.length > 0 && (
               <div style={{ marginTop:14, borderTop:'1px solid #F3F4F6', paddingTop:12 }}>
                 <div style={{ fontSize:11, fontWeight:600, color:'#555', marginBottom:8 }}>
-                  {distribution.find(d => d.key === selectedBucket)?.label} — {contactsByBucket[selectedBucket].length} contacts
+                  {distribution.find(d => d.key === selectedBucket)?.label} - {contactsByBucket[selectedBucket].length} contacts
                 </div>
                 {contactsByBucket[selectedBucket].slice(0,10).map((c,i) => (
                   <div key={c.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'6px 0', borderBottom: i < Math.min(contactsByBucket[selectedBucket].length,10)-1 ? '1px solid #F9FAFB' : 'none' }}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { api } from '../utils/api';
 
-const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '—';
+const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
 const fmtSrc = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
 
 // Color scale for Rev/Lead bar: green (best) → amber → red (worst)
@@ -99,7 +99,7 @@ export default function SourceQuality({ days, onNavigate }) {
           <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px' }}>
             <div style={{ marginBottom:4 }}>
               <div style={{ fontSize:13, fontWeight:700, color:'#111' }}>Revenue per Lead by source</div>
-              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Total revenue divided by total leads from that channel. Shows true ROI — best to worst.</div>
+              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Total revenue divided by total leads from that channel. Shows true ROI - best to worst.</div>
             </div>
             <div style={{ height: revLeadData.length * 44 + 20, marginTop:12 }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -179,10 +179,10 @@ export default function SourceQuality({ days, onNavigate }) {
                 <td style={{ padding:'8px', textAlign:'right', color: s.conversionRate >= 5 ? '#059669' : s.conversionRate >= 2 ? '#F59E0B' : '#999', fontWeight:600 }} title="Contacts that became customers">{s.conversionRate}%</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#111', fontWeight:600 }}>{fmt$(s.revenue)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color: s.revPerLead > 0 ? barColor(s.revPerLead, maxRevLead) : '#ccc', fontWeight: s.revPerLead > 0 ? 700 : 400 }}>
-                  {s.revPerLead > 0 ? `$${s.revPerLead.toLocaleString()}` : '—'}
+                  {s.revPerLead > 0 ? `$${s.revPerLead.toLocaleString()}` : '-'}
                 </td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{fmt$(s.avgDealSize)}</td>
-                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.avgSalesCycle ? `${s.avgSalesCycle}d` : '—'}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.avgSalesCycle ? `${s.avgSalesCycle}d` : '-'}</td>
                 <td onClick={e => { e.stopPropagation(); onNavigate?.('integrations'); }} title="Connect Google Ads to see real cost per acquisition" style={{ padding:'8px', textAlign:'right', cursor:'pointer' }}>
                   <span style={{ filter:'blur(3.5px)', color:'#F97316', fontWeight:700, userSelect:'none' }}>${30 + (s.source.length * 17) % 90}</span>
                 </td>

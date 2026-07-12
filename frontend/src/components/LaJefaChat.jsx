@@ -55,7 +55,7 @@ function ChatInput({ input, setInput, onSend, loading, messages }) {
 
 export default function LaJefaChat({ inline = false }) {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([{ role:'assistant', content:`Hey, I'm ${COACH_NAME}. I've already reviewed your pipeline — what do you want to know?` }]);
+  const [messages, setMessages] = useState([{ role:'assistant', content:`Hey, I'm ${COACH_NAME}. I've already reviewed your pipeline - what do you want to know?` }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

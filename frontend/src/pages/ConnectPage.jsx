@@ -9,7 +9,7 @@ export default function ConnectPage() {
         <h1 style={{ margin:'0 0 6px', fontSize:28, fontWeight:800, color:'#111', letterSpacing:'-0.5px' }}>PipeChamp</h1>
         <p style={{ margin:'0 0 20px', fontSize:11, color:'#43A047', letterSpacing:4, textTransform:'uppercase' }}>Find the leaks. Fix them fast.</p>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:14, padding:'28px 24px' }}>
-          <p style={{ margin:'0 0 20px', fontSize:14, color:'#666', lineHeight:1.65 }}>Connect your HubSpot account and PipeChamp will identify exactly where your pipeline is leaking revenue — and tell you exactly how to fix it.</p>
+          <p style={{ margin:'0 0 20px', fontSize:14, color:'#666', lineHeight:1.65 }}>Connect your HubSpot account and PipeChamp will identify exactly where your pipeline is leaking revenue - and tell you exactly how to fix it.</p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:6, justifyContent:'center', marginBottom:22 }}>
             {['Funnel leak detection','Lead risk scoring','Revenue insights','Ask PipeCoach'].map(f=>(
               <span key={f} style={{ fontSize:11, padding:'4px 12px', borderRadius:20, background:'#F7F8FA', color:'#555', border:'1px solid #E2E5EA' }}>{f}</span>

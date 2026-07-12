@@ -146,7 +146,7 @@ export default function PipelineInsights({ stageInsights, trend }) {
       {stageInsights?.length > 0 && (
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10 }}>
-            Stage-by-stage behavior — what separates contacts that advance from those that stall
+            Stage-by-stage behavior - what separates contacts that advance from those that stall
           </div>
           {stageInsights.map(insight => (
             <StageInsightRow key={insight.stage} insight={insight} />

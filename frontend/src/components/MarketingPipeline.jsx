@@ -88,7 +88,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
             ))}
           </div>
           <div style={{ flex: 1.4, fontSize: 12, color: '#666', lineHeight: 1.5 }}>
-            <strong style={{ color: '#111' }}>See the top of your funnel.</strong> Connect Search Console for impressions and Google Analytics for traffic — on top of your HubSpot leads.
+            <strong style={{ color: '#111' }}>See the top of your funnel.</strong> Connect Search Console for impressions and Google Analytics for traffic - on top of your HubSpot leads.
             <button onClick={() => onNavigate?.('integrations')} style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 700, color: '#FF7A59', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>Connect Google →</button>
           </div>
         </div>
@@ -96,11 +96,11 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
 
       {/* Pickers */}
       {gsc?.connected && gsc.needsSite && (
-        <Picker title="✅ Search Console connected — pick your site" subtitle="Which property's impressions should feed the funnel?"
+        <Picker title="✅ Search Console connected - pick your site" subtitle="Which property's impressions should feed the funnel?"
           options={sites?.map(s => ({ value: s.siteUrl, label: s.siteUrl }))} onPick={selectSite} placeholder="Select a site…" />
       )}
       {ga4?.connected && ga4.needsProperty && (
-        <Picker title="✅ Google Analytics connected — pick your property" subtitle="Which GA4 property should feed traffic?"
+        <Picker title="✅ Google Analytics connected - pick your property" subtitle="Which GA4 property should feed traffic?"
           options={properties?.map(p => ({ value: p.id, label: `${p.name} (${p.account})` }))}
           onPick={(id) => { const p = properties.find(x => x.id === id); selectProperty(id, p?.name); }} placeholder="Select a property…" />
       )}
@@ -109,7 +109,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
       {imprOn && (
         <div style={BLUE_CARD}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Search impressions — last {gsc.days} days <span style={{ fontSize: 11, fontWeight: 400, color: '#888' }}>· via Search Console</span></div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Search impressions - last {gsc.days} days <span style={{ fontSize: 11, fontWeight: 400, color: '#888' }}>· via Search Console</span></div>
             <div style={{ display: 'flex', gap: 18 }}>
               <div style={{ textAlign: 'right' }}><div style={{ fontSize: 20, fontWeight: 800, color: '#111' }}>{gsc.impressions.toLocaleString()}</div><div style={{ fontSize: 10, color: '#999' }}>IMPRESSIONS</div></div>
               <div style={{ textAlign: 'right' }}><div style={{ fontSize: 20, fontWeight: 800, color: '#111' }}>{gsc.clicks.toLocaleString()}</div><div style={{ fontSize: 10, color: '#999' }}>CLICKS · {gsc.ctr}% CTR</div></div>
@@ -131,7 +131,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
       {trafficOn && (
         <div style={BLUE_CARD}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Traffic — last {ga4.days} days <span style={{ fontSize: 11, fontWeight: 400, color: '#888' }}>· via GA4 {ga4.propertyName ? `· ${ga4.propertyName}` : ''}</span></div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Traffic - last {ga4.days} days <span style={{ fontSize: 11, fontWeight: 400, color: '#888' }}>· via GA4 {ga4.propertyName ? `· ${ga4.propertyName}` : ''}</span></div>
             <div style={{ display: 'flex', gap: 18 }}>
               <div style={{ textAlign: 'right' }}><div style={{ fontSize: 20, fontWeight: 800, color: '#111' }}>{ga4.totalSessions.toLocaleString()}</div><div style={{ fontSize: 10, color: '#999' }}>SESSIONS</div></div>
               <div style={{ textAlign: 'right' }}><div style={{ fontSize: 20, fontWeight: 800, color: '#111' }}>{ga4.totalUsers.toLocaleString()}</div><div style={{ fontSize: 10, color: '#999' }}>USERS</div></div>
@@ -163,7 +163,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
 
       {/* Funnel */}
       <div style={CARD}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Acquisition funnel — Impressions → Traffic → Lead → MQL → SQL</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Acquisition funnel - Impressions → Traffic → Lead → MQL → SQL</div>
         {funnelBar('Impressions', impressionsVal, '100%', !imprOn)}
         {funnelBar('Traffic', trafficVal, '84%', !trafficOn)}
         <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} stageContacts={funnel.stageContacts} />

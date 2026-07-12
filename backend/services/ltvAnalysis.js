@@ -60,7 +60,7 @@ function analyzeLTV(contacts, deals) {
     .map(([ownerId, r]) => ({ ownerId, won:r.won, lost:r.lost, total:r.won+r.lost, winRate: Math.round((r.won/(r.won+r.lost))*1000)/10, avgDealSize: r.won > 0 ? Math.round(r.totalValue/r.won) : 0 }))
     .sort((a,b) => b.winRate - a.winRate);
 
-  // Monthly trend (last 12 months) — won AND lost, by close month.
+  // Monthly trend (last 12 months) - won AND lost, by close month.
   const monthMap = {};
   for (const deal of deals) {
     const stage = deal.properties.dealstage;

@@ -85,7 +85,7 @@ const INTEGRATIONS = [
   },
   {
     id: 'search-console', name: 'Search Console', category: 'SEO', logo: '🔍', color: '#34A853',
-    description: 'Search impressions, clicks, and top queries — the top of your acquisition funnel.',
+    description: 'Search impressions, clicks, and top queries - the top of your acquisition funnel.',
     unlocks: ['Real Impressions on the Marketing funnel', 'Top search queries driving traffic', 'Clicks and CTR by query'],
     connectUrl: '/gsc/connect',
     getStatus: async () => { const s = await api.gscStatus(); return s.connected ? 'connected' : 'available'; },
@@ -154,7 +154,7 @@ export default function Integrations() {
     <div>
       <div style={{ marginBottom:20 }}>
         <div style={{ fontSize:13, color:'#888', maxWidth:560, lineHeight:1.7 }}>
-          Every integration you connect unlocks more accurate insights. HubSpot alone gives you pipeline health — add ad platforms and you get cost per acquisition, add accounting tools and you get verified revenue, add Slack and PipeChamp comes to you.
+          Every integration you connect unlocks more accurate insights. HubSpot alone gives you pipeline health - add ad platforms and you get cost per acquisition, add accounting tools and you get verified revenue, add Slack and PipeChamp comes to you.
         </div>
       </div>
 
