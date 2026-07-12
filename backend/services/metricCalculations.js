@@ -165,7 +165,7 @@ function calculateSourceQuality(contacts, deals, sourceProperty = 'hs_analytics_
   for (const c of contacts) {
     const source = c.properties[sourceProperty] || 'Unknown';
     if (!contactBySource[source]) {
-      contactBySource[source] = { contacts: 0, mqls: 0, sqls: 0, opportunities: 0, customers: 0, deals: 0, won: 0, revenue: 0, cycles: [] };
+      contactBySource[source] = { contacts: 0, mqls: 0, sqls: 0, opportunities: 0, customers: 0, deals: 0, won: 0, revenue: 0, cycles: [], wonContacts: new Set() };
     }
     contactBySource[source].contacts++;
     if (c.properties[stageProps.marketingqualifiedlead]) contactBySource[source].mqls++;
@@ -183,6 +183,7 @@ function calculateSourceQuality(contacts, deals, sourceProperty = 'hs_analytics_
     contactBySource[source].deals++;
     if (deal.properties.dealstage === 'closedwon') {
       contactBySource[source].won++;
+      contactBySource[source].wonContacts.add(cId); // deal-based customers (lifecycle stages often unmaintained)
       contactBySource[source].revenue += parseFloat(deal.properties.amount || '0');
       const created = new Date(deal.properties.createdate).getTime();
       const closed = new Date(deal.properties.closedate).getTime();
@@ -194,21 +195,26 @@ function calculateSourceQuality(contacts, deals, sourceProperty = 'hs_analytics_
   }
   return Object.entries(contactBySource)
     .filter(([, s]) => s.contacts >= 3)
-    .map(([source, s]) => ({
+    .map(([source, s]) => {
+      // A won deal means that contact IS a customer, even if their lifecycle
+      // stage was never updated. Reconcile so revenue never shows "0 customers".
+      const customers = Math.max(s.customers, s.wonContacts.size);
+      return {
       source,
       contacts: s.contacts,
       mqls: s.mqls,
       sqls: s.sqls,
-      opportunities: s.opportunities,
-      customers: s.customers,
+      opportunities: Math.max(s.opportunities, s.wonContacts.size),
+      customers,
       deals: s.deals,
       won: s.won,
       revenue: Math.round(s.revenue),
-      conversionRate: s.contacts > 0 ? Math.round((s.customers / s.contacts) * 1000) / 10 : 0,
+      conversionRate: s.contacts > 0 ? Math.round((customers / s.contacts) * 1000) / 10 : 0,
       winRate: s.deals > 0 ? Math.round((s.won / s.deals) * 1000) / 10 : 0,
       avgDealSize: s.won > 0 ? Math.round(s.revenue / s.won) : 0,
       avgSalesCycle: s.cycles.length >= 2 ? Math.round(median(s.cycles)) : null,
-    }))
+      };
+    })
     .sort((a, b) => b.revenue - a.revenue);
 }
 
