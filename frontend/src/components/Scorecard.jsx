@@ -56,8 +56,9 @@ function DimensionRow({ dim }) {
       <div style={{ width: 90, height: 6, background: '#F0F1F4', borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
         <div style={{ width: `${dim.score ?? 0}%`, height: '100%', background: color, borderRadius: 4, transition: 'width .6s ease' }} />
       </div>
-      <div style={{ width: 34, textAlign: 'right', fontSize: 13, fontWeight: 700, color: dim.score === null ? '#ccc' : '#111', flexShrink: 0 }}>
-        {dim.score === null ? '-' : dim.score}
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: dim.score === null ? '#ccc' : '#111' }}>{dim.score === null ? '-' : dim.score}</div>
+        <div style={{ fontSize: 9, color: '#ccc', lineHeight: 1 }}>/100</div>
       </div>
     </div>
   );
@@ -257,32 +258,12 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
               Marketing metrics are limited: this account doesn't tag HubSpot lifecycle stages. The Sales side and deal-based metrics are the reliable read.
             </div>
           )}
-          {/* Tuned-for / personalize - the visible methodology */}
-          {personalized ? (
-            <div style={{ marginTop: 10, fontSize: 11.5, color: '#888', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span>Tuned for: <strong style={{ color: '#555' }}>{tunedFor}</strong></span>
-              {dataDriven && <span style={{ fontSize: 10.5, fontWeight: 700, color: '#059669', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '1px 8px' }}>📊 tuned from your win data</span>}
-              {methodology?.length > 0 && (
-                <button onClick={() => setShowWhy(v => !v)} style={{ fontSize: 11, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
-                  {showWhy ? 'hide why' : 'why these weights?'}
-                </button>
-              )}
-              <button onClick={() => setShowOnboarding(true)} style={{ fontSize: 11, color: '#999', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>edit</button>
-            </div>
-          ) : (
-            <button onClick={() => setShowOnboarding(true)} style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: '#111', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '6px 12px', cursor: 'pointer' }}>
-              ✨ Personalize this grade for your business →
+          <div style={{ marginTop: 10 }}>
+            <button onClick={() => setShowOnboarding(true)} title="Adjust grading for your business" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#888', background: 'none', border: '1px solid #E2E5EA', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="13" y2="12"/><circle cx="6" cy="4" r="1.5" fill="white"/><circle cx="10" cy="8" r="1.5" fill="white"/><circle cx="6" cy="12" r="1.5" fill="white"/></svg>
+              Adjust for your business
             </button>
-          )}
-          {showWhy && methodology?.length > 0 && (
-            <div style={{ marginTop: 10, background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '10px 12px' }}>
-              {methodology.map((m, i) => (
-                <div key={i} style={{ fontSize: 11.5, color: '#555', marginBottom: i < methodology.length - 1 ? 6 : 0, lineHeight: 1.45 }}>
-                  <strong style={{ color: '#111' }}>{m.factor}:</strong> {m.reason}
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
         {revenueImpact?.total > 0 && (
           <HoverCard popover={
@@ -298,9 +279,11 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
             </div>
           }>
             <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 12, borderLeft: '1px solid #F0F1F4' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Revenue Opportunity</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                Revenue Opportunity
+                <span style={{ fontSize: 10, color: '#aaa', fontWeight: 400, border: '1px solid #E2E5EA', borderRadius: '50%', width: 14, height: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>i</span>
+              </div>
               <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(revenueImpact.total)}</div>
-              <div style={{ fontSize: 11, color: '#888', marginTop: 3, textDecoration: 'underline dotted', textUnderlineOffset: 3 }}>if gaps closed · hover for math</div>
             </div>
           </HoverCard>
         )}
