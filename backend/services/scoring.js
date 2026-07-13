@@ -395,7 +395,7 @@ function buildScorecard(data, profile) {
     { key: 'sourceConcentration', weight: W.marketing.sourceConcentration, score: topSourceShare !== null ? Math.round(clamp(100 - Math.max(0, topSourceShare - BENCHMARKS.sourceConcentration.max) * 3)) : null,
       value: topSourceShare, displayValue: topSourceShare !== null ? `${topSourceShare}% ${topSourceName || 'top source'}` : null, ...BENCHMARKS.sourceConcentration, sample: totalSourceContacts },
     { key: 'leadToDeal', weight: W.marketing.leadToDeal, score: leadToDealPct !== null ? scoreToPar(leadToDealPct, BENCHMARKS.leadToDeal.par) : null,
-      value: leadToDealPct, displayValue: fmtPct(leadToDealPct), ...BENCHMARKS.leadToDeal, sample: contacts.length },
+      value: leadToDealPct, displayValue: leadToDealPct !== null ? `${leadsWithDeals} deals · ${leadToDealPct}%` : null, ...BENCHMARKS.leadToDeal, sample: contacts.length },
   ];
 
   // ---- Sales dimensions (weights from resolved profile) ----

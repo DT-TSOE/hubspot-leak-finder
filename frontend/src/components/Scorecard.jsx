@@ -276,7 +276,8 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   } else if (leadsCaptDim?.prevValue != null && leadsCaptDim?.value != null) {
     const diff = leadsCaptDim.value - leadsCaptDim.prevValue;
     const sign = diff > 0 ? '+' : '';
-    marketingComparisons.leadsCapt = `${leadsCaptDim.prevValue} last 90d (${sign}${diff})`;
+    const periodLabel = !days ? '90d' : typeof days === 'number' ? `${days}d` : 'prev period';
+    marketingComparisons.leadsCapt = `${leadsCaptDim.prevValue} ${periodLabel} prior (${sign}${diff})`;
   }
   if (goals.followUpCoverage) marketingComparisons.followUpCoverage = `Target: ${goals.followUpCoverage}%`;
 
@@ -376,18 +377,23 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           </div>
         </div>
 
-        {/* Current pipeline + goal close value */}
+        {/* Current pipeline + expected close + goal close */}
         {openPipelineValue > 0 && (
           <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: 16, borderLeft: '1px solid #F0F1F4', minWidth: 110 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
+            {currentCloseValue !== null && (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
+                <div style={{ fontSize: 10, color: '#bbb', marginTop: 2 }}>at {Math.round(winRateDim.value)}% win rate</div>
+              </div>
+            )}
             {goalCloseValue !== null && (
-              <div style={{ marginTop: 12 }}>
+              <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
-                <div style={{ fontSize: 28, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
-                {currentCloseValue !== null && (
-                  <div style={{ fontSize: 10, color: '#aaa', marginTop: 3 }}>vs {fmt$(currentCloseValue)} at current rate</div>
-                )}
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
+                <div style={{ fontSize: 10, color: '#aaa', marginTop: 2 }}>at {goals.winRate}% goal</div>
               </div>
             )}
           </div>
