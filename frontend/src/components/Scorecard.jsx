@@ -209,7 +209,7 @@ function HoverCard({ children, popover }) {
   );
 }
 
-export default function Scorecard({ onScoreLoad, onTabChange, days, onGapsLoad }) {
+export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -356,7 +356,6 @@ export default function Scorecard({ onScoreLoad, onTabChange, days, onGapsLoad }
     }
     gaps.sort((a, b) => b.impact - a.impact);
   }
-  useEffect(() => { onGapsLoad?.(gaps); }, [gaps.length, onGapsLoad]);
 
   return (
     <div>

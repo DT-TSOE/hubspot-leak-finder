@@ -13,7 +13,6 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [goals, setGoals] = useState({});
-  const [gaps, setGaps] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -46,7 +45,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
   return (
     <div>
       {/* Two-funnel scorecard: overall grade + marketing/sales + deal-stage conversion */}
-      <Scorecard onScoreLoad={onScoreLoad} onTabChange={onTabChange} days={days} onGapsLoad={setGaps} />
+      <Scorecard onScoreLoad={onScoreLoad} onTabChange={onTabChange} days={days} />
 
       {/* Key metrics -- 4-up row */}
       {data.metricCards?.length > 0 && (
@@ -70,8 +69,8 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
         </div>
       )}
 
-      {/* Priority actions -- suppressed when goals+gaps section is shown in the scorecard above */}
-      {gaps.length === 0 && (data.uncontactedCount > 0 || data.stuckCount > 0 || data.topOpportunities?.length > 0) && (() => {
+      {/* Priority actions -- suppressed when goals are set (gaps section in scorecard covers this) */}
+      {Object.keys(goals).length === 0 && (data.uncontactedCount > 0 || data.stuckCount > 0 || data.topOpportunities?.length > 0) && (() => {
         const items = [];
         if (data.uncontactedCount > 0) items.push({
           urgency: 'critical',
