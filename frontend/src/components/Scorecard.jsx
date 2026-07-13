@@ -267,12 +267,44 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
   const hasGoals = goals && Object.keys(goals).length > 0;
 
+  // Dimension lookups
+  const winRateDim = sales?.dimensions?.find(d => d.key === 'winRate');
+  const coverageDim = marketing?.dimensions?.find(d => d.key === 'followUpCoverage');
+  const leadToDealDim = marketing?.dimensions?.find(d => d.key === 'leadToDeal');
+  const leadsCaptDim = marketing?.dimensions?.find(d => d.key === 'leadsCapt');
+  const speedDim = sales?.dimensions?.find(d => d.key === 'speedToLead');
+  const cycleDim = sales?.dimensions?.find(d => d.key === 'salesCycle');
+  const openPipelineValue = data.openPipelineValue || 0;
+  const avgDeal = data.context?.avgDealSize ?? 0;
+  const ldr = (leadToDealDim?.value ?? 0) / 100;
+  const currentCloseValue = (winRateDim?.value != null && openPipelineValue > 0)
+    ? Math.round(openPipelineValue * winRateDim.value / 100)
+    : null;
+
+  // Goal close value: pipeline at goal win rate + outreach coverage gains
+  // Leads volume is derived from these goals, not user-set
+  let goalCloseValue = null;
+  if (hasGoals && openPipelineValue > 0) {
+    const goalWR = goals.winRate ?? winRateDim?.value ?? 0;
+    let total = openPipelineValue * goalWR / 100;
+    if (goals.followUpCoverage && coverageDim?.value != null && (coverageDim.sample || 0) > 0) {
+      const coverageGain = Math.max(0, goals.followUpCoverage - coverageDim.value);
+      total += coverageDim.sample * (coverageGain / 100) * ldr * (goalWR / 100) * avgDeal;
+    }
+    goalCloseValue = Math.round(total);
+  }
+
+  // Derived leads goal: leads needed to achieve goal close value, given conversion rates
+  // Changes automatically with date range and other goals — not user-set
+  const derivedLeadsGoal = (hasGoals && goalCloseValue && avgDeal > 0 && ldr > 0 && goals.winRate)
+    ? Math.round(goalCloseValue / avgDeal / (goals.winRate / 100) / ldr)
+    : null;
+
   // Period-over-period comparisons for marketing dimension rows
   const marketingComparisons = {};
-  const leadsCaptDim = marketing?.dimensions?.find(d => d.key === 'leadsCapt');
-  if (goals.leadsCapt && leadsCaptDim?.value != null) {
-    const pct = Math.min(100, Math.round((leadsCaptDim.value / goals.leadsCapt) * 100));
-    marketingComparisons.leadsCapt = `${pct}% of ${Math.round(goals.leadsCapt)} goal`;
+  if (derivedLeadsGoal != null && leadsCaptDim?.value != null) {
+    const pct = Math.min(100, Math.round((leadsCaptDim.value / derivedLeadsGoal) * 100));
+    marketingComparisons.leadsCapt = `${pct}% of ${derivedLeadsGoal} needed`;
   } else if (leadsCaptDim?.prevValue != null && leadsCaptDim?.value != null) {
     const diff = leadsCaptDim.value - leadsCaptDim.prevValue;
     const sign = diff > 0 ? '+' : '';
@@ -297,38 +329,10 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
     if (fc?.cycleRange?.median != null) salesComparisons.salesCycle = `Your fast wins: ${fmtDays(fc.cycleRange.median)}`;
   }
 
-  const winRateDim = sales?.dimensions?.find(d => d.key === 'winRate');
-  const coverageDim = marketing?.dimensions?.find(d => d.key === 'followUpCoverage');
-  const leadToDealDim = marketing?.dimensions?.find(d => d.key === 'leadToDeal');
-  const speedDim = sales?.dimensions?.find(d => d.key === 'speedToLead');
-  const cycleDim = sales?.dimensions?.find(d => d.key === 'salesCycle');
-  const openPipelineValue = data.openPipelineValue || 0;
-  const avgDeal = data.context?.avgDealSize ?? 0;
-  const ldr = (leadToDealDim?.value ?? 0) / 100;
-  const currentCloseValue = (winRateDim?.value != null && openPipelineValue > 0)
-    ? Math.round(openPipelineValue * winRateDim.value / 100)
-    : null;
-
-  // Goal close value: pipeline at goal win rate + outreach coverage gains + leads volume gains
-  let goalCloseValue = null;
-  if (hasGoals && openPipelineValue > 0) {
-    const goalWR = goals.winRate ?? winRateDim?.value ?? 0;
-    let total = openPipelineValue * goalWR / 100;
-    if (goals.followUpCoverage && coverageDim?.value != null && (coverageDim.sample || 0) > 0) {
-      const coverageGain = Math.max(0, goals.followUpCoverage - coverageDim.value);
-      total += coverageDim.sample * (coverageGain / 100) * ldr * (goalWR / 100) * avgDeal;
-    }
-    if (goals.leadsCapt && leadsCaptDim?.value != null) {
-      const leadGain = Math.max(0, goals.leadsCapt - leadsCaptDim.value);
-      total += leadGain * ldr * (goalWR / 100) * avgDeal;
-    }
-    goalCloseValue = Math.round(total);
-  }
-
-  // Leads needed to hit goal close value (new business component only)
-  const neededLeads = (goalCloseValue && avgDeal > 0 && ldr > 0 && goals.winRate)
-    ? Math.round(Math.max(0, goalCloseValue - openPipelineValue * goals.winRate / 100) / avgDeal / (goals.winRate / 100) / ldr)
-    : 0;
+  // Marketing card goals — leadsCapt uses derived goal instead of user-set
+  const marketingGoals = derivedLeadsGoal != null
+    ? { ...goals, leadsCapt: derivedLeadsGoal }
+    : goals;
 
   // Gaps: where current metrics fall short of goals, sorted by revenue impact
   const gaps = [];
@@ -343,10 +347,10 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       const impact = Math.round(extra * ldr * goalWR * avgDeal);
       gaps.push({ key: 'followUpCoverage', label: 'Lead outreach', current: `${Math.round(coverageDim.value)}%`, goal: `${goals.followUpCoverage}%`, detail: `${Math.round(extra)} more leads need a first touch`, impact, tab: 'lead-response' });
     }
-    if (goals.leadsCapt && leadsCaptDim?.value != null && goals.leadsCapt > leadsCaptDim.value) {
-      const extra = Math.round(goals.leadsCapt - leadsCaptDim.value);
+    if (derivedLeadsGoal != null && leadsCaptDim?.value != null && derivedLeadsGoal > leadsCaptDim.value) {
+      const extra = Math.round(derivedLeadsGoal - leadsCaptDim.value);
       const impact = Math.round(extra * ldr * goalWR * avgDeal);
-      gaps.push({ key: 'leadsCapt', label: 'Leads captured', current: `${Math.round(leadsCaptDim.value)}`, goal: `${Math.round(goals.leadsCapt)}`, detail: `${extra} more leads needed this period`, impact, tab: 'marketing' });
+      gaps.push({ key: 'leadsCapt', label: 'Leads captured', current: `${Math.round(leadsCaptDim.value)}`, goal: `${derivedLeadsGoal}`, detail: `${extra} more leads needed this period`, impact, tab: 'marketing' });
     }
     if (goals.speedToLead && speedDim?.value != null && goals.speedToLead < speedDim.value) {
       gaps.push({ key: 'speedToLead', label: 'First response', current: fmtH(speedDim.value), goal: fmtH(goals.speedToLead), detail: `${fmtH(Math.round(speedDim.value - goals.speedToLead))} above target`, impact: 0, tab: 'lead-response' });
@@ -431,32 +435,27 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
         {/* Pipeline numbers: goal close (hero) → current pipeline → expected close */}
         {openPipelineValue > 0 && (
           <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: 16, borderLeft: '1px solid #F0F1F4', minWidth: 120 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
             {goalCloseValue !== null ? (
-              <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
-                <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
-                </div>
-                {currentCloseValue !== null && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
-                  </div>
-                )}
-              </>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
             ) : (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
-                <div style={{ fontSize: 26, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
-                {currentCloseValue !== null && (
-                  <div style={{ marginTop: 10 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
-                  </div>
-                )}
+                <div style={{ fontSize: 30, fontWeight: 800, color: '#ccc', lineHeight: 1 }}>—</div>
+                <button onClick={() => personalized ? setShowGoals(true) : setShowOnboarding(true)}
+                  style={{ fontSize: 10, color: '#6366F1', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 2, textDecoration: 'underline', display: 'block', textAlign: 'right' }}>
+                  Set your targets
+                </button>
               </>
+            )}
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
+              <div style={{ fontSize: goalCloseValue !== null ? 20 : 26, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
+            </div>
+            {currentCloseValue !== null && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
+                <div style={{ fontSize: goalCloseValue !== null ? 20 : 22, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
+              </div>
             )}
           </div>
         )}
@@ -534,7 +533,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
         <FunnelCard title="Marketing" subtitle="Leads captured -> qualified" grade={marketing.grade} dimensions={marketing.dimensions}
           locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification."
-          comparisons={marketingComparisons} goals={goals} showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
+          comparisons={marketingComparisons} goals={marketingGoals} showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
         <FunnelCard title="Sales" subtitle="Qualified lead -> closed deal" grade={sales.grade} dimensions={sales.dimensions}
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate."
           comparisons={salesComparisons} goals={goals} />
@@ -568,11 +567,11 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               </div>
             </div>
           ))}
-          {neededLeads > 0 && (
+          {derivedLeadsGoal != null && derivedLeadsGoal > 0 && leadsCaptDim?.value != null && (
             <div style={{ padding: '10px 20px', background: '#F7F8FA', borderTop: '1px solid #F3F4F6', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
-              To generate the new business component of your Goal Close Value, you need approximately <strong>{neededLeads.toLocaleString()} new leads</strong> per period.
-              {goals.leadsCapt && neededLeads > goals.leadsCapt && (
-                <span style={{ color: '#EF4444', marginLeft: 4 }}>Your current leads goal of {Math.round(goals.leadsCapt)} is short — consider raising it.</span>
+              To achieve your Goal Close Value, you need approximately <strong>{derivedLeadsGoal.toLocaleString()} new leads</strong> per period.
+              {derivedLeadsGoal > leadsCaptDim.value && (
+                <span style={{ color: '#EF4444', marginLeft: 4 }}>You're currently capturing {Math.round(leadsCaptDim.value)} — {Math.round(derivedLeadsGoal - leadsCaptDim.value)} short.</span>
               )}
             </div>
           )}
