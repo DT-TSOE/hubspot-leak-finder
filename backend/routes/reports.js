@@ -115,6 +115,21 @@ router.post('/interest', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// User-defined performance targets -- stored in session, drive goal-based meters.
+router.get('/goals', requireAuth, (req, res) => {
+  res.json(req.session.goals || {});
+});
+router.post('/goals', requireAuth, (req, res) => {
+  const allowed = ['followUpCoverage', 'winRate', 'speedToLead', 'salesCycle', 'leadToDeal'];
+  const goals = {};
+  for (const k of allowed) {
+    const v = parseFloat(req.body?.[k]);
+    if (!isNaN(v) && v > 0) goals[k] = v;
+  }
+  req.session.goals = goals;
+  res.json({ ok: true, goals });
+});
+
 // Onboarding profile (business type, hubs, revenue, challenge, goal) - used to
 // tune the scorecard weights. Stored in the signed session cookie (no DB).
 router.get('/onboarding', requireAuth, (req, res) => {

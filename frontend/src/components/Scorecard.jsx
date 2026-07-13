@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../utils/api';
 import Onboarding from './Onboarding';
+import GoalsModal from './GoalsModal';
 
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
 const fmt$k = n => n >= 1000 ? '$' + Math.round(n / 1000) + 'k' : '$' + Math.round(n);
@@ -32,14 +33,23 @@ function dimStatus(score) {
   return score >= 70 ? 'good' : score >= 40 ? 'watch' : 'critical';
 }
 
-function DimensionRow({ dim, comparison }) {
+function DimensionRow({ dim, comparison, goal }) {
   const status = dimStatus(dim.score);
   const s = status ? STATUS_STYLE[status] : null;
-  const mc = meterColor(dim.score);
   const tip = (dim.source || '') + (dim.sample ? `\nBased on ${dim.sample} records.` : '');
 
   if (dim.showMeter && dim.score != null) {
-    const fill = dim.meterFill != null ? dim.meterFill : dim.score;
+    const lowerIsBetter = dim.key === 'speedToLead' || dim.key === 'salesCycle';
+    let fill, mc;
+    if (goal != null && dim.value != null) {
+      fill = lowerIsBetter
+        ? Math.min(100, Math.round((goal / dim.value) * 100))
+        : Math.min(100, Math.round((dim.value / goal) * 100));
+      mc = fill >= 100 ? '#10B981' : fill >= 60 ? '#D97706' : '#EF4444';
+    } else {
+      fill = dim.meterFill != null ? dim.meterFill : dim.score;
+      mc = meterColor(dim.score);
+    }
     return (
       <div title={tip} style={{ padding: '10px 0', borderBottom: '1px solid #F7F8FA', cursor: 'help' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
@@ -79,7 +89,7 @@ const GA4_PREVIEW_ROWS = [
   { label: 'Top traffic channel', value: 'Organic search' },
 ];
 
-function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, comparisons, showGa4Cta, onTabChange }) {
+function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, comparisons, showGa4Cta, onTabChange, goals }) {
   const color = grade ? (GRADE_COLOR[grade] || '#ccc') : '#ccc';
   return (
     <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', position: 'relative', overflow: 'hidden' }}>
@@ -93,7 +103,7 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
         )}
       </div>
       <div style={{ filter: locked ? 'blur(5px)' : 'none', userSelect: locked ? 'none' : 'auto', pointerEvents: locked ? 'none' : 'auto' }} aria-hidden={locked}>
-        {dimensions.filter(d => !d.hidden).map(d => <DimensionRow key={d.key} dim={d} comparison={comparisons?.[d.key]} />)}
+        {dimensions.filter(d => !d.hidden).map(d => <DimensionRow key={d.key} dim={d} comparison={comparisons?.[d.key]} goal={goals?.[d.key]} />)}
       </div>
       {locked && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', background: 'rgba(255,255,255,.45)' }}>
@@ -192,6 +202,8 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showGoals, setShowGoals] = useState(false);
+  const [goals, setGoals] = useState({});
   const [interested, setInterested] = useState(false);
   const [showTriage, setShowTriage] = useState(false);
   const [triageContacts, setTriageContacts] = useState(null);
@@ -232,6 +244,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   }, [onScoreLoad, days]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
 
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn't build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Calculating your pipeline health...</div>;
@@ -241,6 +254,8 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   const mc = meterColor(overall.score);
   const lastMonthScore = (scoreDelta != null && overall.score != null) ? overall.score - scoreDelta : null;
 
+  const hasGoals = goals && Object.keys(goals).length > 0;
+
   // Period-over-period comparisons for marketing dimension rows
   const marketingComparisons = {};
   const leadsCaptDim = marketing?.dimensions?.find(d => d.key === 'leadsCapt');
@@ -249,14 +264,32 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
     const sign = diff > 0 ? '+' : '';
     marketingComparisons.leadsCapt = `${leadsCaptDim.prevValue} last 90d (${sign}${diff})`;
   }
+  if (goals.followUpCoverage) marketingComparisons.followUpCoverage = `Target: ${goals.followUpCoverage}%`;
 
-  // Best-customer comparisons for sales dimension rows
+  // Best-customer comparisons for sales dimension rows (goals override best-wins)
   const salesComparisons = {};
-  if (dealProfiles && !dealProfiles.insufficient) {
+  if (goals.winRate) salesComparisons.winRate = `Target: ${goals.winRate}%`;
+  if (goals.speedToLead) {
+    salesComparisons.speedToLead = `Target: ${fmtH(goals.speedToLead)}`;
+  } else if (dealProfiles && !dealProfiles.insufficient) {
     const fc = dealProfiles.fastestClose;
     if (fc?.speedHours?.median != null) salesComparisons.speedToLead = `Your fast wins: ${fmtH(fc.speedHours.median)}`;
+  }
+  if (goals.salesCycle) {
+    salesComparisons.salesCycle = `Target: ${fmtDays(goals.salesCycle)}`;
+  } else if (dealProfiles && !dealProfiles.insufficient) {
+    const fc = dealProfiles.fastestClose;
     if (fc?.cycleRange?.median != null) salesComparisons.salesCycle = `Your fast wins: ${fmtDays(fc.cycleRange.median)}`;
   }
+
+  // Revenue if you hit your targets (win-rate gap applied to closed-deal volume)
+  const winRateDim = sales?.dimensions?.find(d => d.key === 'winRate');
+  const goalRevenue = (hasGoals && goals.winRate && winRateDim?.value != null && goals.winRate > winRateDim.value && (winRateDim.sample || 0) > 0 && data.context?.avgDealSize)
+    ? Math.round((goals.winRate - winRateDim.value) / 100 * winRateDim.sample * data.context.avgDealSize)
+    : 0;
+  const showRevenue = goalRevenue > 0 || (revenueImpact?.total > 0);
+  const revenueAmount = goalRevenue > 0 ? goalRevenue : revenueImpact?.total;
+  const revenueLabel = goalRevenue > 0 ? 'Revenue if you hit targets' : 'Revenue opportunity';
 
   return (
     <div>
@@ -318,9 +351,10 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => setShowOnboarding(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#888', background: 'none', border: '1px solid #E2E5EA', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
+            <button onClick={() => personalized ? setShowGoals(true) : setShowOnboarding(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: hasGoals ? '#6366F1' : '#888', background: 'none', border: `1px solid ${hasGoals ? '#C7D2FE' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="13" y2="12"/><circle cx="6" cy="4" r="1.5" fill="white"/><circle cx="10" cy="8" r="1.5" fill="white"/><circle cx="6" cy="12" r="1.5" fill="white"/></svg>
-              Adjust to your business goals
+              {hasGoals ? 'Edit your targets' : 'Set your targets'}
             </button>
             <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#C2410C' : '#888', background: 'none', border: `1px solid ${showTriage ? '#FDE68A' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
               🧹 Clean your data{spamCount > 0 && <span style={{ color: '#059669', fontWeight: 600 }}> · {spamCount} filtered</span>}
@@ -328,12 +362,21 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           </div>
         </div>
 
-        {/* Revenue opportunity */}
-        {revenueImpact?.total > 0 && (
+        {/* Revenue opportunity / goal revenue */}
+        {showRevenue && (
           <HoverCard popover={
             <div>
-              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>Where this comes from</div>
-              {revenueImpact.items.map(i => (
+              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>{goalRevenue > 0 ? 'How this is calculated' : 'Where this comes from'}</div>
+              {goalRevenue > 0 ? (
+                <div style={{ marginBottom: 9 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontWeight: 700, marginBottom: 3 }}>
+                    <span>Win rate improvement</span><span style={{ color: '#34D399' }}>{fmt$(goalRevenue)}</span>
+                  </div>
+                  <div style={{ opacity: 0.75, fontWeight: 400 }}>
+                    Closing {goals.winRate}% of deals instead of {Math.round(winRateDim?.value || 0)}% -- on {winRateDim?.sample || 0} recent deals at your avg deal size.
+                  </div>
+                </div>
+              ) : revenueImpact?.items?.map(i => (
                 <div key={i.key} style={{ marginBottom: 9 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontWeight: 700, marginBottom: 3 }}>
                     <span>{i.title}</span><span style={{ color: '#34D399' }}>{fmt$(i.amount)}</span>
@@ -346,10 +389,10 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           }>
             <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 16, borderLeft: '1px solid #F0F1F4' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
-                Revenue opportunity
+                {revenueLabel}
                 <span style={{ fontSize: 10, color: '#aaa', fontWeight: 400, border: '1px solid #E2E5EA', borderRadius: '50%', width: 14, height: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>i</span>
               </div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(revenueImpact.total)}</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(revenueAmount)}</div>
             </div>
           </HoverCard>
         )}
@@ -427,10 +470,10 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
         <FunnelCard title="Marketing" subtitle="Leads captured -> qualified" grade={marketing.grade} dimensions={marketing.dimensions}
           locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification."
-          comparisons={marketingComparisons} showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
+          comparisons={marketingComparisons} goals={goals} showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
         <FunnelCard title="Sales" subtitle="Qualified lead -> closed deal" grade={sales.grade} dimensions={sales.dimensions}
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate."
-          comparisons={salesComparisons} />
+          comparisons={salesComparisons} goals={goals} />
       </div>
 
       {/* Best deals profile */}
@@ -477,7 +520,16 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       {showOnboarding && (
         <Onboarding
           onClose={() => { localStorage.setItem('pipechamp_onboard_dismissed', '1'); setShowOnboarding(false); }}
-          onComplete={() => { setShowOnboarding(false); setData(null); load(); }}
+          onComplete={() => { setShowOnboarding(false); setData(null); load(); setShowGoals(true); }}
+        />
+      )}
+      {showGoals && data && (
+        <GoalsModal
+          data={data}
+          dealProfiles={dealProfiles}
+          existingGoals={goals}
+          onClose={() => setShowGoals(false)}
+          onSave={g => { setGoals(g); setShowGoals(false); }}
         />
       )}
     </div>
