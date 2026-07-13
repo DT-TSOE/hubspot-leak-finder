@@ -356,7 +356,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days, onGapsLoad }
     }
     gaps.sort((a, b) => b.impact - a.impact);
   }
-  useEffect(() => { onGapsLoad?.(gaps); }, [gaps.length, onGapsLoad]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { onGapsLoad?.(gaps); }, [gaps.length, onGapsLoad]);
 
   return (
     <div>
