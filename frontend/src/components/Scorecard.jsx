@@ -209,7 +209,7 @@ function HoverCard({ children, popover }) {
   );
 }
 
-export default function Scorecard({ onScoreLoad, onTabChange, days }) {
+export default function Scorecard({ onScoreLoad, onTabChange, days, onGapsLoad }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -300,7 +300,11 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   const winRateDim = sales?.dimensions?.find(d => d.key === 'winRate');
   const coverageDim = marketing?.dimensions?.find(d => d.key === 'followUpCoverage');
   const leadToDealDim = marketing?.dimensions?.find(d => d.key === 'leadToDeal');
+  const speedDim = sales?.dimensions?.find(d => d.key === 'speedToLead');
+  const cycleDim = sales?.dimensions?.find(d => d.key === 'salesCycle');
   const openPipelineValue = data.openPipelineValue || 0;
+  const avgDeal = data.context?.avgDealSize ?? 0;
+  const ldr = (leadToDealDim?.value ?? 0) / 100;
   const currentCloseValue = (winRateDim?.value != null && openPipelineValue > 0)
     ? Math.round(openPipelineValue * winRateDim.value / 100)
     : null;
@@ -309,8 +313,6 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   let goalCloseValue = null;
   if (hasGoals && openPipelineValue > 0) {
     const goalWR = goals.winRate ?? winRateDim?.value ?? 0;
-    const ldr = (leadToDealDim?.value ?? 0) / 100;
-    const avgDeal = data.context?.avgDealSize ?? 0;
     let total = openPipelineValue * goalWR / 100;
     if (goals.followUpCoverage && coverageDim?.value != null && (coverageDim.sample || 0) > 0) {
       const coverageGain = Math.max(0, goals.followUpCoverage - coverageDim.value);
@@ -322,6 +324,39 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
     }
     goalCloseValue = Math.round(total);
   }
+
+  // Leads needed to hit goal close value (new business component only)
+  const neededLeads = (goalCloseValue && avgDeal > 0 && ldr > 0 && goals.winRate)
+    ? Math.round(Math.max(0, goalCloseValue - openPipelineValue * goals.winRate / 100) / avgDeal / (goals.winRate / 100) / ldr)
+    : 0;
+
+  // Gaps: where current metrics fall short of goals, sorted by revenue impact
+  const gaps = [];
+  if (hasGoals && avgDeal > 0) {
+    const goalWR = (goals.winRate ?? winRateDim?.value ?? 0) / 100;
+    if (goals.winRate && winRateDim?.value != null && goals.winRate > winRateDim.value) {
+      const impact = Math.round((goals.winRate - winRateDim.value) / 100 * (winRateDim.sample || 0) * avgDeal);
+      gaps.push({ key: 'winRate', label: 'Win rate', current: `${Math.round(winRateDim.value)}%`, goal: `${goals.winRate}%`, detail: `${goals.winRate - Math.round(winRateDim.value)}pt gap to close`, impact, tab: 'revenue' });
+    }
+    if (goals.followUpCoverage && coverageDim?.value != null && goals.followUpCoverage > coverageDim.value) {
+      const extra = (coverageDim.sample || 0) * (goals.followUpCoverage - coverageDim.value) / 100;
+      const impact = Math.round(extra * ldr * goalWR * avgDeal);
+      gaps.push({ key: 'followUpCoverage', label: 'Lead outreach', current: `${Math.round(coverageDim.value)}%`, goal: `${goals.followUpCoverage}%`, detail: `${Math.round(extra)} more leads need a first touch`, impact, tab: 'lead-response' });
+    }
+    if (goals.leadsCapt && leadsCaptDim?.value != null && goals.leadsCapt > leadsCaptDim.value) {
+      const extra = Math.round(goals.leadsCapt - leadsCaptDim.value);
+      const impact = Math.round(extra * ldr * goalWR * avgDeal);
+      gaps.push({ key: 'leadsCapt', label: 'Leads captured', current: `${Math.round(leadsCaptDim.value)}`, goal: `${Math.round(goals.leadsCapt)}`, detail: `${extra} more leads needed this period`, impact, tab: 'marketing' });
+    }
+    if (goals.speedToLead && speedDim?.value != null && goals.speedToLead < speedDim.value) {
+      gaps.push({ key: 'speedToLead', label: 'First response', current: fmtH(speedDim.value), goal: fmtH(goals.speedToLead), detail: `${fmtH(Math.round(speedDim.value - goals.speedToLead))} above target`, impact: 0, tab: 'lead-response' });
+    }
+    if (goals.salesCycle && cycleDim?.value != null && goals.salesCycle < cycleDim.value) {
+      gaps.push({ key: 'salesCycle', label: 'Sales cycle', current: fmtDays(cycleDim.value), goal: fmtDays(goals.salesCycle), detail: `${fmtDays(Math.round(cycleDim.value - goals.salesCycle))} above target`, impact: 0, tab: 'revenue' });
+    }
+    gaps.sort((a, b) => b.impact - a.impact);
+  }
+  useEffect(() => { onGapsLoad?.(gaps); }, [gaps.length, onGapsLoad]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -394,22 +429,35 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           </div>
         </div>
 
-        {/* Current pipeline + expected close + goal close */}
+        {/* Pipeline numbers: goal close (hero) → current pipeline → expected close */}
         {openPipelineValue > 0 && (
-          <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: 16, borderLeft: '1px solid #F0F1F4', minWidth: 110 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
-            {currentCloseValue !== null && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
-              </div>
-            )}
-            {goalCloseValue !== null && (
-              <div style={{ marginTop: 10 }}>
+          <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: 16, borderLeft: '1px solid #F0F1F4', minWidth: 120 }}>
+            {goalCloseValue !== null ? (
+              <>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
-              </div>
+                <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
+                </div>
+                {currentCloseValue !== null && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
+                {currentCloseValue !== null && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -492,6 +540,50 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate."
           comparisons={salesComparisons} goals={goals} />
       </div>
+
+      {/* Gaps in your plan */}
+      {hasGoals && gaps.length > 0 && (
+        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, marginBottom: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Gaps in your plan</div>
+            <div style={{ fontSize: 11, color: '#aaa' }}>biggest revenue impact first</div>
+          </div>
+          {gaps.map((gap, i) => (
+            <div key={gap.key} onClick={() => gap.tab && onTabChange?.(gap.tab)}
+              style={{ display: 'flex', gap: 14, padding: '12px 20px', borderBottom: i < gaps.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center', cursor: gap.tab ? 'pointer' : 'default' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{gap.label}</span>
+                  <span style={{ fontSize: 11.5, color: '#aaa' }}>{gap.current} → {gap.goal}</span>
+                </div>
+                <div style={{ fontSize: 12, color: '#666' }}>{gap.detail}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                {gap.impact > 0 && (
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#059669' }}>{fmt$(gap.impact)}</div>
+                    <div style={{ fontSize: 10, color: '#aaa' }}>revenue impact</div>
+                  </div>
+                )}
+                {gap.tab && <span style={{ fontSize: 12, color: '#ccc' }}>→</span>}
+              </div>
+            </div>
+          ))}
+          {neededLeads > 0 && (
+            <div style={{ padding: '10px 20px', background: '#F7F8FA', borderTop: '1px solid #F3F4F6', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
+              To generate the new business component of your Goal Close Value, you need approximately <strong>{neededLeads.toLocaleString()} new leads</strong> per period.
+              {goals.leadsCapt && neededLeads > goals.leadsCapt && (
+                <span style={{ color: '#EF4444', marginLeft: 4 }}>Your current leads goal of {Math.round(goals.leadsCapt)} is short — consider raising it.</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {hasGoals && gaps.length === 0 && (
+        <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 18px', marginBottom: 12, fontSize: 13, color: '#166534', fontWeight: 600 }}>
+          All your targets are on track
+        </div>
+      )}
 
       {/* Best deals profile */}
       {dealProfiles && !dealProfiles.insufficient && (
