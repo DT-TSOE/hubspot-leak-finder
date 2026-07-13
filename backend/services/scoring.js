@@ -439,6 +439,7 @@ function buildScorecard(data, profile) {
     sales: { score: salesScore, grade: letterGrade(salesScore), dimensions: salesDims, weight: W.split.sales, locked: W.locked === 'sales' },
     dealStageConversion,
     revenueImpact,
+    openPipelineValue: openPipeline.value || 0,
     context: { avgDealSize },
     tunedFor: W.tunedFor,
     methodology: W.methodology,

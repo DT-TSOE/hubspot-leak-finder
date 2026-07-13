@@ -296,14 +296,14 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
     if (fc?.cycleRange?.median != null) salesComparisons.salesCycle = `Your fast wins: ${fmtDays(fc.cycleRange.median)}`;
   }
 
-  // Revenue if you hit your targets (win-rate gap applied to closed-deal volume)
   const winRateDim = sales?.dimensions?.find(d => d.key === 'winRate');
-  const goalRevenue = (hasGoals && goals.winRate && winRateDim?.value != null && goals.winRate > winRateDim.value && (winRateDim.sample || 0) > 0 && data.context?.avgDealSize)
-    ? Math.round((goals.winRate - winRateDim.value) / 100 * winRateDim.sample * data.context.avgDealSize)
-    : 0;
-  const showRevenue = goalRevenue > 0 || (revenueImpact?.total > 0);
-  const revenueAmount = goalRevenue > 0 ? goalRevenue : revenueImpact?.total;
-  const revenueLabel = goalRevenue > 0 ? 'Revenue uplift at goal' : 'Current pipeline value';
+  const openPipelineValue = data.openPipelineValue || 0;
+  const goalCloseValue = (goals.winRate && openPipelineValue > 0)
+    ? Math.round(openPipelineValue * goals.winRate / 100)
+    : null;
+  const currentCloseValue = (winRateDim?.value != null && openPipelineValue > 0)
+    ? Math.round(openPipelineValue * winRateDim.value / 100)
+    : null;
 
   return (
     <div>
@@ -376,39 +376,21 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           </div>
         </div>
 
-        {/* Revenue opportunity / goal revenue */}
-        {showRevenue && (
-          <HoverCard popover={
-            <div>
-              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12 }}>{goalRevenue > 0 ? 'How this is calculated' : 'Where this comes from'}</div>
-              {goalRevenue > 0 ? (
-                <div style={{ marginBottom: 9 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontWeight: 700, marginBottom: 3 }}>
-                    <span>Win rate improvement</span><span style={{ color: '#34D399' }}>{fmt$(goalRevenue)}</span>
-                  </div>
-                  <div style={{ opacity: 0.75, fontWeight: 400 }}>
-                    Closing {goals.winRate}% of deals instead of {Math.round(winRateDim?.value || 0)}% -- on {winRateDim?.sample || 0} recent deals at your avg deal size.
-                  </div>
-                </div>
-              ) : revenueImpact?.items?.map(i => (
-                <div key={i.key} style={{ marginBottom: 9 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontWeight: 700, marginBottom: 3 }}>
-                    <span>{i.title}</span><span style={{ color: '#34D399' }}>{fmt$(i.amount)}</span>
-                  </div>
-                  <div style={{ opacity: 0.75, fontWeight: 400 }}>{i.how}</div>
-                </div>
-              ))}
-              <div style={{ opacity: 0.5, marginTop: 6, fontSize: 10, borderTop: '1px solid rgba(255,255,255,.15)', paddingTop: 6 }}>Calculated from your actual deals and contacts.</div>
-            </div>
-          }>
-            <div style={{ textAlign: 'right', flexShrink: 0, cursor: 'help', paddingLeft: 16, borderLeft: '1px solid #F0F1F4' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
-                {revenueLabel}
-                <span style={{ fontSize: 10, color: '#aaa', fontWeight: 400, border: '1px solid #E2E5EA', borderRadius: '50%', width: 14, height: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>i</span>
+        {/* Current pipeline + goal close value */}
+        {openPipelineValue > 0 && (
+          <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: 16, borderLeft: '1px solid #F0F1F4', minWidth: 110 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Current Pipeline</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(openPipelineValue)}</div>
+            {goalCloseValue !== null && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
+                {currentCloseValue !== null && (
+                  <div style={{ fontSize: 10, color: '#aaa', marginTop: 3 }}>vs {fmt$(currentCloseValue)} at current rate</div>
+                )}
               </div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(revenueAmount)}</div>
-            </div>
-          </HoverCard>
+            )}
+          </div>
         )}
       </div>
 
