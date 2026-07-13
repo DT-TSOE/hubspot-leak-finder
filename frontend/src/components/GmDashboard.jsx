@@ -3,14 +3,15 @@ import { api } from '../utils/api';
 import Scorecard from './Scorecard';
 
 
-export default function GmDashboard({ onScoreLoad, onTabChange }) {
+export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let mounted = true;
-    api.getGmDashboard()
+    setLoading(true);
+    api.getGmDashboard(days)
       .then(d => {
         if (mounted) {
           setData(d);
@@ -19,7 +20,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
       })
       .catch(e => { if (mounted) { setError(e.message); setLoading(false); } });
     return () => { mounted = false; };
-  }, []);
+  }, [days]);
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Building your pipeline health report…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
@@ -36,7 +37,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange }) {
   return (
     <div>
       {/* Two-funnel scorecard: overall grade + marketing/sales + deal-stage conversion */}
-      <Scorecard onScoreLoad={onScoreLoad} onTabChange={onTabChange} />
+      <Scorecard onScoreLoad={onScoreLoad} onTabChange={onTabChange} days={days} />
 
       {/* Key metrics -- 4-up row */}
       {data.metricCards?.length > 0 && (

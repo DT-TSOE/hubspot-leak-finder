@@ -188,7 +188,7 @@ function HoverCard({ children, popover }) {
   );
 }
 
-export default function Scorecard({ onScoreLoad, onTabChange }) {
+export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -222,14 +222,14 @@ export default function Scorecard({ onScoreLoad, onTabChange }) {
   };
 
   const load = useCallback(() => {
-    return api.getScorecard()
+    return api.getScorecard(days)
       .then(d => {
         setData(d);
         if (onScoreLoad && d.overall) onScoreLoad(d.overall);
         if (!d.personalized && !localStorage.getItem('pipechamp_onboard_dismissed')) setShowOnboarding(true);
       })
       .catch(e => setError(e.message));
-  }, [onScoreLoad]);
+  }, [onScoreLoad, days]);
 
   useEffect(() => { load(); }, [load]);
 

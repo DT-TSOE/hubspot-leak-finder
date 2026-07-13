@@ -17,8 +17,8 @@ const { findStuckRecords } = require('./pipelineHealth');
 // --- Benchmarks (v1 published defaults; swap for per-industry data later) ----
 const BENCHMARKS = {
   speedToLead: {
-    source: 'Median time from when a lead is created to when your team first reached out. Faster is better -- leads go cold quickly.',
-    label: 'Median first-response time',
+    source: 'Average time from when a lead is created to when your team first reached out. Faster is better -- leads go cold quickly.',
+    label: 'Avg first-response time',
   },
   leadToDeal: {
     par: 30,

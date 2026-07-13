@@ -55,7 +55,15 @@ router.post('/spam', requireAuth, (req, res) => {
 router.get('/scorecard', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
-    const { contacts, deals, dealsWithContacts, dealsWithHistory, pipelines } = await hs.getCachedData();
+    const { contacts: allContacts, deals: allDeals, dealsWithContacts: allDWC, dealsWithHistory: allDWH, pipelines } = await hs.getCachedData();
+    const { days, startDate, endDate } = req.query;
+
+    const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
+    const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
+    const filteredIds = new Set(deals.map(d => d.id));
+    const dealsWithContacts = allDWC.filter(d => filteredIds.has(d.id));
+    const dealsWithHistory = allDWH.filter(d => filteredIds.has(d.id));
+
     const scorecard = buildScorecard({ contacts, deals, dealsWithContacts, dealsWithHistory, pipelines }, req.session.onboarding);
     scorecard.recommendations = buildRecommendations(scorecard);
 
@@ -63,9 +71,9 @@ router.get('/scorecard', requireAuth, async (req, res) => {
     const stageHistoryById = Object.fromEntries((dealsWithHistory || []).map(d => [d.id, d._stagesEntered || []]));
     scorecard.dealProfiles = buildDealProfiles(dealsWithContacts, contacts, stageHistoryById);
 
-    // Monthly snapshot + "vs last month" trend (no-ops until DB is provisioned).
+    // Monthly snapshot + "vs last month" trend -- only on unfiltered (all-time) view.
     let trend = null;
-    if (db.enabled()) {
+    if (db.enabled() && !days && !startDate && !endDate) {
       if (!req.session.portalId) req.session.portalId = await hs.getPortalId();
       const portalId = req.session.portalId;
       if (portalId) {
