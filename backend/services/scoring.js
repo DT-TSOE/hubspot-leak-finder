@@ -281,9 +281,15 @@ function computeDataDrivers(data) {
   return { sufficient: Object.keys(drivers).length > 0, drivers, notes };
 }
 
+// Friendly labels for HubSpot's hs_analytics_source enum values
+const SOURCE_LABEL = s => {
+  const map = { ORGANIC_SEARCH: 'Organic Search', DIRECT_TRAFFIC: 'Direct', EMAIL_MARKETING: 'Email', SOCIAL_MEDIA: 'Social Media', REFERRALS: 'Referrals', PAID_SEARCH: 'Paid Search', PAID_SOCIAL: 'Paid Social', OFFLINE: 'Offline', OTHER_CAMPAIGNS: 'Other Campaigns' };
+  return map[s] || (s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : null);
+};
+
 // --- The scorecard -----------------------------------------------------------
 function buildScorecard(data, profile) {
-  const { contacts = [], deals = [], dealsWithContacts = [], dealsWithHistory = [], pipelines = [] } = data;
+  const { contacts = [], deals = [], dealsWithContacts = [], dealsWithHistory = [], pipelines = [], allDealsWithContacts, prevPeriodLeads, filterActive } = data;
   const W = resolveScoreProfile(profile);
 
   // Blend in data-driven drivers (what actually separates their wins from losses).
@@ -306,13 +312,17 @@ function buildScorecard(data, profile) {
   const speed = calc.calculateTimeToFirstTouch(contacts);
   const cycle = calc.calculateSalesCycle(deals);
 
-  // Lead -> Deal created: of all contacts, % who have at least one associated deal
+  // Lead -> Deal created: of contacts in the period, % who have any associated deal
+  // Use allDealsWithContacts (not date-filtered) so we catch open/future deals too
+  const dwcForLeadToDeal = allDealsWithContacts || dealsWithContacts;
   const contactsWithDealIds = new Set();
-  for (const d of dealsWithContacts) {
+  for (const d of dwcForLeadToDeal) {
     (d._contactIds || []).forEach(id => contactsWithDealIds.add(id));
   }
+  const contactIdsInPeriod = new Set(contacts.map(c => c.id));
+  const leadsWithDeals = [...contactsWithDealIds].filter(id => contactIdsInPeriod.has(id)).length;
   const leadToDealPct = contacts.length > 0
-    ? Math.round((contactsWithDealIds.size / contacts.length) * 100)
+    ? Math.round((leadsWithDeals / contacts.length) * 100)
     : null;
   // Overall lead -> customer rate (lifecycle-based), used for revenue-impact estimates only.
   const leadToCustomer = calc.calculateStageConversion(contacts, 'lead', 'customer');
@@ -326,7 +336,7 @@ function buildScorecard(data, profile) {
   const topSourceShare = totalSourceContacts > 0 && topSourceEntry
     ? Math.round((topSourceEntry.contacts / totalSourceContacts) * 100)
     : null;
-  const topSourceName = topSourceEntry?.label || null;
+  const topSourceName = topSourceEntry ? SOURCE_LABEL(topSourceEntry.source) : null;
 
   const dealStageConversion = calculateDealStageConversion(dealsWithHistory, pipelines);
   // Sales-side deal-stage score: weakest open-stage conversion in the primary pipeline.
@@ -342,26 +352,35 @@ function buildScorecard(data, profile) {
   const stuck = findStuckRecords(contacts, deals).filter(r => r.type === 'deal');
   const openPipeline = calc.calculateOpenPipelineValue(deals);
   const stalledValue = stuck.reduce((s, d) => s + (d.revenueAtRisk || 0), 0);
-  const stalledScore = openPipeline.value > 0
-    ? Math.round(clamp(100 - (stalledValue / openPipeline.value) * 100))
+  const stalledPct = openPipeline.value > 0
+    ? Math.round((stalledValue / openPipeline.value) * 100)
     : null;
+  const stalledScore = stalledPct !== null ? Math.round(clamp(100 - stalledPct)) : null;
 
   const fmtHours = h => h == null ? null : h < 1 ? `${Math.round(h * 60)}m` : h < 24 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
   const fmtDays = d => d == null ? null : d < 7 ? `${Math.round(d)}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
   const fmtPct = v => v == null ? null : `${Math.round(v)}%`;
 
-  // Leads captured in the last 90 days (informational -- no score, doesn't affect grade).
-  const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
-  const oneEightyDaysAgo = Date.now() - 180 * 24 * 3600 * 1000;
-  const recentLeads = contacts.filter(c => {
-    const cd = c.properties?.createdate;
-    return cd && new Date(cd).getTime() > ninetyDaysAgo;
-  }).length;
-  const prevRecentLeads = contacts.filter(c => {
-    const cd = c.properties?.createdate;
-    const t = new Date(cd).getTime();
-    return cd && t > oneEightyDaysAgo && t <= ninetyDaysAgo;
-  }).length;
+  // Leads captured: when a date filter is active, contacts are already filtered
+  // so recentLeads = contacts.length and prevPeriodLeads comes from the route.
+  // Without a filter, use the default last-90-days window.
+  let recentLeads, prevRecentLeads;
+  if (filterActive) {
+    recentLeads = contacts.length;
+    prevRecentLeads = prevPeriodLeads ?? 0;
+  } else {
+    const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
+    const oneEightyDaysAgo = Date.now() - 180 * 24 * 3600 * 1000;
+    recentLeads = contacts.filter(c => {
+      const cd = c.properties?.createdate;
+      return cd && new Date(cd).getTime() > ninetyDaysAgo;
+    }).length;
+    prevRecentLeads = contacts.filter(c => {
+      const cd = c.properties?.createdate;
+      const t = new Date(cd).getTime();
+      return cd && t > oneEightyDaysAgo && t <= ninetyDaysAgo;
+    }).length;
+  }
 
   // ---- Marketing dimensions (weights from resolved profile) ----
   const marketingDims = [
@@ -389,7 +408,8 @@ function buildScorecard(data, profile) {
       meterFill: winRate.value !== null ? Math.min(100, Math.round(winRate.value)) : null,
       showMeter: true, ...BENCHMARKS.winRate, sample: winRate.sample },
     { key: 'stalledDeals', weight: W.sales.stalledDeals, score: stalledScore,
-      value: stalledValue, displayValue: stuck.length > 0 ? `${stuck.length} stalled deal${stuck.length !== 1 ? 's' : ''}` : 'none stalled',
+      value: stalledPct,
+      displayValue: stalledPct !== null ? `${stalledPct}% stalled${stuck.length > 0 ? ` · ${stuck.length} deal${stuck.length !== 1 ? 's' : ''}` : ''}` : (stuck.length > 0 ? `${stuck.length} stalled` : 'none stalled'),
       meterFill: stalledScore,
       showMeter: true, ...BENCHMARKS.stalledDeals, sample: stuck.length },
     { key: 'speedToLead', weight: W.sales.speedToLead, score: scoreSpeedToLead(speed.mean ?? speed.value),

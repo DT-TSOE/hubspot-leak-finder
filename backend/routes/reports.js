@@ -64,7 +64,29 @@ router.get('/scorecard', requireAuth, async (req, res) => {
     const dealsWithContacts = allDWC.filter(d => filteredIds.has(d.id));
     const dealsWithHistory = allDWH.filter(d => filteredIds.has(d.id));
 
-    const scorecard = buildScorecard({ contacts, deals, dealsWithContacts, dealsWithHistory, pipelines }, req.session.onboarding);
+    // Previous-period lead count: same window length, shifted back one period
+    const filterActive = !!(days || startDate);
+    let prevPeriodLeads = null;
+    if (filterActive) {
+      if (days) {
+        const daysMs = parseInt(days) * 86400000;
+        const periodStart = Date.now() - daysMs;
+        prevPeriodLeads = allContacts.filter(c => {
+          const t = new Date(c.properties?.createdate || 0).getTime();
+          return t >= periodStart - daysMs && t < periodStart;
+        }).length;
+      } else if (startDate && endDate) {
+        const start = new Date(startDate).getTime();
+        const end = new Date(endDate).getTime() + 86400000;
+        const duration = end - start;
+        prevPeriodLeads = allContacts.filter(c => {
+          const t = new Date(c.properties?.createdate || 0).getTime();
+          return t >= start - duration && t < start;
+        }).length;
+      }
+    }
+
+    const scorecard = buildScorecard({ contacts, deals, dealsWithContacts, dealsWithHistory, pipelines, allDealsWithContacts: allDWC, prevPeriodLeads, filterActive }, req.session.onboarding);
     scorecard.recommendations = buildRecommendations(scorecard);
 
     // Winning-deal profiles (behavioral). Stage discipline needs history keyed by deal id.
