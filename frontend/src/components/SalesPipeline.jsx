@@ -157,7 +157,6 @@ export default function SalesPipeline({ funnelData, days }) {
               <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Deal funnel</div>
               {pipelines.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: '#aaa' }}>Showing:</span>
                   {pipelines.map((p, i) => {
                     const on = i === Math.min(pipelineIdx, pipelines.length - 1);
                     return (
