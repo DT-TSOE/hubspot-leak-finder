@@ -43,17 +43,24 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
   const impressionsVal = imprOn ? gsc.impressions.toLocaleString() : (leadCount > 0 ? leadCount * 420 : 48200).toLocaleString();
   const trafficVal = trafficOn ? ga4.totalSessions.toLocaleString() : (leadCount > 0 ? leadCount * 26 : 3140).toLocaleString();
 
-  const funnelBar = (label, val, width, locked) => (
-    <div key={label} onClick={() => locked && onNavigate?.('integrations')} title={locked ? 'Connect to unlock' : undefined}
-      style={{ position: 'relative', width, margin: '0 auto 6px', height: 38, borderRadius: 7, cursor: locked ? 'pointer' : 'default', overflow: 'hidden',
-        background: locked ? '#EEF1F5' : '#EFF4FF', border: `1px ${locked ? 'dashed #CBD5E1' : 'solid #BFD4FF'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px' }}>
-      <span style={{ fontSize: 12.5, fontWeight: 600, color: locked ? '#7A8493' : '#1D4ED8', filter: locked ? 'blur(2px)' : 'none' }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 800, color: locked ? '#5B6472' : '#111', filter: locked ? 'blur(2.5px)' : 'none' }}>{val}</span>
-      {locked && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <span style={{ fontSize: 12 }}>🔒</span><span style={{ fontSize: 11, fontWeight: 700, color: '#FF7A59' }}>Unlock →</span>
-        </div>
-      )}
+  const funnelBar = (label, val, pctWidth, locked, ctaLabel) => (
+    <div key={label} style={{ marginBottom: 6 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: locked ? '#999' : '#111', filter: locked ? 'blur(2px)' : 'none' }}>{label}</span>
+        <span style={{ fontSize: 12, color: locked ? '#bbb' : '#888', filter: locked ? 'blur(2.5px)' : 'none' }}>{val}</span>
+      </div>
+      <div style={{ position: 'relative', height: 28, borderRadius: 6, background: '#F3F4F6', overflow: 'hidden', cursor: locked ? 'pointer' : 'default' }}
+        onClick={locked ? () => onNavigate?.('integrations') : undefined}>
+        {!locked && <div style={{ height: '100%', width: pctWidth, borderRadius: 6, background: '#BFD4FF' }} />}
+        {locked && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(247,248,250,.6)' }}>
+            <button onClick={e => { e.stopPropagation(); onNavigate?.('integrations'); }}
+              style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,.18)' }}>
+              {ctaLabel} →
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -84,20 +91,26 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
 
       {/* Connect prompt when neither Google source is connected */}
       {nothingConnected && (
-        <div style={{ ...CARD, borderStyle: 'dashed', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ display: 'flex', gap: 8, flex: 1 }}>
-            {[{ label: 'Impressions', val: impressionsVal }, { label: 'Traffic', val: trafficVal }].map(s => (
-              <div key={s.label} style={{ position: 'relative', flex: 1, textAlign: 'center', padding: '10px 8px', background: '#F7F8FA', borderRadius: 8, overflow: 'hidden' }}>
-                <div style={{ fontSize: 10, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.05em' }}>{s.label}</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#5B6472', filter: 'blur(2.5px)', userSelect: 'none' }}>{s.val}</div>
-                <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 11 }}>🔒</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+          {[
+            { label: 'Search Impressions', val: impressionsVal, sub: 'clicks · CTR · top queries', cta: 'Connect Search Console', hint: 'via Google Search Console' },
+            { label: 'Website Traffic', val: trafficVal, sub: 'sessions · users · by channel', cta: 'Connect GA4', hint: 'via Google Analytics 4' },
+          ].map(s => (
+            <div key={s.label} style={{ position: 'relative', background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '16px', overflow: 'hidden' }}>
+              <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+                <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: '#111', marginBottom: 2 }}>{s.val}</div>
+                <div style={{ fontSize: 11, color: '#aaa' }}>{s.sub}</div>
               </div>
-            ))}
-          </div>
-          <div style={{ flex: 1.4, fontSize: 12, color: '#666', lineHeight: 1.5 }}>
-            <strong style={{ color: '#111' }}>See the top of your funnel.</strong> Connect Search Console for impressions and Google Analytics for traffic - on top of your HubSpot leads.
-            <button onClick={() => onNavigate?.('integrations')} style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 700, color: '#FF7A59', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>Connect Google →</button>
-          </div>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.5)' }}>
+                <button onClick={() => onNavigate?.('integrations')}
+                  style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,.18)' }}>
+                  {s.cta} →
+                </button>
+                <div style={{ fontSize: 10, color: '#999', marginTop: 5 }}>{s.hint}</div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -171,8 +184,8 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
       {/* Funnel */}
       <div style={CARD}>
         <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Acquisition funnel - Impressions → Traffic → Lead → MQL → SQL</div>
-        {funnelBar('Impressions', impressionsVal, '100%', !imprOn)}
-        {funnelBar('Traffic', trafficVal, '84%', !trafficOn)}
+        {funnelBar('Impressions', impressionsVal, '100%', !imprOn, 'Connect Search Console')}
+        {funnelBar('Traffic', trafficVal, '84%', !trafficOn, 'Connect GA4')}
         <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} stageContacts={funnel.stageContacts} />
       </div>
 

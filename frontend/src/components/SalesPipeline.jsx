@@ -10,10 +10,10 @@ const SALES_TIMING_KEYS = ['salesqualifiedlead_to_opportunity', 'opportunity_to_
 
 // Sales funnel: SQL → deal stages. Lifecycle SQL→Opp→Customer plus the real
 // deal-stage conversion table (fetched from the scorecard endpoint).
-export default function SalesPipeline({ funnelData }) {
+export default function SalesPipeline({ funnelData, days }) {
   const [scorecard, setScorecard] = useState(null);
   const [pipelineIdx, setPipelineIdx] = useState(0);
-  useEffect(() => { api.getScorecard().then(setScorecard).catch(() => {}); }, []);
+  useEffect(() => { api.getScorecard(days).then(setScorecard).catch(() => {}); }, [days]);
 
   if (!funnelData?.funnel) return <div style={{ textAlign: 'center', padding: '3rem', color: '#888', fontSize: 13 }}>Loading sales funnel…</div>;
   const { funnel } = funnelData;
@@ -39,11 +39,12 @@ export default function SalesPipeline({ funnelData }) {
       </div>
 
       <div style={CARD}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Sales funnel - SQL → Opportunity → Customer</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 2 }}>Lifecycle funnel — SQL → Opportunity → Customer</div>
+        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 10 }}>Based on HubSpot lifecycle stage tags. Accurate only if your team maintains lifecycle stages — deal conversion below is more reliable.</div>
         <FunnelChart funnelStages={stages} biggestLeak={funnel.biggestLeak} stageContacts={funnel.stageContacts} />
       </div>
 
-      {/* Real deal-stage conversion (created→won + per-stage) with pipeline picker */}
+      {/* Deal-stage conversion: of every deal that entered each stage, % that reached Won */}
       {scorecard?.dealStageConversion?.length > 0 && (() => {
         const pipelines = scorecard.dealStageConversion;
         const active = pipelines[Math.min(pipelineIdx, pipelines.length - 1)];

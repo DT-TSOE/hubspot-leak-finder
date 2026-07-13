@@ -386,7 +386,7 @@ export default function DashboardPage({ onDisconnect }) {
             <>
               {/* GROWTH FUNNEL - Marketing / Sales sub-tabs */}
               {section === 'growth-funnel' && (
-                <GrowthFunnel funnelData={funnelData} onNavigate={navigateTo} />
+                <GrowthFunnel funnelData={funnelData} onNavigate={navigateTo} days={days} />
               )}
 
               {/* AT RISK - Stage Aging + Lead Risk merged */}
