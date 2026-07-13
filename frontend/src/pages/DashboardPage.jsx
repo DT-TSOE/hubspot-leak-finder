@@ -48,7 +48,7 @@ const ALL_ITEMS = [
   ...NAV.filter(n => n.type === 'group').flatMap(g => g.items),
 ];
 
-const NO_DATE_SECTIONS = new Set(['ask-coach', 'integrations', 'exports']);
+const NO_DATE_SECTIONS = new Set(['ask-coach', 'integrations', 'exports', 'at-risk']);
 
 function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connected, insightCount, atRiskCount, healthScore }) {
   const colors = { free: { bg: '#F3F4F6', text: '#555' }, starter: { bg: '#EFF6FF', text: '#1D4ED8' }, pro: { bg: '#ECFDF5', text: '#059669' } };

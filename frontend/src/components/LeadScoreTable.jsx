@@ -27,21 +27,22 @@ export default function LeadScoreTable({ leads }) {
       </div>
       <div style={{ overflowX:'auto' }}>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
-          <thead><tr style={{ borderBottom:'1px solid #F3F4F6' }}>{['Contact','Stage','Score','Days in Stage','Touches','Flags'].map(h=><th key={h} style={{ textAlign:'left', padding:'7px 8px', fontSize:10, fontWeight:600, color:'#999', textTransform:'uppercase', letterSpacing:'.04em' }}>{h}</th>)}</tr></thead>
+          <thead><tr style={{ borderBottom:'1px solid #F3F4F6' }}>{['Contact','Owner','Stage','Score','Days in Stage','Touches','Flags'].map(h=><th key={h} style={{ textAlign:'left', padding:'7px 8px', fontSize:10, fontWeight:600, color:'#999', textTransform:'uppercase', letterSpacing:'.04em', whiteSpace:'nowrap' }}>{h}</th>)}</tr></thead>
           <tbody>
             {filtered.slice(0,50).map(l => {
               const s = RISK[l.risk];
               return (
                 <tr key={l.id} style={{ borderBottom:'0.5px solid #F9FAFB' }}>
                   <td style={{ padding:'9px 8px' }}><div style={{ fontWeight:500, color:'#111' }}>{l.name}</div><div style={{ fontSize:10, color:'#999' }}>{l.email}</div></td>
-                  <td style={{ padding:'9px 8px', color:'#666' }}>{l.stage}</td>
+                  <td style={{ padding:'9px 8px', color:'#666', whiteSpace:'nowrap' }}>{l.ownerName || <span style={{ color:'#ccc' }}>—</span>}</td>
+                  <td style={{ padding:'9px 8px', color:'#666', whiteSpace:'nowrap' }}>{l.stage}</td>
                   <td style={{ padding:'9px 8px' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-                      <div style={{ width:34, height:34, borderRadius:'50%', background:s.bg, border:`2px solid ${s.border}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:s.text }}>{l.score}</div>
-                      <span style={{ fontSize:10, color:s.text, fontWeight:500 }}>{s.label}</span>
+                      <div style={{ width:34, height:34, minWidth:34, minHeight:34, flexShrink:0, borderRadius:'50%', background:s.bg, border:`2px solid ${s.border}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:s.text }}>{l.score}</div>
+                      <span style={{ fontSize:10, color:s.text, fontWeight:500, whiteSpace:'nowrap' }}>{s.label}</span>
                     </div>
                   </td>
-                  <td style={{ padding:'9px 8px', color:l.daysInStage>30?'#EF4444':'#666' }}>{l.daysInStage}d</td>
+                  <td style={{ padding:'9px 8px', color:l.daysInStage>30?'#EF4444':'#666', whiteSpace:'nowrap' }}>{l.daysInStage}d</td>
                   <td style={{ padding:'9px 8px', color:l.touches===0?'#EF4444':'#666' }}>{l.touches}</td>
                   <td style={{ padding:'9px 8px' }}>
                     <div style={{ display:'flex', flexWrap:'wrap', gap:3 }}>

@@ -41,6 +41,7 @@ function scoreLeads(contacts) {
       risk: score >= 60 ? 'high' : score >= 35 ? 'medium' : 'low',
       flags, daysInStage, touches, daysSinceContact: daysSince,
       source: props.hs_analytics_source || 'Unknown',
+      ownerId: props.hubspot_owner_id || null,
     });
   }
 
