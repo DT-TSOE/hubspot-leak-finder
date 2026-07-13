@@ -10,6 +10,56 @@ const fmtDays = d => d == null ? '-' : d < 7 ? `${Math.round(d)}d` : d < 60 ? `$
 
 const SALES_TIMING_KEYS = ['salesqualifiedlead_to_opportunity', 'opportunity_to_customer'];
 
+const STAGE_COLORS = ['#6366F1', '#8B5CF6', '#A855F7', '#EC4899', '#F59E0B', '#10B981'];
+
+function DealFunnel({ pipeline }) {
+  if (!pipeline?.stages?.length) return null;
+  const stages = pipeline.stages.filter(s => s.everReached > 0);
+  if (stages.length < 2) return null;
+  const max = stages[0].everReached;
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      {stages.map((s, i) => {
+        const pct = max > 0 ? (s.everReached / max) * 100 : 0;
+        const prev = stages[i - 1];
+        const dropPct = prev ? Math.round(((prev.everReached - s.everReached) / prev.everReached) * 100) : null;
+        const dropColor = dropPct === null ? null : dropPct > 60 ? '#EF4444' : dropPct > 35 ? '#F59E0B' : '#10B981';
+        const color = STAGE_COLORS[i % STAGE_COLORS.length];
+        const convColor = s.conversionPct === null ? '#ccc' : s.conversionPct >= 30 ? '#059669' : s.conversionPct >= 15 ? '#D97706' : '#EF4444';
+
+        return (
+          <div key={s.stageId}>
+            {i > 0 && dropPct !== null && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0 3px 2px', marginBottom: 3 }}>
+                <div style={{ width: 2, height: 14, background: `${dropColor}50`, borderRadius: 1, marginLeft: 6, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: dropColor }}>↓ {dropPct}% drop-off</span>
+                <span style={{ fontSize: 11, color: '#aaa' }}>({prev.everReached - s.everReached} left {prev.label})</span>
+              </div>
+            )}
+            <div style={{ marginBottom: i < stages.length - 1 ? 3 : 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{s.label}</span>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <span style={{ fontSize: 12, color: '#888' }}>{s.everReached.toLocaleString()} deals</span>
+                  {s.conversionPct !== null && (
+                    <span style={{ fontSize: 12, fontWeight: 700, color: convColor }}>{s.conversionPct}% won</span>
+                  )}
+                </div>
+              </div>
+              <div style={{ height: 26, borderRadius: 6, background: '#F3F4F6', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 6, display: 'flex', alignItems: 'center', paddingLeft: pct > 15 ? 10 : 0, transition: 'width .6s ease' }}>
+                  {pct > 15 && <span style={{ fontSize: 11, color: 'rgba(255,255,255,.9)', fontWeight: 700 }}>{Math.round(pct)}%</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function SalesPipeline({ funnelData, days }) {
   const [scorecard, setScorecard] = useState(null);
   const [pipelineIdx, setPipelineIdx] = useState(0);
@@ -56,7 +106,7 @@ export default function SalesPipeline({ funnelData, days }) {
         </div>
       )}
 
-      {/* Deal-stage conversion: the real win-rate funnel from deal history */}
+      {/* Deal-stage funnel + conversion table */}
       {scorecard?.dealStageConversion?.length > 0 ? (() => {
         const pipelines = scorecard.dealStageConversion;
         const active = pipelines[Math.min(pipelineIdx, pipelines.length - 1)];
@@ -77,6 +127,10 @@ export default function SalesPipeline({ funnelData, days }) {
                 })}
               </div>
             )}
+            <div style={CARD}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Deal stage funnel</div>
+              <DealFunnel pipeline={active} />
+            </div>
             <DealStageTable pipeline={active} />
           </div>
         );
