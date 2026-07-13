@@ -240,6 +240,7 @@ export default function DashboardPage({ onDisconnect }) {
   const [revenueData, setRevenueData] = useState(null);
   const [revenueLoading, setRevenueLoading] = useState(false);
   const [exporting, setExporting] = useState(null);
+  const [funnelTab, setFunnelTab] = useState('marketing');
   const [ga4Connected, setGa4Connected] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [healthScore, setHealthScore] = useState(null);
@@ -386,7 +387,7 @@ export default function DashboardPage({ onDisconnect }) {
             <>
               {/* GROWTH FUNNEL - Marketing / Sales sub-tabs */}
               {section === 'growth-funnel' && (
-                <GrowthFunnel funnelData={funnelData} onNavigate={navigateTo} days={days} />
+                <GrowthFunnel funnelData={funnelData} onNavigate={navigateTo} days={days} tab={funnelTab} onTab={setFunnelTab} />
               )}
 
               {/* AT RISK - Stage Aging + Lead Risk merged */}
