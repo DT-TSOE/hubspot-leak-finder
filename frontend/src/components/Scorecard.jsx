@@ -303,7 +303,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
     : 0;
   const showRevenue = goalRevenue > 0 || (revenueImpact?.total > 0);
   const revenueAmount = goalRevenue > 0 ? goalRevenue : revenueImpact?.total;
-  const revenueLabel = goalRevenue > 0 ? 'Revenue if you hit targets' : 'Revenue opportunity';
+  const revenueLabel = goalRevenue > 0 ? 'Revenue uplift at goal' : 'Current pipeline value';
 
   return (
     <div>
