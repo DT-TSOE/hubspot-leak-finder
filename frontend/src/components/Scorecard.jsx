@@ -298,13 +298,30 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   }
 
   const winRateDim = sales?.dimensions?.find(d => d.key === 'winRate');
+  const coverageDim = marketing?.dimensions?.find(d => d.key === 'followUpCoverage');
+  const leadToDealDim = marketing?.dimensions?.find(d => d.key === 'leadToDeal');
   const openPipelineValue = data.openPipelineValue || 0;
-  const goalCloseValue = (goals.winRate && openPipelineValue > 0)
-    ? Math.round(openPipelineValue * goals.winRate / 100)
-    : null;
   const currentCloseValue = (winRateDim?.value != null && openPipelineValue > 0)
     ? Math.round(openPipelineValue * winRateDim.value / 100)
     : null;
+
+  // Goal close value: pipeline at goal win rate + outreach coverage gains + leads volume gains
+  let goalCloseValue = null;
+  if (hasGoals && openPipelineValue > 0) {
+    const goalWR = goals.winRate ?? winRateDim?.value ?? 0;
+    const ldr = (leadToDealDim?.value ?? 0) / 100;
+    const avgDeal = data.context?.avgDealSize ?? 0;
+    let total = openPipelineValue * goalWR / 100;
+    if (goals.followUpCoverage && coverageDim?.value != null && (coverageDim.sample || 0) > 0) {
+      const coverageGain = Math.max(0, goals.followUpCoverage - coverageDim.value);
+      total += coverageDim.sample * (coverageGain / 100) * ldr * (goalWR / 100) * avgDeal;
+    }
+    if (goals.leadsCapt && leadsCaptDim?.value != null) {
+      const leadGain = Math.max(0, goals.leadsCapt - leadsCaptDim.value);
+      total += leadGain * ldr * (goalWR / 100) * avgDeal;
+    }
+    goalCloseValue = Math.round(total);
+  }
 
   return (
     <div>
@@ -386,14 +403,12 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Expected Close</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#555', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(currentCloseValue)}</div>
-                <div style={{ fontSize: 10, color: '#bbb', marginTop: 2 }}>at {Math.round(winRateDim.value)}% win rate</div>
               </div>
             )}
             {goalCloseValue !== null && (
               <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
-                <div style={{ fontSize: 10, color: '#aaa', marginTop: 2 }}>at {goals.winRate}% goal</div>
               </div>
             )}
           </div>
