@@ -295,11 +295,13 @@ router.get('/source-quality', requireAuth, async (req, res) => {
 router.get('/stage-aging', requireAuth, async (req, res) => {
   try {
     const hs = new HubSpotService(req.session.tokens.access_token, req.session.id);
-    const { contacts: allContacts, deals: allDeals } = await loadData(req);
+    const { contacts: allContacts, deals: allDeals } = await hs.getCachedData();
     const { days, startDate, endDate } = req.query;
     const contacts = applyDateFilter(allContacts, days, 'createdate', startDate, endDate);
-    const deals = applyDateFilter(allDeals, days, 'closedate', startDate, endDate);
-    const stuck = health.findStuckRecords(contacts, deals);
+    // Stuck deals are currently open — they have no closedate, so filtering by
+    // closedate would exclude all of them. Pass all deals unfiltered; findStuckRecords
+    // already skips closed/won/lost deals internally.
+    const stuck = health.findStuckRecords(contacts, allDeals);
 
     // Attribute at-risk records to their owner so a manager can see who's on top
     // of theirs and who's letting deals rot.
