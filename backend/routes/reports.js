@@ -120,7 +120,7 @@ router.get('/goals', requireAuth, (req, res) => {
   res.json(req.session.goals || {});
 });
 router.post('/goals', requireAuth, (req, res) => {
-  const allowed = ['followUpCoverage', 'winRate', 'speedToLead', 'salesCycle', 'leadToDeal'];
+  const allowed = ['followUpCoverage', 'winRate', 'speedToLead', 'salesCycle', 'leadToDeal', 'leadsCapt'];
   const goals = {};
   for (const k of allowed) {
     const v = parseFloat(req.body?.[k]);

@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import Scorecard from './Scorecard';
 
+const fmtH = h => h == null ? '-' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
+const fmtDays = d => d < 7 ? `${d}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
+
+const CARD_GOAL_KEY = { win_rate: 'winRate', sales_cycle: 'salesCycle', speed: 'speedToLead' };
+const CARD_GOAL_FMT = { win_rate: v => `${v}% goal`, sales_cycle: v => `${fmtDays(v)} goal`, speed: v => `${fmtH(v)} goal` };
 
 export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [goals, setGoals] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -21,6 +27,8 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
       .catch(e => { if (mounted) { setError(e.message); setLoading(false); } });
     return () => { mounted = false; };
   }, [days]);
+
+  useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
 
   if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Building your pipeline health report…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
@@ -44,12 +52,16 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
           {data.metricCards.filter(c => ['win_rate','sales_cycle','speed','biggest_leak'].includes(c.id)).map(card => {
             const dest = METRIC_TAB[card.id];
+            const gKey = CARD_GOAL_KEY[card.id];
+            const gVal = gKey && goals[gKey] != null ? goals[gKey] : null;
+            const goalLine = gVal != null && CARD_GOAL_FMT[card.id] ? CARD_GOAL_FMT[card.id](gVal) : null;
             return (
               <div key={card.id} onClick={() => dest && onTabChange?.(dest)}
                 style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'13px 16px', textAlign:'center', cursor: dest ? 'pointer' : 'default' }}>
                 <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>{card.label}</div>
                 <div style={{ fontSize:20, fontWeight:700, color:'#111' }}>{card.value}</div>
                 {card.sub && <div style={{ fontSize:11, color:'#888', marginTop:3 }}>{card.sub}</div>}
+                {goalLine && <div style={{ fontSize:11, color:'#6366F1', fontWeight:600, marginTop:3 }}>→ {goalLine}</div>}
                 {dest && <div style={{ fontSize:10, color:'#ccc', marginTop:4 }}>tap to explore →</div>}
               </div>
             );

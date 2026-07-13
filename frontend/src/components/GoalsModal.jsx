@@ -13,6 +13,7 @@ export default function GoalsModal({ data, dealProfiles, existingGoals, onClose,
   const speedDim = salesDims.find(d => d.key === 'speedToLead');
   const cycleDim = salesDims.find(d => d.key === 'salesCycle');
   const coverageDim = mktDims.find(d => d.key === 'followUpCoverage');
+  const leadsCaptDim = mktDims.find(d => d.key === 'leadsCapt');
 
   const METRICS = [
     {
@@ -58,6 +59,17 @@ export default function GoalsModal({ data, dealProfiles, existingGoals, onClose,
       suggestedNote: fc?.cycleRange?.median != null ? 'your fastest wins' : 'best practice',
       min: 1, max: 365, step: 1,
       lowerIsBetter: true,
+    },
+    {
+      key: 'leadsCapt',
+      label: 'New leads per 90 days',
+      unit: 'leads',
+      current: leadsCaptDim?.value != null ? Math.round(leadsCaptDim.value) : null,
+      currentFmt: v => v != null ? `${v}` : 'No data',
+      suggested: leadsCaptDim?.value != null ? Math.max(10, Math.round(leadsCaptDim.value * 1.2)) : 50,
+      suggestedNote: '+20% growth',
+      min: 1, max: 10000, step: 1,
+      lowerIsBetter: false,
     },
   ];
 

@@ -37,9 +37,10 @@ function DimensionRow({ dim, comparison, goal }) {
   const status = dimStatus(dim.score);
   const s = status ? STATUS_STYLE[status] : null;
   const tip = (dim.source || '') + (dim.sample ? `\nBased on ${dim.sample} records.` : '');
+  const lowerIsBetter = dim.key === 'speedToLead' || dim.key === 'salesCycle';
+  const hasMeter = (dim.showMeter && dim.score != null) || (goal != null && dim.value != null);
 
-  if (dim.showMeter && dim.score != null) {
-    const lowerIsBetter = dim.key === 'speedToLead' || dim.key === 'salesCycle';
+  if (hasMeter) {
     let fill, mc;
     if (goal != null && dim.value != null) {
       fill = lowerIsBetter
@@ -50,11 +51,21 @@ function DimensionRow({ dim, comparison, goal }) {
       fill = dim.meterFill != null ? dim.meterFill : dim.score;
       mc = meterColor(dim.score);
     }
+    const goalTag = goal != null ? (() => {
+      if (dim.key === 'leadsCapt') return `/ ${Math.round(goal)}`;
+      if (dim.key === 'followUpCoverage' || dim.key === 'winRate') return `/ ${goal}%`;
+      if (dim.key === 'speedToLead') return `/ ${fmtH(goal)}`;
+      if (dim.key === 'salesCycle') return `/ ${fmtDays(goal)}`;
+      return null;
+    })() : null;
     return (
       <div title={tip} style={{ padding: '10px 0', borderBottom: '1px solid #F7F8FA', cursor: 'help' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
           <div style={{ fontSize: 11.5, color: '#888' }}>{dim.label}</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{dim.displayValue || 'No data'}</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>
+            {dim.displayValue || 'No data'}
+            {goalTag && <span style={{ fontSize: 11, fontWeight: 400, color: '#bbb', marginLeft: 4 }}>{goalTag}</span>}
+          </div>
         </div>
         <div style={{ position: 'relative', height: 6, borderRadius: 4, background: '#F0F1F4', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(239,68,68,.13)' }} />
@@ -259,7 +270,10 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   // Period-over-period comparisons for marketing dimension rows
   const marketingComparisons = {};
   const leadsCaptDim = marketing?.dimensions?.find(d => d.key === 'leadsCapt');
-  if (leadsCaptDim?.prevValue != null && leadsCaptDim?.value != null) {
+  if (goals.leadsCapt && leadsCaptDim?.value != null) {
+    const pct = Math.min(100, Math.round((leadsCaptDim.value / goals.leadsCapt) * 100));
+    marketingComparisons.leadsCapt = `${pct}% of ${Math.round(goals.leadsCapt)} goal`;
+  } else if (leadsCaptDim?.prevValue != null && leadsCaptDim?.value != null) {
     const diff = leadsCaptDim.value - leadsCaptDim.prevValue;
     const sign = diff > 0 ? '+' : '';
     marketingComparisons.leadsCapt = `${leadsCaptDim.prevValue} last 90d (${sign}${diff})`;
