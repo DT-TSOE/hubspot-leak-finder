@@ -47,28 +47,6 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
       {/* Two-funnel scorecard: overall grade + marketing/sales + deal-stage conversion */}
       <Scorecard onScoreLoad={onScoreLoad} onTabChange={onTabChange} days={days} />
 
-      {/* Key metrics -- 4-up row */}
-      {data.metricCards?.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
-          {data.metricCards.filter(c => ['win_rate','sales_cycle','speed','biggest_leak'].includes(c.id)).map(card => {
-            const dest = METRIC_TAB[card.id];
-            const gKey = CARD_GOAL_KEY[card.id];
-            const gVal = gKey && goals[gKey] != null ? goals[gKey] : null;
-            const goalLine = gVal != null && CARD_GOAL_FMT[card.id] ? CARD_GOAL_FMT[card.id](gVal) : null;
-            return (
-              <div key={card.id} onClick={() => dest && onTabChange?.(dest)}
-                style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'13px 16px', textAlign:'center', cursor: dest ? 'pointer' : 'default' }}>
-                <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>{card.label}</div>
-                <div style={{ fontSize:20, fontWeight:700, color:'#111' }}>{card.value}</div>
-                {card.sub && <div style={{ fontSize:11, color:'#888', marginTop:3 }}>{card.sub}</div>}
-                {goalLine && <div style={{ fontSize:11, color:'#6366F1', fontWeight:600, marginTop:3 }}>→ {goalLine}</div>}
-                {dest && <div style={{ fontSize:10, color:'#ccc', marginTop:4 }}>tap to explore →</div>}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       {/* Priority actions -- suppressed when goals are set (gaps section in scorecard covers this) */}
       {Object.keys(goals).length === 0 && (data.uncontactedCount > 0 || data.stuckCount > 0 || data.topOpportunities?.length > 0) && (() => {
         const items = [];

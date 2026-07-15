@@ -124,7 +124,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
           {data.repPerformance.map((r, i) => (
             <div key={r.ownerId} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom:i < data.repPerformance.length-1 ? '1px solid #F9FAFB' : 'none' }}>
               <div>
-                <div style={{ fontSize:13, fontWeight:600, color:'#222' }}>{r.name || `Team member ${i + 1}`}</div>
+                <div style={{ fontSize:13, fontWeight:600, color:'#222' }}>{r.name || (r.ownerId === 'Unassigned' ? 'Unassigned' : r.ownerId || 'Unknown')}</div>
                 <div style={{ fontSize:11, color:'#999' }}>{r.won} won · {r.lost} lost · {fmt$(r.avgDealSize)} avg deal</div>
               </div>
               <div style={{ fontSize:16, fontWeight:700, color:i===0 ? '#059669' : '#555' }}>{r.winRate}%</div>
@@ -206,6 +206,11 @@ export default function RevenueTab({ data, loading, onNavigate }) {
             <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Why deals lose</div>
             <div style={{ fontSize:11, color:'#888' }}>{data.lostReasons.total} lost deals{data.lostReasons.loggedPct != null ? ` · ${data.lostReasons.loggedPct}% have a reason logged` : ''}</div>
           </div>
+          {data.lostReasons.loggedPct != null && data.lostReasons.loggedPct < 70 && (
+            <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:8, padding:'10px 12px', marginBottom:10, fontSize:12, color:'#92400E', lineHeight:1.55 }}>
+              <strong style={{ color:'#111' }}>{100 - data.lostReasons.loggedPct}% of lost deals have no reason logged.</strong> Without this data you're flying blind on why you lose. Ask your team to fill in the close reason every time a deal is marked lost in HubSpot.
+            </div>
+          )}
           <div style={{ marginTop:10 }}>
             {data.lostReasons.reasons.slice(0, 6).map((r, i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 0', borderBottom: i < Math.min(data.lostReasons.reasons.length,6)-1 ? '1px solid #F9FAFB' : 'none' }}>
