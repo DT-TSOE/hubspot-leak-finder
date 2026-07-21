@@ -28,7 +28,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
   const selectProperty = async (id, name) => { await api.ga4SelectProperty(id, name); setGa4(null); await loadGa4(); };
   const selectSite = async (siteUrl) => { await api.gscSelectSite(siteUrl); setGsc(null); await loadGsc(); };
 
-  if (!funnelData?.funnel) return <div style={{ textAlign: 'center', padding: '3rem', color: '#888', fontSize: 13 }}>Loading marketing funnel…</div>;
+  if (!funnelData?.funnel) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'3rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Loading marketing funnel…</div>;
   const { funnel } = funnelData;
   const stages = funnel.funnelStages.filter(s => MKT_STAGES.includes(s.label));
   const timings = Object.fromEntries(Object.entries(funnel.stageTimes || {}).filter(([k]) => MKT_TIMING_KEYS.includes(k)));

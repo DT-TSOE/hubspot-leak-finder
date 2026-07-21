@@ -60,72 +60,72 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     const locked = item.feature && !features[item.feature];
     return (
       <button data-tour={dataTour} onClick={() => onSection(item.id)}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 16px', border: 'none', background: active ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, borderLeft: active ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
-        <span style={{ fontSize: 13, color: active ? '#111' : '#555', fontWeight: active ? 600 : 400 }}>{item.label}</span>
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 13px', border: 'none', background: active ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, borderLeft: active ? '3px solid #0091AE' : '3px solid transparent', textAlign: 'left' }}>
+        <span style={{ fontSize: 13, color: active ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: active ? 600 : 400 }}>{item.label}</span>
         <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          {item.id === 'insights' && insightCount > 0 && <span style={{ fontSize: 9, background: '#F3F4F6', color: '#555', padding: '1px 5px', borderRadius: 8 }}>{insightCount}</span>}
+          {item.id === 'insights' && insightCount > 0 && <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)', padding: '1px 5px', borderRadius: 8 }}>{insightCount}</span>}
           {item.id === 'at-risk' && atRiskCount > 0 && <span style={{ fontSize: 9, background: '#FEE2E2', color: '#DC2626', padding: '1px 5px', borderRadius: 8 }}>{atRiskCount}</span>}
-          {locked && <span style={{ fontSize: 10, color: '#ccc' }}>🔒</span>}
+          {locked && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>🔒</span>}
         </span>
       </button>
     );
   };
 
   return (
-    <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#fff', borderRight: '1px solid #E2E5EA', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
+    <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
-      <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid #F3F4F6' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: '#F0FBF0', border: '1px solid #C8E6C9', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>
+      <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>
             <img src="/el-pipeador.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} onError={e => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '🤼'; }} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14, color: '#111', letterSpacing: '-0.3px', lineHeight: 1.2 }}>PipeChamp</div>
-            <div style={{ fontSize: 8, color: '#43A047', letterSpacing: 2, textTransform: 'uppercase' }}>Pipeline Hunter</div>
+            <div style={{ fontWeight: 600, fontSize: 15, color: '#FFFFFF', letterSpacing: '-0.3px', lineHeight: 1.2, fontFamily: 'Fraunces, Georgia, serif' }}>PipeChamp</div>
+            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Pipeline Hunter</div>
           </div>
         </div>
       </div>
 
       {/* Nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
-        {/* Dashboard - with live health score badge */}
+        {/* Scorecard — with live health score badge */}
         <button data-tour="nav-dashboard" onClick={() => onSection('dashboard')}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 16px', border: 'none', background: section === 'dashboard' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '2px solid #111' : '2px solid transparent', textAlign: 'left' }}>
-          <span style={{ fontSize: 14, color: section === 'dashboard' ? '#111' : '#333', fontWeight: 700 }}>Scorecard</span>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 13px', border: 'none', background: section === 'dashboard' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '3px solid #0091AE' : '3px solid transparent', textAlign: 'left' }}>
+          <span style={{ fontSize: 14, color: section === 'dashboard' ? '#FFFFFF' : 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Scorecard</span>
           {healthScore ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <span style={{ fontSize: 16, fontWeight: 800, lineHeight: 1, color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626' }}>
+              <span style={{ fontSize: 16, fontWeight: 800, lineHeight: 1, color: healthScore.score >= 70 ? '#00A47C' : healthScore.score >= 50 ? '#D97706' : '#E5484D' }}>
                 {healthScore.score}
               </span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: healthScore.score >= 70 ? '#059669' : healthScore.score >= 50 ? '#D97706' : '#DC2626', letterSpacing: '.03em' }}>
+              <span style={{ fontSize: 9, fontWeight: 700, color: healthScore.score >= 70 ? '#00A47C' : healthScore.score >= 50 ? '#D97706' : '#E5484D', letterSpacing: '.03em' }}>
                 Grade {healthScore.grade}
               </span>
             </div>
           ) : (
-            <span style={{ width: 28, height: 28, borderRadius: 6, background: '#F3F4F6' }} />
+            <span style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.1)' }} />
           )}
         </button>
 
-        <div style={{ margin: '8px 0 4px', borderTop: '1px solid #F3F4F6' }} />
+        <div style={{ margin: '8px 0 4px', borderTop: '1px solid rgba(255,255,255,0.1)' }} />
 
         {NAV.filter(n => n.type === 'group').map(group => (
           <div key={group.label} style={{ marginBottom: 8 }} data-tour={`nav-${group.label.toLowerCase()}`}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 16px 4px' }}>{group.label}</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 16px 4px' }}>{group.label}</div>
             {group.items.map(item => <NavItem key={item.id} item={item} dataTour={`nav-${item.id}`} />)}
           </div>
         ))}
       </nav>
 
       {/* Bottom */}
-      <div style={{ padding: '12px 14px', borderTop: '1px solid #F3F4F6' }}>
+      <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         <button onClick={() => onSection('integrations')}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? '#F4F4F5' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left', borderLeft: section === 'integrations' ? '3px solid #0091AE' : '3px solid transparent' }}>
           <span style={{ fontSize: 14 }}>⚡</span>
-          <span style={{ fontSize: 12, color: section === 'integrations' ? '#111' : '#666', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
+          <span style={{ fontSize: 12, color: section === 'integrations' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
           {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', display: 'inline-block', flexShrink: 0 }} />}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: pc.bg, color: pc.text, textTransform: 'uppercase', letterSpacing: '.05em' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
             {PLANS[plan]?.name || 'Free'}
           </span>
           {plan !== 'pro' && (
@@ -134,7 +134,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
             </button>
           )}
         </div>
-        <button onClick={onDisconnect} style={{ width: '100%', padding: '6px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#888' }}>
+        <button onClick={onDisconnect} style={{ width: '100%', padding: '6px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', fontSize: 11, cursor: 'pointer', color: 'rgba(255,255,255,0.5)' }}>
           Disconnect
         </button>
       </div>
@@ -145,15 +145,15 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
 function TopBar({ section, loading, onRefresh, insightsData }) {
   const item = ALL_ITEMS.find(i => i.id === section);
   return (
-    <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '0 24px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
+    <div style={{ background: 'var(--card)', borderBottom: '1px solid var(--line)', padding: '0 24px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{item?.label || section}</span>
-        {insightsData?.insights && <span style={{ fontSize: 11, color: '#aaa', marginLeft: 4 }}>{insightsData.insights.length} insights</span>}
+        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--navy-900)' }}>{item?.label || section}</span>
+        {insightsData?.insights && <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 4 }}>{insightsData.insights.length} insights</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <NotificationBell />
         <button onClick={onRefresh} disabled={loading}
-          style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#555' }}>
+          style={{ padding: '5px 12px', borderRadius: 'var(--r-btn)', border: '1px solid var(--line)', background: 'var(--card)', fontSize: 11, cursor: 'pointer', color: 'var(--slate)' }}>
           {loading ? '…' : '↺'}
         </button>
       </div>
@@ -332,7 +332,7 @@ export default function DashboardPage({ onDisconnect }) {
   const highRiskLeads = leadsData?.leads?.filter(l => l.risk === 'high').length || 0;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F7F8FA', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)' }}>
 
       {/* Upgrade modal */}
       {showUpgrade && (
@@ -373,7 +373,10 @@ export default function DashboardPage({ onDisconnect }) {
           <ContentDateBar section={section} days={days} onDays={handleDays} onLockedDays={() => setShowUpgrade(true)} />
 
           {loading && section !== 'dashboard' && (
-            <div style={{ textAlign: 'center', padding: '4rem', color: '#888', fontSize: 14 }}>Analyzing your HubSpot data…</div>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}>
+              <div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>
+              Analyzing your HubSpot data…
+            </div>
           )}
           {error && (
             <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 16px', color: '#DC2626', fontSize: 13, marginBottom: 14 }}>Error: {error}</div>
@@ -399,7 +402,18 @@ export default function DashboardPage({ onDisconnect }) {
                     <div style={{ marginTop: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Lead Risk Scores</div>
                       {leadsLoading
-                        ? <div style={{ textAlign: 'center', padding: '2rem', color: '#888', fontSize: 13 }}>Scoring leads…</div>
+                        ? <div style={{ padding:'16px 0', display:'flex', flexDirection:'column', gap:10 }}>
+                            {[...Array(5)].map((_,i) => (
+                              <div key={i} style={{ display:'flex', gap:12, alignItems:'center' }}>
+                                <div className="pc-skel" style={{ width:34, height:34, borderRadius:8, flexShrink:0 }}></div>
+                                <div style={{ flex:1, display:'flex', flexDirection:'column', gap:6 }}>
+                                  <div className="pc-skel" style={{ width:`${55+i*7}%`, height:12 }}></div>
+                                  <div className="pc-skel" style={{ width:`${30+i*5}%`, height:10 }}></div>
+                                </div>
+                                <div className="pc-skel" style={{ width:48, height:24, borderRadius:6 }}></div>
+                              </div>
+                            ))}
+                          </div>
                         : leadsData && <Card title={`${leadsData.total} active leads scored`} action={features.exports && <button onClick={() => handleExport('leads')} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#555' }}>{exporting === 'leads' ? '…' : 'Export CSV'}</button>}><LeadScoreTable leads={leadsData.leads} /></Card>
                       }
                     </div>

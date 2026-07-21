@@ -30,7 +30,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
 
   useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
 
-  if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Building your pipeline health report…</div>;
+  if (loading) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Building your pipeline health report…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 

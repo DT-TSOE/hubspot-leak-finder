@@ -1,0 +1,147 @@
+/* =============================================================
+   PipeChamp — animation spec
+   Drop these keyframes + classes into src/animations.css and
+   import once at the app root. Colors reference the pine/gold
+   tokens; hardcoded here so this file is self-contained.
+   ============================================================= */
+
+/* Animation tokens — reference App.css design system where possible */
+:root{
+  --anim-ease:cubic-bezier(.22,.61,.36,1);
+  --anim-ease-out:cubic-bezier(.16,1,.3,1);
+  /* Skeleton uses its own tokens (set in App.css too) */
+  --skel-base:#DDE8DD;
+  --skel-shine:#EEF4EE;
+}
+
+/* -------------------------------------------------------------
+   LOADER 1 — BELT STUDS  (default app loader)
+   Markup:
+   <div class="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>
+   ------------------------------------------------------------- */
+.pc-belt{display:inline-flex;gap:6px}
+.pc-belt i{
+  width:12px;height:12px;border-radius:2px;
+  background:var(--navy,#33475B);
+  animation:pc-beltfill 2.2s var(--anim-ease) infinite;
+}
+.pc-belt i:nth-child(2){animation-delay:.24s}
+.pc-belt i:nth-child(3){animation-delay:.48s}
+.pc-belt i:nth-child(4){animation-delay:.72s}
+.pc-belt i:nth-child(5){animation-delay:.96s}
+@keyframes pc-beltfill{
+  0%,70%,100%{background:var(--navy,#33475B);transform:scale(1)}
+  35%{background:var(--teal,#0091AE);transform:scale(1.15)}
+}
+
+/* -------------------------------------------------------------
+   LOADER 2 — TALE OF THE TAPE  (Won vs Lost screen)
+   Markup:
+   <div class="pc-vs">
+     <div class="pc-vs-track">
+       <span class="pc-vs-lbl won">WON</span>
+       <div class="pc-vs-wrap"><div class="pc-vs-bar won"></div></div>
+     </div>
+     <div class="pc-vs-track">
+       <span class="pc-vs-lbl lost">LOST</span>
+       <div class="pc-vs-wrap"><div class="pc-vs-bar lost"></div></div>
+     </div>
+   </div>
+   ------------------------------------------------------------- */
+.pc-vs{display:inline-flex;flex-direction:column;gap:8px;width:120px}
+.pc-vs-track{display:flex;align-items:center;gap:6px}
+.pc-vs-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;width:30px;flex:none}
+.pc-vs-lbl.won{color:var(--won-600);text-align:right}
+.pc-vs-lbl.lost{color:var(--lost-600)}
+.pc-vs-wrap{flex:1;height:8px;background:var(--pine-700);border-radius:2px;overflow:hidden}
+.pc-vs-bar{height:100%;border-radius:2px;transform-origin:left;transform:scaleX(0)}
+.pc-vs-bar.won{background:var(--won,#00A47C);animation:pc-vsgrow 2.6s var(--anim-ease) infinite}
+.pc-vs-bar.lost{background:var(--lost,#E5484D);animation:pc-vsgrow 2.6s var(--anim-ease) infinite .35s}
+@keyframes pc-vsgrow{
+  0%{transform:scaleX(0)}
+  55%,75%{transform:scaleX(1)}
+  100%{transform:scaleX(0)}
+}
+
+/* -------------------------------------------------------------
+   LOADER 3 — TUMBLING STUD  (inline / button spinner)
+   Markup:  <span class="pc-stud"></span>
+   ------------------------------------------------------------- */
+.pc-stud{
+  display:inline-block;width:16px;height:16px;
+  background:var(--teal,#0091AE);border-radius:3px;
+  animation:pc-studtumble 1.8s var(--anim-ease) infinite;
+}
+@keyframes pc-studtumble{
+  0%{transform:rotate(0) scale(1)}
+  50%{transform:rotate(180deg) scale(.7)}
+  100%{transform:rotate(360deg) scale(1)}
+}
+
+/* -------------------------------------------------------------
+   SKELETON SHIMMER  (tables / cards while loading)
+   Markup:  <div class="pc-skel" style="width:120px;height:12px"></div>
+   ------------------------------------------------------------- */
+.pc-skel{
+  border-radius:3px;
+  background:linear-gradient(90deg,var(--skel-base,#DDE8DD) 0%,var(--skel-shine,#EEF4EE) 50%,var(--skel-base,#DDE8DD) 100%);
+  background-size:200% 100%;
+  animation:pc-shimmer 2.4s linear infinite;
+}
+@keyframes pc-shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+/* -------------------------------------------------------------
+   CHART LOAD-IN  (bars + funnel stages grow on mount)
+   Add class "pc-animate" to the CONTAINER when data is ready.
+   Bars:   <div class="pc-grow pc-d1"></div>   (transform-origin left)
+   Funnel: <div class="pc-drop pc-d1"></div>   (transform-origin top)
+   ------------------------------------------------------------- */
+.pc-grow{transform:scaleX(0);transform-origin:left}
+.pc-drop{transform:scaleY(0);transform-origin:top}
+
+.pc-animate .pc-grow{animation:pc-grow 1.6s var(--anim-ease-out) forwards}
+.pc-animate .pc-drop{animation:pc-drop .9s var(--anim-ease-out) forwards}
+
+/* stagger helpers — add alongside pc-grow / pc-drop */
+.pc-d1{animation-delay:.00s !important}
+.pc-d2{animation-delay:.16s !important}
+.pc-d3{animation-delay:.32s !important}
+.pc-d4{animation-delay:.48s !important}
+.pc-d5{animation-delay:.62s !important}
+
+@keyframes pc-grow{to{transform:scaleX(1)}}
+@keyframes pc-drop{to{transform:scaleY(1)}}
+
+/* -------------------------------------------------------------
+   ACCESSIBILITY — honor reduced-motion.
+   Disables looping/among motion; content still appears.
+   ------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce){
+  .pc-belt i,
+  .pc-vs-bar,
+  .pc-stud,
+  .pc-skel,
+  .pc-animate .pc-grow,
+  .pc-animate .pc-drop{
+    animation:none !important;
+  }
+  /* make sure charts still render at full size when motion is off */
+  .pc-grow{transform:scaleX(1)}
+  .pc-drop{transform:scaleY(1)}
+  /* belt studs settle mid-teal so the loader is still visible */
+  .pc-belt i{background:var(--teal,#0091AE)}
+}
+
+/* =============================================================
+   TIMING REFERENCE (for humans)
+   - belt studs:      2.2s loop, 0.24s stagger between studs
+   - tale of tape:    2.6s loop, won leads, lost +0.35s
+   - tumbling stud:   1.8s loop
+   - skeleton:        2.4s linear loop (uses --skel-base/--skel-shine tokens)
+   - chart bars:      1.6s once, ease-out, staggered 0.16s
+   - funnel stages:   0.9s once, ease-out, staggered 0.16s
+   All "once" animations use `forwards` so they hold final state.
+   ============================================================= */

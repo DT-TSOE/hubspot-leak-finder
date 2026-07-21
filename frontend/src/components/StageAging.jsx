@@ -84,7 +84,7 @@ export default function StageAging({ days }) {
       .catch(e => { setError(e.message); setLoading(false); });
   }, [days]);
 
-  if (loading) return <div style={{ textAlign:'center', padding:'4rem', color:'#888', fontSize:14 }}>Finding stuck records…</div>;
+  if (loading) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Finding stuck records…</div>;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data || data.total === 0) {
     return (
