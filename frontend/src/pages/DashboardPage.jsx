@@ -433,10 +433,7 @@ export default function DashboardPage({ onDisconnect }) {
 
               {/* EXPORTS - scrollable pipeline report + download/email */}
               {section === 'exports' && (
-                <>
-                  <Scorecard onTabChange={navigateTo} />
-                  <PipelineReport funnelData={funnelData} insightsData={insightsData} />
-                </>
+                <PipelineReport funnelData={funnelData} insightsData={insightsData} />
               )}
 
               {/* placeholder - integrations rendered outside funnelData gate below */}
