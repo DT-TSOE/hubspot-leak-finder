@@ -32,8 +32,6 @@ export default function PipelineReport({ funnelData, insightsData }) {
   const [dashData, setDashData] = useState(null);
   const [sourceData, setSourceData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [emailInput, setEmailInput] = useState('');
-  const [showEmailBox, setShowEmailBox] = useState(false);
   const reportRef = useRef(null);
 
   // Report customization - pick which modules appear (persisted).
@@ -66,40 +64,6 @@ export default function PipelineReport({ funnelData, insightsData }) {
   }, []);
 
   const handlePrint = () => window.print();
-
-  const handleEmail = (to) => {
-    const score = dashData?.pipelineHealthScore;
-    const funnel = funnelData?.funnel;
-    const metrics = dashData?.metricCards || [];
-    const winRate = metrics.find(m => m.id === 'win_rate')?.value || '-';
-    const atRisk = metrics.find(m => m.id === 'at_risk')?.value || '-';
-
-    const subject = encodeURIComponent(`PipeChamp Pipeline Report - ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`);
-    const body = encodeURIComponent([
-      `PIPECHAMP PIPELINE HEALTH REPORT`,
-      `Generated: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`,
-      ``,
-      `Pipeline Health Score: ${score?.score ?? '-'}/100 (Grade ${score?.grade ?? '-'})`,
-      ``,
-      `KEY METRICS`,
-      `Win Rate: ${winRate}`,
-      `Records At Risk: ${atRisk}`,
-      `Total Contacts: ${funnelData?.summary?.totalContacts?.toLocaleString() ?? '-'}`,
-      `Total Deals: ${funnelData?.summary?.totalDeals?.toLocaleString() ?? '-'}`,
-      ``,
-      `BIGGEST LEAK`,
-      funnel?.biggestLeak ? funnel.biggestLeak.description : 'No significant leaks detected',
-      ``,
-      `TOP ISSUES`,
-      ...(insightsData?.insights?.slice(0, 3).map((ins, i) => `${i + 1}. [${ins.type}] ${ins.title}`) || ['No insights available']),
-      ``,
-      `View full report: https://hubspot-leak-finder.vercel.app`,
-    ].join('\n'));
-
-    window.location.href = `mailto:${to || ''}?subject=${subject}&body=${body}`;
-    setShowEmailBox(false);
-    setEmailInput('');
-  };
 
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '4rem', color: '#888', fontSize: 14 }}>Building your report…</div>
@@ -141,26 +105,6 @@ export default function PipelineReport({ funnelData, insightsData }) {
             <div style={{ fontSize: 12, color: '#888' }}>Generated {today} · Scroll to review, then download or share</div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {showEmailBox && (
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <input
-                  type="email"
-                  value={emailInput}
-                  onChange={e => setEmailInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleEmail(emailInput)}
-                  placeholder="recipient@email.com"
-                  style={{ padding: '7px 11px', borderRadius: 7, border: '1px solid #E2E5EA', fontSize: 12, width: 200, outline: 'none' }}
-                  autoFocus
-                />
-                <button onClick={() => handleEmail(emailInput)} style={{ padding: '7px 14px', borderRadius: 7, border: 'none', background: '#111', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Send</button>
-                <button onClick={() => setShowEmailBox(false)} style={{ padding: '7px 10px', borderRadius: 7, border: '1px solid #E2E5EA', background: '#fff', fontSize: 12, cursor: 'pointer', color: '#888' }}>✕</button>
-              </div>
-            )}
-            {!showEmailBox && (
-              <button onClick={() => setShowEmailBox(true)} style={{ padding: '8px 16px', borderRadius: 7, border: '1px solid #E2E5EA', background: '#fff', fontSize: 12, fontWeight: 500, cursor: 'pointer', color: '#555', display: 'flex', alignItems: 'center', gap: 6 }}>
-                ✉ Email report
-              </button>
-            )}
             <button onClick={handlePrint} style={{ padding: '8px 16px', borderRadius: 7, border: 'none', background: '#111', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
               ⬇ Download PDF
             </button>
