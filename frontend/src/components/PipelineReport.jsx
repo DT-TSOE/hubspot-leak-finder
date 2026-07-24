@@ -31,6 +31,7 @@ function MetricRow({ items }) {
 export default function PipelineReport({ funnelData, insightsData }) {
   const [dashData, setDashData] = useState(null);
   const [sourceData, setSourceData] = useState(null);
+  const [scorecardData, setScorecardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const reportRef = useRef(null);
 
@@ -56,9 +57,11 @@ export default function PipelineReport({ funnelData, insightsData }) {
     Promise.all([
       api.getGmDashboard().catch(() => null),
       api.getSourceQuality().catch(() => null),
-    ]).then(([dash, src]) => {
+      api.getScorecard().catch(() => null),
+    ]).then(([dash, src, sc]) => {
       setDashData(dash);
       setSourceData(src);
+      setScorecardData(sc);
       setLoading(false);
     });
   }, []);
@@ -69,7 +72,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
     <div style={{ textAlign: 'center', padding: '4rem', color: '#888', fontSize: 14 }}>Building your report…</div>
   );
 
-  const score = dashData?.pipelineHealthScore;
+  const score = scorecardData?.overall ?? dashData?.pipelineHealthScore;
   const metrics = dashData?.metricCards || [];
   const funnel = funnelData?.funnel;
   const insights = insightsData?.insights || [];
