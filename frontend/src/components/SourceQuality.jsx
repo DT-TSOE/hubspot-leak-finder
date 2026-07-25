@@ -147,7 +147,7 @@ export default function SourceQuality({ days, onNavigate }) {
                     <XAxis type="number" hide />
                     <YAxis type="category" dataKey="name" width={110} tick={{ fontSize:12, fill:'#555' }} axisLine={false} tickLine={false} />
                     <Bar dataKey="value" radius={[0,5,5,0]} maxBarSize={24} isAnimationActive={false}>
-                      {cycleData.map((d, i) => <Cell key={i} fill={d.value === minCycle ? '#3B82F6' : '#93C5FD'} />)}
+                      {cycleData.map((d, i) => <Cell key={i} fill={d.value === minCycle ? '#0091AE' : '#CBD6E2'} />)}
                       <LabelList dataKey="value" position="right" formatter={v => `${v}d`} style={{ fontSize:11, fill:'#555', fontWeight:600 }} />
                     </Bar>
                   </BarChart>

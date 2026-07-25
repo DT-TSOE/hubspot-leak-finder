@@ -28,7 +28,7 @@ function fmtStage(stage) {
   return stage.replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim();
 }
 
-const BAR_COLORS = ['#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16'];
+const BAR_COLORS = ['#243A52', '#1B72C7', '#0091AE', '#2EBF9A', '#3DD6C7'];
 
 function RevenueAtRiskChart({ stageBreakdown, selectedStage, onSelectStage }) {
   const data = stageBreakdown

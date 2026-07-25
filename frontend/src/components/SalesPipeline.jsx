@@ -11,7 +11,7 @@ const fmtDays = d => d == null ? '-' : d < 7 ? `${Math.round(d)}d` : d < 60 ? `$
 
 const SALES_TIMING_KEYS = ['salesqualifiedlead_to_opportunity', 'opportunity_to_customer'];
 
-const STAGE_COLORS = ['#6366F1', '#8B5CF6', '#A855F7', '#EC4899', '#F59E0B', '#10B981'];
+const STAGE_COLORS = ['#243A52', '#1B72C7', '#0091AE', '#2EBF9A', '#3DD6C7', '#1B5E9E'];
 
 function DealFunnel({ pipeline }) {
   if (!pipeline) return null;
@@ -67,8 +67,8 @@ function DealFunnel({ pipeline }) {
   const winPct = total > 0 ? Math.round((won / total) * 100) : 0;
   if (total === 0) return null;
   const bars = [
-    { label: 'Deals created', count: total, pct: 100, color: '#6366F1' },
-    { label: 'Deals won', count: won, pct: winPct, color: '#10B981' },
+    { label: 'Deals created', count: total, pct: 100, color: '#243A52' },
+    { label: 'Deals won', count: won, pct: winPct, color: '#2EBF9A' },
   ];
   return (
     <div>
