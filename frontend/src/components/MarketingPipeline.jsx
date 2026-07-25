@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import FunnelChart from './FunnelChart';
 import StageTimingTable from './StageTimingTable';
 import { api } from '../utils/api';
+import FunnelLoader from './FunnelLoader';
 
 const CARD = { background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px', marginBottom: 12 };
 const BLUE_CARD = { ...CARD, borderColor: '#BFD4FF' };
@@ -28,7 +29,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
   const selectProperty = async (id, name) => { await api.ga4SelectProperty(id, name); setGa4(null); await loadGa4(); };
   const selectSite = async (siteUrl) => { await api.gscSelectSite(siteUrl); setGsc(null); await loadGsc(); };
 
-  if (!funnelData?.funnel) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'3rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Loading marketing funnel…</div>;
+  if (!funnelData?.funnel) return <FunnelLoader variant="seq" size="md" label="Loading marketing funnel…" />;
   const { funnel } = funnelData;
   const stages = funnel.funnelStages.filter(s => MKT_STAGES.includes(s.label));
   const timings = Object.fromEntries(Object.entries(funnel.stageTimes || {}).filter(([k]) => MKT_TIMING_KEYS.includes(k)));

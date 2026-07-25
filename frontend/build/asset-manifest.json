@@ -1,10 +1,28 @@
 {
   "files": {
-    "main.js": "/static/js/main.c5d390b9.js",
+    "main.css": "/static/css/main.f98e5aae.css",
+    "main.js": "/static/js/main.951236ea.js",
+    "static/media/lexend-deca-latin-wght-normal.woff2": "/static/media/lexend-deca-latin-wght-normal.abe639894f145e90175a.woff2",
+    "static/media/lexend-deca-latin-ext-wght-normal.woff2": "/static/media/lexend-deca-latin-ext-wght-normal.cdb8e8b5ece62506a827.woff2",
+    "static/media/fraunces-latin-600-italic.woff": "/static/media/fraunces-latin-600-italic.5b971b0f7c2bba0fa9fd.woff",
+    "static/media/fraunces-latin-ext-600-italic.woff": "/static/media/fraunces-latin-ext-600-italic.d0cffd88be6bca09eb13.woff",
+    "static/media/fraunces-latin-600-italic.woff2": "/static/media/fraunces-latin-600-italic.c0d247f43958c49fc421.woff2",
+    "static/media/fraunces-latin-600-normal.woff": "/static/media/fraunces-latin-600-normal.abcc7b0dbd26f0a00e13.woff",
+    "static/media/fraunces-latin-ext-600-normal.woff": "/static/media/fraunces-latin-ext-600-normal.846d7b20a2e5f7cf0cbf.woff",
+    "static/media/fraunces-latin-ext-600-italic.woff2": "/static/media/fraunces-latin-ext-600-italic.a88a1a5672fddc810a46.woff2",
+    "static/media/fraunces-latin-600-normal.woff2": "/static/media/fraunces-latin-600-normal.2ff38412868fc8bf103b.woff2",
+    "static/media/fraunces-latin-ext-600-normal.woff2": "/static/media/fraunces-latin-ext-600-normal.c001a40e1d4c09219d77.woff2",
+    "static/media/lexend-deca-vietnamese-wght-normal.woff2": "/static/media/lexend-deca-vietnamese-wght-normal.a68fbff953bc6d0830d3.woff2",
+    "static/media/fraunces-vietnamese-600-italic.woff": "/static/media/fraunces-vietnamese-600-italic.9dc4627af97ea83620ee.woff",
+    "static/media/fraunces-vietnamese-600-normal.woff": "/static/media/fraunces-vietnamese-600-normal.ca9b5e09dfbccabcc584.woff",
+    "static/media/fraunces-vietnamese-600-italic.woff2": "/static/media/fraunces-vietnamese-600-italic.9097f28442338e23b71a.woff2",
+    "static/media/fraunces-vietnamese-600-normal.woff2": "/static/media/fraunces-vietnamese-600-normal.729fcb9d6ddf510cad7c.woff2",
     "index.html": "/index.html",
-    "main.c5d390b9.js.map": "/static/js/main.c5d390b9.js.map"
+    "main.f98e5aae.css.map": "/static/css/main.f98e5aae.css.map",
+    "main.951236ea.js.map": "/static/js/main.951236ea.js.map"
   },
   "entrypoints": [
-    "static/js/main.c5d390b9.js"
+    "static/css/main.f98e5aae.css",
+    "static/js/main.951236ea.js"
   ]
 }

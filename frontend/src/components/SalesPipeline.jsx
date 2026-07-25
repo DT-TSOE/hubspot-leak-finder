@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StageTimingTable from './StageTimingTable';
 import { DealStageTable } from './Scorecard';
 import { api } from '../utils/api';
+import FunnelLoader from './FunnelLoader';
 
 const CARD = { background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px', marginBottom: 12 };
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
@@ -130,7 +131,7 @@ export default function SalesPipeline({ funnelData, days }) {
   ].filter(Boolean);
 
   if (!scorecard && !funnelData) {
-    return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'3rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Loading sales data…</div>;
+    return <FunnelLoader variant="seq" size="md" label="Loading sales data…" />;
   }
 
   return (

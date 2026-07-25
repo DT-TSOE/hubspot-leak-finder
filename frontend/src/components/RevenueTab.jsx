@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import IntegrationHint from './IntegrationHint';
+import FunnelLoader from './FunnelLoader';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : 'N/A';
 const fmtSrc = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
@@ -18,7 +19,7 @@ function RevenueTooltip({ active, payload }) {
 }
 
 export default function RevenueTab({ data, loading, onNavigate }) {
-  if (loading) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'3rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Loading revenue data…</div>;
+  if (loading) return <FunnelLoader variant="seq" size="md" label="Loading revenue data…" />;
 
   if (!data || data.insufficient) return (
     <div>

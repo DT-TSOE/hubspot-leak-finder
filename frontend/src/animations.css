@@ -1,147 +1,180 @@
 /* =============================================================
    PipeChamp — animation spec
-   Drop these keyframes + classes into src/animations.css and
-   import once at the app root. Colors reference the pine/gold
-   tokens; hardcoded here so this file is self-contained.
    ============================================================= */
 
-/* Animation tokens — reference App.css design system where possible */
-:root{
-  --anim-ease:cubic-bezier(.22,.61,.36,1);
-  --anim-ease-out:cubic-bezier(.16,1,.3,1);
-  /* Skeleton uses its own tokens (set in App.css too) */
-  --skel-base:#DDE8DD;
-  --skel-shine:#EEF4EE;
+:root {
+  --anim-ease:     cubic-bezier(.22,.61,.36,1);
+  --anim-ease-out: cubic-bezier(.16,1,.3,1);
+  --skel-base:  #DDE8DD;
+  --skel-shine: #EEF4EE;
+
+  /* Funnel palette — matches logo exactly */
+  --f1: #243A52;   /* navy   — top layer    */
+  --f2: #1B72C7;   /* blue   — second layer */
+  --f3: #0091AE;   /* teal   — third layer  */
+  --f4: #2EBF9A;   /* mint   — bottom layer */
+  --fd: #E8562A;   /* orange — the dot      */
+  --fm: #CBD6E2;   /* muted  — empty state  */
 }
 
-/* -------------------------------------------------------------
-   LOADER 1 — BELT STUDS  (default app loader)
-   Markup:
-   <div class="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>
-   ------------------------------------------------------------- */
-.pc-belt{display:inline-flex;gap:6px}
-.pc-belt i{
-  width:12px;height:12px;border-radius:2px;
-  background:var(--navy,#33475B);
-  animation:pc-beltfill 2.2s var(--anim-ease) infinite;
-}
-.pc-belt i:nth-child(2){animation-delay:.24s}
-.pc-belt i:nth-child(3){animation-delay:.48s}
-.pc-belt i:nth-child(4){animation-delay:.72s}
-.pc-belt i:nth-child(5){animation-delay:.96s}
-@keyframes pc-beltfill{
-  0%,70%,100%{background:var(--navy,#33475B);transform:scale(1)}
-  35%{background:var(--teal,#0091AE);transform:scale(1.15)}
-}
+/* ─────────────────────────────────────────
+   FUNNEL LOADER
+   SVG shape (viewBox 0 0 100 98):
+     L1: 6,2 94,2 82,20 18,20
+     L2: 18,23 82,23 72,39 28,39
+     L3: 28,42 72,42 63,57 37,57
+     L4: 37,60 63,60 56,74 44,74
+     Dot: cx=50 cy=87 r=7
+   Use <FunnelLoader /> component in React.
+───────────────────────────────────────── */
 
-/* -------------------------------------------------------------
-   LOADER 2 — TALE OF THE TAPE  (Won vs Lost screen)
-   Markup:
-   <div class="pc-vs">
-     <div class="pc-vs-track">
-       <span class="pc-vs-lbl won">WON</span>
-       <div class="pc-vs-wrap"><div class="pc-vs-bar won"></div></div>
-     </div>
-     <div class="pc-vs-track">
-       <span class="pc-vs-lbl lost">LOST</span>
-       <div class="pc-vs-wrap"><div class="pc-vs-bar lost"></div></div>
-     </div>
-   </div>
-   ------------------------------------------------------------- */
-.pc-vs{display:inline-flex;flex-direction:column;gap:8px;width:120px}
-.pc-vs-track{display:flex;align-items:center;gap:6px}
-.pc-vs-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;width:30px;flex:none}
-.pc-vs-lbl.won{color:var(--won-600);text-align:right}
-.pc-vs-lbl.lost{color:var(--lost-600)}
-.pc-vs-wrap{flex:1;height:8px;background:var(--pine-700);border-radius:2px;overflow:hidden}
-.pc-vs-bar{height:100%;border-radius:2px;transform-origin:left;transform:scaleX(0)}
-.pc-vs-bar.won{background:var(--won,#00A47C);animation:pc-vsgrow 2.6s var(--anim-ease) infinite}
-.pc-vs-bar.lost{background:var(--lost,#E5484D);animation:pc-vsgrow 2.6s var(--anim-ease) infinite .35s}
-@keyframes pc-vsgrow{
-  0%{transform:scaleX(0)}
-  55%,75%{transform:scaleX(1)}
-  100%{transform:scaleX(0)}
-}
+.pc-funnel { overflow: visible; display: block; }
+.pc-funnel.sz-lg { width: 72px; height: auto; }
+.pc-funnel.sz-md { width: 48px; height: auto; }
+.pc-funnel.sz-sm { width: 28px; height: auto; }
+.pc-funnel.sz-xs { width: 18px; height: auto; }
 
-/* -------------------------------------------------------------
-   LOADER 3 — TUMBLING STUD  (inline / button spinner)
-   Markup:  <span class="pc-stud"></span>
-   ------------------------------------------------------------- */
-.pc-stud{
-  display:inline-block;width:16px;height:16px;
-  background:var(--teal,#0091AE);border-radius:3px;
-  animation:pc-studtumble 1.8s var(--anim-ease) infinite;
-}
-@keyframes pc-studtumble{
-  0%{transform:rotate(0) scale(1)}
-  50%{transform:rotate(180deg) scale(.7)}
-  100%{transform:rotate(360deg) scale(1)}
-}
+/* ── V1: Sequential Fill + Drop ──────────
+   Layers go grey→color top-to-bottom,
+   then orange dot drops and bounces.       */
 
-/* -------------------------------------------------------------
-   SKELETON SHIMMER  (tables / cards while loading)
-   Markup:  <div class="pc-skel" style="width:120px;height:12px"></div>
-   ------------------------------------------------------------- */
-.pc-skel{
+@keyframes seqL1 { 0%,4%{fill:var(--fm)} 14%,72%{fill:var(--f1)} 88%,100%{fill:var(--fm)} }
+@keyframes seqL2 { 0%,17%{fill:var(--fm)} 27%,72%{fill:var(--f2)} 88%,100%{fill:var(--fm)} }
+@keyframes seqL3 { 0%,30%{fill:var(--fm)} 40%,72%{fill:var(--f3)} 88%,100%{fill:var(--fm)} }
+@keyframes seqL4 { 0%,43%{fill:var(--fm)} 53%,72%{fill:var(--f4)} 88%,100%{fill:var(--fm)} }
+@keyframes seqDot {
+  0%,54%   { transform:translateY(-18px); opacity:0 }
+  66%      { transform:translateY(5px);   opacity:1 }
+  73%      { transform:translateY(0);     opacity:1 }
+  76%      { transform:translateY(-3px);  opacity:1 }
+  80%      { transform:translateY(0);     opacity:1 }
+  88%      { opacity:1 }
+  96%,100% { opacity:0; transform:translateY(0) }
+}
+.pc-seq .l1  { fill:var(--fm); animation:seqL1  3s ease-in-out infinite; }
+.pc-seq .l2  { fill:var(--fm); animation:seqL2  3s ease-in-out infinite; }
+.pc-seq .l3  { fill:var(--fm); animation:seqL3  3s ease-in-out infinite; }
+.pc-seq .l4  { fill:var(--fm); animation:seqL4  3s ease-in-out infinite; }
+.pc-seq .dot { fill:var(--fd); animation:seqDot 3s var(--anim-ease) infinite; transform-origin:50px 87px; }
+
+/* ── V2: Pulse Wave ──────────────────────
+   All layers visible, brightness ripples
+   top-to-bottom continuously.             */
+
+@keyframes pulseW { 0%,100%{opacity:.25} 50%{opacity:1} }
+@keyframes pulseD { 0%,100%{transform:scale(.75);opacity:.5} 50%{transform:scale(1);opacity:1} }
+.pc-pulse .l1  { fill:var(--f1); animation:pulseW 2s ease-in-out infinite 0s; }
+.pc-pulse .l2  { fill:var(--f2); animation:pulseW 2s ease-in-out infinite .25s; }
+.pc-pulse .l3  { fill:var(--f3); animation:pulseW 2s ease-in-out infinite .5s; }
+.pc-pulse .l4  { fill:var(--f4); animation:pulseW 2s ease-in-out infinite .75s; }
+.pc-pulse .dot { fill:var(--fd); animation:pulseD 2s ease-in-out infinite 1s; transform-origin:50px 87px; }
+
+/* ── V3: Micro ───────────────────────────
+   Compact version — faded funnel with
+   bouncing dot. For small spaces.         */
+
+@keyframes microF { 0%,100%{opacity:.3} 50%{opacity:.6} }
+@keyframes microD {
+  0%,100% { transform:translateY(0) scale(1) }
+  40%     { transform:translateY(-10px) scale(.9) }
+  60%     { transform:translateY(2px) scale(1.05) }
+  75%     { transform:translateY(0) scale(1) }
+}
+.pc-micro .l1  { fill:var(--f1); animation:microF 2s ease-in-out infinite 0s; }
+.pc-micro .l2  { fill:var(--f2); animation:microF 2s ease-in-out infinite .1s; }
+.pc-micro .l3  { fill:var(--f3); animation:microF 2s ease-in-out infinite .2s; }
+.pc-micro .l4  { fill:var(--f4); animation:microF 2s ease-in-out infinite .3s; }
+.pc-micro .dot { fill:var(--fd); animation:microD 1.4s var(--anim-ease) infinite; transform-origin:50px 87px; }
+
+/* ── V4: Deal Journey ────────────────────
+   Dot travels through each layer,
+   lighting it up as it passes through.   */
+
+@keyframes jL1 { 0%,3%{fill:rgba(36,58,82,.18)} 6%,20%{fill:var(--f1)} 28%,100%{fill:rgba(36,58,82,.18)} }
+@keyframes jL2 { 0%,18%{fill:rgba(27,114,199,.18)} 22%,35%{fill:var(--f2)} 43%,100%{fill:rgba(27,114,199,.18)} }
+@keyframes jL3 { 0%,33%{fill:rgba(0,145,174,.18)} 37%,49%{fill:var(--f3)} 57%,100%{fill:rgba(0,145,174,.18)} }
+@keyframes jL4 { 0%,47%{fill:rgba(46,191,154,.18)} 51%,63%{fill:var(--f4)} 72%,100%{fill:rgba(46,191,154,.18)} }
+@keyframes jDot {
+  0%       { transform:translateY(-76px); opacity:0 }
+  6%       { transform:translateY(-76px); opacity:1 }
+  22%      { transform:translateY(-56px); opacity:1 }
+  37%      { transform:translateY(-37px); opacity:1 }
+  51%      { transform:translateY(-20px); opacity:1 }
+  63%      { transform:translateY(5px);   opacity:1 }
+  70%      { transform:translateY(0);     opacity:1 }
+  82%      { transform:translateY(0);     opacity:1 }
+  94%,100% { transform:translateY(0);     opacity:0 }
+}
+.pc-journey .l1  { fill:rgba(36,58,82,.18);   animation:jL1  3.2s ease-in-out infinite; }
+.pc-journey .l2  { fill:rgba(27,114,199,.18); animation:jL2  3.2s ease-in-out infinite; }
+.pc-journey .l3  { fill:rgba(0,145,174,.18);  animation:jL3  3.2s ease-in-out infinite; }
+.pc-journey .l4  { fill:rgba(46,191,154,.18); animation:jL4  3.2s ease-in-out infinite; }
+.pc-journey .dot { fill:var(--fd); animation:jDot 3.2s var(--anim-ease) infinite; transform-origin:50px 87px; }
+
+/* ── V5: Three Dots ──────────────────────
+   Static funnel + three bouncing orange
+   dots. Use for AI/chat thinking states.  */
+
+@keyframes tdot {
+  0%,100% { transform:translateY(0);    opacity:.35 }
+  30%     { transform:translateY(-8px); opacity:1 }
+  55%     { transform:translateY(2px);  opacity:.9 }
+  70%     { transform:translateY(0);    opacity:.35 }
+}
+.pc-three-dots { display:inline-flex; align-items:center; gap:5px; }
+.pc-td-funnel .l1 { fill:var(--f1); }
+.pc-td-funnel .l2 { fill:var(--f2); }
+.pc-td-funnel .l3 { fill:var(--f3); }
+.pc-td-funnel .l4 { fill:var(--f4); }
+.pc-td { width:8px; height:8px; border-radius:50%; background:var(--fd); display:inline-block; flex-shrink:0; }
+.pc-three-dots .pc-td:nth-child(2) { animation:tdot 1.4s ease-in-out infinite 0s; }
+.pc-three-dots .pc-td:nth-child(3) { animation:tdot 1.4s ease-in-out infinite .2s; }
+.pc-three-dots .pc-td:nth-child(4) { animation:tdot 1.4s ease-in-out infinite .4s; }
+
+/* ─────────────────────────────────────────
+   SKELETON SHIMMER
+   <div class="pc-skel" style="width:120px;height:12px"></div>
+───────────────────────────────────────── */
+.pc-skel {
   border-radius:3px;
   background:linear-gradient(90deg,var(--skel-base,#DDE8DD) 0%,var(--skel-shine,#EEF4EE) 50%,var(--skel-base,#DDE8DD) 100%);
   background-size:200% 100%;
   animation:pc-shimmer 2.4s linear infinite;
 }
-@keyframes pc-shimmer{
-  0%{background-position:200% 0}
-  100%{background-position:-200% 0}
+@keyframes pc-shimmer {
+  0%   { background-position:200% 0 }
+  100% { background-position:-200% 0 }
 }
 
-/* -------------------------------------------------------------
-   CHART LOAD-IN  (bars + funnel stages grow on mount)
-   Add class "pc-animate" to the CONTAINER when data is ready.
-   Bars:   <div class="pc-grow pc-d1"></div>   (transform-origin left)
-   Funnel: <div class="pc-drop pc-d1"></div>   (transform-origin top)
-   ------------------------------------------------------------- */
-.pc-grow{transform:scaleX(0);transform-origin:left}
-.pc-drop{transform:scaleY(0);transform-origin:top}
+/* ─────────────────────────────────────────
+   CHART LOAD-IN
+   Add "pc-animate" to container when ready.
+   .pc-grow  — bars (transform-origin left)
+   .pc-drop  — funnel stages (origin top)
+───────────────────────────────────────── */
+.pc-grow { transform:scaleX(0); transform-origin:left; }
+.pc-drop { transform:scaleY(0); transform-origin:top; }
+.pc-animate .pc-grow { animation:pc-grow 1.6s var(--anim-ease-out) forwards; }
+.pc-animate .pc-drop { animation:pc-drop  .9s var(--anim-ease-out) forwards; }
+.pc-d1 { animation-delay:.00s !important }
+.pc-d2 { animation-delay:.16s !important }
+.pc-d3 { animation-delay:.32s !important }
+.pc-d4 { animation-delay:.48s !important }
+.pc-d5 { animation-delay:.62s !important }
+@keyframes pc-grow { to { transform:scaleX(1) } }
+@keyframes pc-drop { to { transform:scaleY(1) } }
 
-.pc-animate .pc-grow{animation:pc-grow 1.6s var(--anim-ease-out) forwards}
-.pc-animate .pc-drop{animation:pc-drop .9s var(--anim-ease-out) forwards}
-
-/* stagger helpers — add alongside pc-grow / pc-drop */
-.pc-d1{animation-delay:.00s !important}
-.pc-d2{animation-delay:.16s !important}
-.pc-d3{animation-delay:.32s !important}
-.pc-d4{animation-delay:.48s !important}
-.pc-d5{animation-delay:.62s !important}
-
-@keyframes pc-grow{to{transform:scaleX(1)}}
-@keyframes pc-drop{to{transform:scaleY(1)}}
-
-/* -------------------------------------------------------------
-   ACCESSIBILITY — honor reduced-motion.
-   Disables looping/among motion; content still appears.
-   ------------------------------------------------------------- */
-@media (prefers-reduced-motion: reduce){
-  .pc-belt i,
-  .pc-vs-bar,
-  .pc-stud,
-  .pc-skel,
-  .pc-animate .pc-grow,
-  .pc-animate .pc-drop{
-    animation:none !important;
-  }
-  /* make sure charts still render at full size when motion is off */
-  .pc-grow{transform:scaleX(1)}
-  .pc-drop{transform:scaleY(1)}
-  /* belt studs settle mid-teal so the loader is still visible */
-  .pc-belt i{background:var(--teal,#0091AE)}
+/* ─────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pc-seq .l1, .pc-pulse .l1, .pc-micro .l1, .pc-journey .l1 { fill:var(--f1) !important; animation:none !important; }
+  .pc-seq .l2, .pc-pulse .l2, .pc-micro .l2, .pc-journey .l2 { fill:var(--f2) !important; animation:none !important; }
+  .pc-seq .l3, .pc-pulse .l3, .pc-micro .l3, .pc-journey .l3 { fill:var(--f3) !important; animation:none !important; }
+  .pc-seq .l4, .pc-pulse .l4, .pc-micro .l4, .pc-journey .l4 { fill:var(--f4) !important; animation:none !important; }
+  .pc-seq .dot, .pc-pulse .dot, .pc-micro .dot, .pc-journey .dot { animation:none !important; opacity:1 !important; transform:none !important; }
+  .pc-td { animation:none !important; opacity:1 !important; }
+  .pc-skel { animation:none !important; }
+  .pc-grow { transform:scaleX(1); }
+  .pc-drop { transform:scaleY(1); }
 }
-
-/* =============================================================
-   TIMING REFERENCE (for humans)
-   - belt studs:      2.2s loop, 0.24s stagger between studs
-   - tale of tape:    2.6s loop, won leads, lost +0.35s
-   - tumbling stud:   1.8s loop
-   - skeleton:        2.4s linear loop (uses --skel-base/--skel-shine tokens)
-   - chart bars:      1.6s once, ease-out, staggered 0.16s
-   - funnel stages:   0.9s once, ease-out, staggered 0.16s
-   All "once" animations use `forwards` so they hold final state.
-   ============================================================= */

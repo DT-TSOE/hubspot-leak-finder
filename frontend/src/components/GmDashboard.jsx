@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import Scorecard from './Scorecard';
+import FunnelLoader from './FunnelLoader';
 
 const fmtH = h => h == null ? '-' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
 const fmtDays = d => d < 7 ? `${d}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
@@ -30,7 +31,7 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
 
   useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
 
-  if (loading) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Building your pipeline health report…</div>;
+  if (loading) return <FunnelLoader variant="seq" size="lg" label="Building your pipeline health report…" />;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 

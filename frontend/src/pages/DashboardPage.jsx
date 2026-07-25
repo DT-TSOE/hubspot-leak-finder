@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import FunnelLoader from '../components/FunnelLoader';
 import InsightCard from '../components/InsightCard';
 import SourceQuality from '../components/SourceQuality';
 import LeadScoreTable from '../components/LeadScoreTable';
@@ -373,10 +374,7 @@ export default function DashboardPage({ onDisconnect }) {
           <ContentDateBar section={section} days={days} onDays={handleDays} onLockedDays={() => setShowUpgrade(true)} />
 
           {loading && section !== 'dashboard' && (
-            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}>
-              <div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>
-              Analyzing your HubSpot data…
-            </div>
+            <FunnelLoader variant="seq" size="md" label="Analyzing your HubSpot data…" />
           )}
           {error && (
             <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 16px', color: '#DC2626', fontSize: 13, marginBottom: 14 }}>Error: {error}</div>

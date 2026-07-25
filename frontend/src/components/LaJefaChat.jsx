@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { api } from '../utils/api';
+import '../animations.css';
 
 const SUGGESTIONS = ["What's my biggest problem?","Which leads need attention today?","What should I fix first?","Why am I losing deals?"];
 
@@ -24,8 +25,18 @@ function ChatMessages({ messages, loading, error, bottomRef }) {
       {loading && (
         <div style={{ display:'flex', gap:6, alignItems:'flex-end' }}>
           <div style={{ width:26, height:26, borderRadius:7, background:'#0F1A0F', border:'1.5px solid #4CAF50', flexShrink:0 }}/>
-          <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, borderBottomLeftRadius:3, padding:'10px 14px', display:'flex', gap:4 }}>
-            {[0,1,2].map(i=><div key={i} style={{ width:5, height:5, borderRadius:'50%', background:'#ccc', animation:'bounce 1.2s infinite', animationDelay:`${i*0.2}s` }}/>)}
+          <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, borderBottomLeftRadius:3, padding:'10px 14px' }}>
+            <span className="pc-three-dots">
+              <svg viewBox="0 0 100 98" className="pc-funnel pc-td-funnel sz-xs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polygon className="l1" points="6,2 94,2 82,20 18,20" />
+                <polygon className="l2" points="18,23 82,23 72,39 28,39" />
+                <polygon className="l3" points="28,42 72,42 63,57 37,57" />
+                <polygon className="l4" points="37,60 63,60 56,74 44,74" />
+              </svg>
+              <span className="pc-td" />
+              <span className="pc-td" />
+              <span className="pc-td" />
+            </span>
           </div>
         </div>
       )}

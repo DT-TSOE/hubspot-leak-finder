@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
+import FunnelLoader from './FunnelLoader';
 
 const URGENCY = {
   critical: { bg:'#FEF2F2', border:'#FECACA', text:'#DC2626', label:'Critical' },
@@ -65,7 +66,7 @@ export default function SpeedToLead({ days }) {
     }
   };
 
-  if (loading) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Calculating response times…</div>;
+  if (loading) return <FunnelLoader variant="journey" size="md" label="Calculating response times…" />;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data) return null;
 

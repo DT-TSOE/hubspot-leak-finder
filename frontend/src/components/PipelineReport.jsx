@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
+import FunnelLoader from './FunnelLoader';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
 const fmtPct = n => n != null ? `${n}%` : '-';
@@ -68,9 +69,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
 
   const handlePrint = () => window.print();
 
-  if (loading) return (
-    <div style={{ textAlign: 'center', padding: '4rem', color: '#888', fontSize: 14 }}>Building your report…</div>
-  );
+  if (loading) return <FunnelLoader variant="journey" size="lg" label="Building your report…" />;
 
   const score = scorecardData?.overall ?? dashData?.pipelineHealthScore;
   const metrics = dashData?.metricCards || [];

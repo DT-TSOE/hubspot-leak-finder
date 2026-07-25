@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ConnectPage from './pages/ConnectPage';
 import DashboardPage from './pages/DashboardPage';
+import FunnelLoader from './components/FunnelLoader';
 import { api } from './utils/api';
 
 export default function App() {
@@ -13,6 +14,6 @@ export default function App() {
     api.authStatus().then(d => setConnected(d.connected)).catch(() => setConnected(false));
   }, []);
 
-  if (connected === null) return <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div></div>;
+  if (connected === null) return <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><FunnelLoader variant="seq" size="lg" /></div>;
   return connected ? <DashboardPage onDisconnect={() => setConnected(false)}/> : <ConnectPage/>;
 }

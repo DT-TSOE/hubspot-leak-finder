@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, LabelList, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
+import FunnelLoader from './FunnelLoader';
 
 const URGENCY = {
   critical: { bg:'#FEF2F2', border:'#FECACA', text:'#DC2626', label:'Critical' },
@@ -84,7 +85,7 @@ export default function StageAging({ days }) {
       .catch(e => { setError(e.message); setLoading(false); });
   }, [days]);
 
-  if (loading) return <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'4rem 0', color:'#888', fontSize:13 }}><div className="pc-belt"><i></i><i></i><i></i><i></i><i></i></div>Finding stuck records…</div>;
+  if (loading) return <FunnelLoader variant="journey" size="md" label="Finding stuck records…" />;
   if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
   if (!data || data.total === 0) {
     return (
