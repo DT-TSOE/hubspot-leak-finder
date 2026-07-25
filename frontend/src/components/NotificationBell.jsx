@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
+import { Bell, Zap, Thermometer, PauseCircle, UserMinus, TrendingDown, AlertTriangle, CheckCircle, Mail } from 'lucide-react';
 
 const SEV = {
   urgent: { color:'#DC2626', bg:'#FEF2F2', border:'#FECACA', dot:'#EF4444', label:'Urgent' },
@@ -8,12 +9,12 @@ const SEV = {
 };
 
 const TYPE_ICONS = {
-  response: '⚡',
-  going_cold: '🧊',
-  stuck: '⏸',
-  low_touch: '👋',
-  stalling_deal: '📉',
-  batch: '🔔',
+  response: (c) => <Zap size={14} color={c} />,
+  going_cold: (c) => <Thermometer size={14} color={c} />,
+  stuck: (c) => <PauseCircle size={14} color={c} />,
+  low_touch: (c) => <UserMinus size={14} color={c} />,
+  stalling_deal: (c) => <TrendingDown size={14} color={c} />,
+  batch: (c) => <Bell size={14} color={c} />,
 };
 
 export default function NotificationBell() {
@@ -72,7 +73,7 @@ export default function NotificationBell() {
     <div ref={ref} style={{ position:'relative' }}>
       {/* Bell button */}
       <button onClick={handleOpen} style={{ position:'relative', width:34, height:34, borderRadius:8, background: urgentCount > 0 ? '#FEF2F2' : '#fff', border:`1px solid ${urgentCount > 0 ? '#FECACA' : '#E2E5EA'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>
-        🔔
+        <Bell size={16} color={urgentCount > 0 ? '#DC2626' : '#555'} />
         {unreadCount > 0 && (
           <div style={{ position:'absolute', top:-4, right:-4, width:16, height:16, borderRadius:'50%', background: urgentCount > 0 ? '#EF4444' : '#F59E0B', border:'2px solid #fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, color:'#fff', fontWeight:700 }}>
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -95,7 +96,7 @@ export default function NotificationBell() {
             </div>
             <div style={{ display:'flex', gap:6 }}>
               <button onClick={() => setEmailSetup(!emailSetup)} title="Email digest" style={{ width:28, height:28, borderRadius:6, background:emailSetup?'#111':'#F3F4F6', border:'none', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                {emailSetup ? '✕' : '📧'}
+                {emailSetup ? '✕' : <Mail size={14} color="#555" />}
               </button>
               <button onClick={loadAlerts} disabled={loading} style={{ width:28, height:28, borderRadius:6, background:'#F3F4F6', border:'none', cursor:'pointer', fontSize:12, display:'flex', alignItems:'center', justifyContent:'center' }}>
                 ↺
@@ -123,7 +124,7 @@ export default function NotificationBell() {
           <div style={{ maxHeight:380, overflowY:'auto' }}>
             {alerts.length === 0 && !loading && (
               <div style={{ padding:'24px 16px', textAlign:'center' }}>
-                <div style={{ fontSize:24, marginBottom:8 }}>✅</div>
+                <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}><CheckCircle size={28} color="#059669" /></div>
                 <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:4 }}>Pipeline looks healthy</div>
                 <div style={{ fontSize:12, color:'#888' }}>No urgent issues right now. PipeCoach is watching.</div>
               </div>
@@ -131,7 +132,8 @@ export default function NotificationBell() {
 
             {alerts.map((alert, i) => {
               const s = SEV[alert.severity] || SEV.info;
-              const icon = TYPE_ICONS[alert.type] || '⚠️';
+              const IconFn = TYPE_ICONS[alert.type] || ((c) => <AlertTriangle size={14} color={c} />);
+              const icon = IconFn(s.color);
               const isUnread = !read.has(alert.id);
               return (
                 <div key={alert.id} style={{ padding:'12px 14px', borderBottom:'1px solid #F9FAFB', background: isUnread ? s.bg : '#fff', transition:'background .2s' }}>
@@ -144,7 +146,7 @@ export default function NotificationBell() {
                       </div>
                       <div style={{ fontSize:12, fontWeight:600, color:'#111', marginBottom:2, lineHeight:1.3 }}>{alert.title}</div>
                       <div style={{ fontSize:11, color:'#666', lineHeight:1.5, marginBottom:5 }}>{alert.body}</div>
-                      {alert.benchmark && <div style={{ fontSize:10, color:s.color, fontStyle:'italic', marginBottom:5 }}>📊 {alert.benchmark}</div>}
+                      {alert.benchmark && <div style={{ fontSize:10, color:s.color, fontStyle:'italic', marginBottom:5 }}>{alert.benchmark}</div>}
                       <a href={alert.action.url} target="_blank" rel="noopener noreferrer"
                         style={{ fontSize:11, fontWeight:600, color:s.color, textDecoration:'none' }}>
                         {alert.action.label} →

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
+import { Database, BarChart2, Search, Target, Share2, CreditCard, BookOpen, Globe, Bell } from 'lucide-react';
 
 function SeedButton() {
   const [status, setStatus] = useState('idle');
@@ -44,57 +45,57 @@ function SeedButton() {
 
 const INTEGRATIONS = [
   {
-    id: 'hubspot', name: 'HubSpot', category: 'CRM', logo: '🟠', color: '#FF7A59',
+    id: 'hubspot', name: 'HubSpot', category: 'CRM', logo: <Database size={22} color="#FF7A59" />, color: '#FF7A59',
     description: 'Your deal pipeline, contacts, lifecycle stages, and revenue data. The foundation everything else builds on.',
     unlocks: ['Pipeline health score', 'Funnel analysis', 'Lead scoring', 'Stage aging', 'Source quality'],
     getStatus: async () => { const s = await api.authStatus(); return s.connected ? 'connected' : 'disconnected'; },
   },
   {
-    id: 'ga4', name: 'Google Analytics 4', category: 'Analytics', logo: '📊', color: '#4285F4',
+    id: 'ga4', name: 'Google Analytics 4', category: 'Analytics', logo: <BarChart2 size={22} color="#4285F4" />, color: '#4285F4',
     description: 'Website traffic by channel — see which pages and campaigns actually generate pipeline.',
     unlocks: ['Traffic → Lead conversion', 'Sessions and users by channel', 'Which campaigns drive pipeline'],
     connectUrl: '/ga4/connect',
     getStatus: async () => { const s = await api.ga4Status(); return s.connected ? 'connected' : 'available'; },
   },
   {
-    id: 'search-console', name: 'Google Search Console', category: 'SEO', logo: '🔍', color: '#34A853',
+    id: 'search-console', name: 'Google Search Console', category: 'SEO', logo: <Search size={22} color="#34A853" />, color: '#34A853',
     description: 'Search impressions, clicks, and top queries — the very top of your acquisition funnel.',
     unlocks: ['Real impressions on the Marketing funnel', 'Top search queries driving traffic', 'Clicks and CTR by query'],
     connectUrl: '/gsc/connect',
     getStatus: async () => { const s = await api.gscStatus(); return s.connected ? 'connected' : 'available'; },
   },
   {
-    id: 'google-ads', name: 'Google Ads', category: 'Paid Media', logo: '🎯', color: '#FBBC04',
+    id: 'google-ads', name: 'Google Ads', category: 'Paid Media', logo: <Target size={22} color="#FBBC04" />, color: '#FBBC04',
     description: 'Which ad campaigns and keywords generate closed deals, not just clicks.',
     unlocks: ['Cost per lead by campaign', 'Cost per acquisition by keyword', 'ROAS from actual closed revenue'],
     comingSoon: true,
   },
   {
-    id: 'meta-ads', name: 'Meta Ads', category: 'Paid Media', logo: '📘', color: '#1877F2',
+    id: 'meta-ads', name: 'Meta Ads', category: 'Paid Media', logo: <Share2 size={22} color="#1877F2" />, color: '#1877F2',
     description: 'Facebook and Instagram ad performance mapped all the way to pipeline outcomes.',
     unlocks: ['Which campaigns close deals', 'Cost per acquisition by ad set', 'Audience quality by win rate'],
     comingSoon: true,
   },
   {
-    id: 'stripe', name: 'Stripe', category: 'Revenue', logo: '💳', color: '#635BFF',
+    id: 'stripe', name: 'Stripe', category: 'Revenue', logo: <CreditCard size={22} color="#635BFF" />, color: '#635BFF',
     description: 'Verify actual revenue against HubSpot deal amounts and track real MRR.',
     unlocks: ['Actual revenue vs HubSpot estimates', 'MRR and ARR trend', 'True customer LTV', 'Payment failure signals'],
     comingSoon: true,
   },
   {
-    id: 'quickbooks', name: 'QuickBooks Online', category: 'Revenue', logo: '📗', color: '#2CA01C',
+    id: 'quickbooks', name: 'QuickBooks Online', category: 'Revenue', logo: <BookOpen size={22} color="#2CA01C" />, color: '#2CA01C',
     description: 'Connect your accounting data for verified revenue and true customer value.',
     unlocks: ['Actual invoiced and paid revenue', 'True LTV by source', 'Revenue vs pipeline accuracy'],
     comingSoon: true,
   },
   {
-    id: 'xero', name: 'Xero', category: 'Revenue', logo: '📘', color: '#00B4D8',
+    id: 'xero', name: 'Xero', category: 'Revenue', logo: <Globe size={22} color="#00B4D8" />, color: '#00B4D8',
     description: 'Accounting integration for verified revenue data across your pipeline.',
     unlocks: ['Actual revenue vs HubSpot deal values', 'Customer payment history', 'Invoice to close time by source'],
     comingSoon: true,
   },
   {
-    id: 'slack', name: 'Slack', category: 'Notifications', logo: '💬', color: '#4A154B',
+    id: 'slack', name: 'Slack', category: 'Notifications', logo: <Bell size={22} color="#4A154B" />, color: '#4A154B',
     description: 'Weekly pipeline digest and critical alerts delivered straight to your team.',
     unlocks: ['Weekly health score digest', 'Alert when leads go 24h uncontacted', 'At-risk deal notifications'],
     comingSoon: true,

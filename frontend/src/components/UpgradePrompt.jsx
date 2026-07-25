@@ -1,5 +1,6 @@
 import React from 'react';
 import { PLANS, setPlan, getCurrentPlan } from '../utils/plan';
+import { Lock } from 'lucide-react';
 
 export default function UpgradePrompt({ feature, requiredPlan = 'starter', inline = false, children }) {
   const plan = PLANS[requiredPlan];
@@ -14,7 +15,7 @@ export default function UpgradePrompt({ feature, requiredPlan = 'starter', inlin
   if (inline) {
     return (
       <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:8 }}>
-        <span style={{ fontSize:12, color:'#92400E' }}>🔒 {children || `This feature requires ${plan.name}`}</span>
+        <span style={{ fontSize:12, color:'#92400E', display:'flex', alignItems:'center', gap:5 }}><Lock size={12} color="#92400E" /> {children || `This feature requires ${plan.name}`}</span>
         <button onClick={handleUpgrade} style={{ fontSize:11, fontWeight:700, color:'#fff', background:'#F59E0B', border:'none', borderRadius:5, padding:'3px 10px', cursor:'pointer', flexShrink:0 }}>
           Upgrade - ${plan.price}/mo
         </button>
@@ -24,7 +25,7 @@ export default function UpgradePrompt({ feature, requiredPlan = 'starter', inlin
 
   return (
     <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:12, padding:'2rem', textAlign:'center', maxWidth:400, margin:'0 auto' }}>
-      <div style={{ width:48, height:48, borderRadius:12, background:'#FFFBEB', border:'1px solid #FDE68A', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, margin:'0 auto 14px' }}>🔒</div>
+      <div style={{ width:48, height:48, borderRadius:12, background:'#FFFBEB', border:'1px solid #FDE68A', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 14px' }}><Lock size={22} color="#F59E0B" /></div>
       <div style={{ fontSize:16, fontWeight:700, color:'#111', marginBottom:6 }}>
         {children || `Unlock with ${plan.name}`}
       </div>

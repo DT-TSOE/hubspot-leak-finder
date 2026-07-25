@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
 import FunnelLoader from './FunnelLoader';
+import { Download, AlertTriangle } from 'lucide-react';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
 const fmtPct = n => n != null ? `${n}%` : '-';
@@ -108,7 +109,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button onClick={handlePrint} style={{ padding: '8px 16px', borderRadius: 7, border: 'none', background: '#111', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-              ⬇ Download PDF
+              <Download size={14} /> Download PDF
             </button>
           </div>
         </div>
@@ -186,7 +187,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
             <ReportSection title="Lifecycle Funnel">
               {funnel.biggestLeak && (
                 <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderLeft: '3px solid #EF4444', borderRadius: 7, padding: '10px 14px', marginBottom: 12, fontSize: 13, color: '#DC2626', fontWeight: 600 }}>
-                  ⚠ Biggest Leak: {funnel.biggestLeak.description}
+                  <AlertTriangle size={13} style={{ verticalAlign:'text-bottom', marginRight:4 }} /> Biggest Leak: {funnel.biggestLeak.description}
                 </div>
               )}
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>

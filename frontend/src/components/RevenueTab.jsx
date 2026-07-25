@@ -2,6 +2,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import IntegrationHint from './IntegrationHint';
 import FunnelLoader from './FunnelLoader';
+import { CreditCard } from 'lucide-react';
 
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : 'N/A';
 const fmtSrc = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
@@ -31,7 +32,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         </div>
       </div>
       <IntegrationHint
-        icon="💳" name="Stripe, QuickBooks, or Xero"
+        icon={<CreditCard size={18} color="#635BFF" />} name="Stripe, QuickBooks, or Xero"
         feature="Verified Revenue & MRR" benefit="Verify actual revenue vs HubSpot estimates, track MRR trends, and calculate true LTV by source." preview="bars"
         onConnect={() => onNavigate?.('integrations')}
       />
@@ -248,7 +249,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
 
       {/* Accounting integration hint */}
       <IntegrationHint
-        icon="💳" name="Stripe, QuickBooks, or Xero"
+        icon={<CreditCard size={18} color="#635BFF" />} name="Stripe, QuickBooks, or Xero"
         feature="Verified Revenue & MRR" benefit="Verify actual revenue vs HubSpot estimates, track MRR trends, and calculate true LTV by source." preview="bars"
         onConnect={() => onNavigate?.('integrations')}
       />

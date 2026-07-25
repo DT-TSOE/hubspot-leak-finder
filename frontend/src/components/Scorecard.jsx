@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../utils/api';
 import Onboarding from './Onboarding';
 import GoalsModal from './GoalsModal';
+import { Lock, Eraser } from 'lucide-react';
 
 const fmt$ = n => '$' + Math.round(n || 0).toLocaleString();
 const fmt$k = n => n >= 1000 ? '$' + Math.round(n / 1000) + 'k' : '$' + Math.round(n);
@@ -118,7 +119,7 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
       </div>
       {locked && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', background: 'rgba(255,255,255,.45)' }}>
-          <div style={{ fontSize: 22, marginBottom: 6 }}>🔒</div>
+          <div style={{ marginBottom: 6, display:'flex', justifyContent:'center' }}><Lock size={22} color="#111" /></div>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 4 }}>Your {title} grade is locked</div>
           <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, maxWidth: 260 }}>{unlockHint}</div>
         </div>
@@ -427,7 +428,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               {hasGoals ? 'Edit your targets' : 'Set your targets'}
             </button>
             <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#C2410C' : '#888', background: 'none', border: `1px solid ${showTriage ? '#FDE68A' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
-              🧹 Clean your data{spamCount > 0 && <span style={{ color: '#059669', fontWeight: 600 }}> · {spamCount} filtered</span>}
+              <Eraser size={12} /> Clean your data{spamCount > 0 && <span style={{ color: '#059669', fontWeight: 600 }}> · {spamCount} filtered</span>}
             </button>
           </div>
         </div>

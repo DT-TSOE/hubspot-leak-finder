@@ -117,11 +117,11 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
 
       {/* Pickers */}
       {gsc?.connected && gsc.needsSite && (
-        <Picker title="✅ Search Console connected - pick your site" subtitle="Which property's impressions should feed the funnel?"
+        <Picker title="Search Console connected — pick your site" subtitle="Which property's impressions should feed the funnel?"
           options={sites?.map(s => ({ value: s.siteUrl, label: s.siteUrl }))} onPick={selectSite} placeholder="Select a site…" />
       )}
       {ga4?.connected && ga4.needsProperty && (
-        <Picker title="✅ Google Analytics connected - pick your property" subtitle="Which GA4 property should feed traffic?"
+        <Picker title="Google Analytics connected — pick your property" subtitle="Which GA4 property should feed traffic?"
           options={properties?.map(p => ({ value: p.id, label: `${p.name} (${p.account})` }))}
           onPick={(id) => { const p = properties.find(x => x.id === id); selectProperty(id, p?.name); }} placeholder="Select a property…" />
       )}

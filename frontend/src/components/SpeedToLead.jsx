@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 import FunnelLoader from './FunnelLoader';
+import { AlertTriangle, Phone, Mail, Calendar, Eraser, CheckCircle } from 'lucide-react';
 
 const URGENCY = {
   critical: { bg:'#FEF2F2', border:'#FECACA', text:'#DC2626', label:'Critical' },
@@ -77,7 +78,7 @@ export default function SpeedToLead({ days }) {
       {/* Hero alert when uncontacted leads exist */}
       {data.uncontactedCount > 0 && (
         <div style={{ background:'linear-gradient(135deg,#1a1a1a,#2d1a1a)', borderRadius:12, padding:'16px 20px', marginBottom:14, display:'flex', alignItems:'center', gap:16 }}>
-          <div style={{ width:44, height:44, borderRadius:10, background:'rgba(239,68,68,.15)', border:'2px solid #EF4444', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>🚨</div>
+          <div style={{ width:44, height:44, borderRadius:10, background:'rgba(239,68,68,.15)', border:'2px solid #EF4444', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><AlertTriangle size={22} color="#EF4444" /></div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:10, fontWeight:700, color:'#EF4444', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:3 }}>Needs Immediate Attention</div>
             <div style={{ fontSize:18, fontWeight:700, color:'#fff', marginBottom:3 }}>
@@ -117,9 +118,9 @@ export default function SpeedToLead({ days }) {
           <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
             <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Activity (30 days)</div>
             {[
-              { label:'Calls', value:activitySummary.calls, icon:'📞' },
-              { label:'Sales emails', value:activitySummary.emails, icon:'✉' },
-              { label:'Meetings', value:activitySummary.meetings, icon:'📅' },
+              { label:'Calls', value:activitySummary.calls, icon:<Phone size={13} color="#888" /> },
+              { label:'Sales emails', value:activitySummary.emails, icon:<Mail size={13} color="#888" /> },
+              { label:'Meetings', value:activitySummary.meetings, icon:<Calendar size={13} color="#888" /> },
             ].map(a => (
               <div key={a.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
                 <span style={{ fontSize:11, color:'#666' }}>{a.icon} {a.label}</span>
@@ -137,7 +138,7 @@ export default function SpeedToLead({ days }) {
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ fontSize:12.5, fontWeight:600, color:'#111', marginBottom:12 }}>Activity - this week vs last week</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-            {[{k:'calls',label:'Calls',icon:'📞'},{k:'emails',label:'Sales emails',icon:'✉'},{k:'meetings',label:'Meetings booked',icon:'📅'}].map(a => {
+            {[{k:'calls',label:'Calls',icon:<Phone size={13} color="#888" />},{k:'emails',label:'Sales emails',icon:<Mail size={13} color="#888" />},{k:'meetings',label:'Meetings booked',icon:<Calendar size={13} color="#888" />}].map(a => {
               const c = activityComparison[a.k] || {};
               const tw = c.thisWeek, lw = c.lastWeek;
               const delta = (tw != null && lw != null) ? tw - lw : null;
@@ -163,7 +164,7 @@ export default function SpeedToLead({ days }) {
         <div ref={triageRef} style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderLeft:'4px solid #F59E0B', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
             <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
-              <span style={{ fontSize:20, flexShrink:0 }}>🧹</span>
+              <Eraser size={18} color="#F59E0B" style={{ flexShrink:0 }} />
               <div>
                 <div style={{ fontSize:13.5, fontWeight:700, color:'#111' }}>Clean up spam &amp; junk contacts {spamCount > 0 && <span style={{ color:'#059669' }}>· {spamCount} filtered out</span>}</div>
                 <div style={{ fontSize:11.5, color:'#92400E', marginTop:2, lineHeight:1.5 }}>Junk form-fills skew response time, conversion, and source quality across the whole app. Mark them spam and every metric recalculates without them - one of the highest-impact things you can do.</div>
@@ -327,7 +328,7 @@ export default function SpeedToLead({ days }) {
         </div>
       ) : (
         <div style={{ background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:10, padding:'2rem', textAlign:'center' }}>
-          <div style={{ fontSize:28, marginBottom:8 }}>✅</div>
+          <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}><CheckCircle size={32} color="#059669" /></div>
           <div style={{ fontSize:15, fontWeight:600, color:'#059669', marginBottom:6 }}>No uncontacted leads right now</div>
           <div style={{ fontSize:13, color:'#666', maxWidth:340, margin:'0 auto', lineHeight:1.6 }}>Every recent lead has been reached out to. Keep that response time low.</div>
         </div>
