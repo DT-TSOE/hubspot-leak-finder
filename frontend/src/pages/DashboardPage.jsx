@@ -75,7 +75,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
       <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <img src="/logos/logo-horizontal-white-on-navy.png" alt="PipeChamp" style={{ height: 28 }} />
+        <img src="/logos/logo-horizontal-white-on-navy.png" alt="PipeChamp" style={{ height: 32, mixBlendMode: 'lighten' }} />
       </div>
 
       {/* Nav */}
