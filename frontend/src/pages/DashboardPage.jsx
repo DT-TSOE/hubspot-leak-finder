@@ -75,16 +75,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
       <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '-0.3px', fontFamily: 'Fraunces, Georgia, serif' }}>PipeChamp</span>
-          <svg width="28" height="28" viewBox="0 0 100 98" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-            <polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7"/>
-            <polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/>
-            <polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/>
-            <polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity="0.7"/>
-            <circle cx="50" cy="87" r="7" fill="#E8562A"/>
-          </svg>
-        </div>
+        <img src="/logos/logo-horizontal-white-on-navy.png" alt="PipeChamp" style={{ height: 28 }} />
       </div>
 
       {/* Nav */}
