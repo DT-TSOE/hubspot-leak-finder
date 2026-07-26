@@ -19,14 +19,14 @@ function profileRows(p) {
   ].filter(Boolean);
 }
 
-const GRADE_COLOR = { A: '#2EBF9A', B: '#0091AE', C: '#1B72C7', D: '#E8562A', F: '#243A52' };
-const scoreColor = s => s === null || s === undefined ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 50 ? '#1B72C7' : '#E8562A';
-const meterColor = s => s == null ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 40 ? '#1B72C7' : '#E8562A';
+const GRADE_COLOR = { A: '#2EBF9A', B: '#0091AE', C: '#1B72C7', D: '#243A52', F: '#243A52' };
+const scoreColor = s => s === null || s === undefined ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 50 ? '#1B72C7' : '#243A52';
+const meterColor = s => s == null ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 40 ? '#1B72C7' : '#243A52';
 
 const STATUS_STYLE = {
-  good:     { label: 'Good',     bg: 'rgba(46,191,154,0.08)',  color: '#0E7C6D', border: 'rgba(46,191,154,0.3)' },
-  watch:    { label: 'Watch',    bg: 'rgba(27,114,199,0.08)',  color: '#1B72C7', border: 'rgba(27,114,199,0.25)' },
-  critical: { label: 'Critical', bg: 'rgba(232,86,42,0.08)',   color: '#C2410C', border: 'rgba(232,86,42,0.25)' },
+  good:     { label: 'Good',     bg: 'rgba(0,145,174,0.07)',  color: '#0091AE', border: 'rgba(0,145,174,0.2)' },
+  watch:    { label: 'Watch',    bg: 'rgba(27,114,199,0.07)', color: '#1B72C7', border: 'rgba(27,114,199,0.2)' },
+  critical: { label: 'Critical', bg: 'rgba(36,58,82,0.07)',   color: '#243A52', border: 'rgba(36,58,82,0.15)' },
 };
 
 function dimStatus(score) {
@@ -47,7 +47,7 @@ function DimensionRow({ dim, comparison, goal }) {
       fill = lowerIsBetter
         ? Math.min(100, Math.round((goal / dim.value) * 100))
         : Math.min(100, Math.round((dim.value / goal) * 100));
-      mc = fill >= 100 ? '#2EBF9A' : fill >= 60 ? '#1B72C7' : '#E8562A';
+      mc = fill >= 100 ? '#2EBF9A' : fill >= 60 ? '#1B72C7' : '#243A52';
     } else {
       fill = dim.meterFill != null ? dim.meterFill : dim.score;
       mc = meterColor(fill);
@@ -69,7 +69,7 @@ function DimensionRow({ dim, comparison, goal }) {
           </div>
         </div>
         <div style={{ position: 'relative', height: 6, borderRadius: 4, background: '#F0F1F4', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(232,86,42,.1)' }} />
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(36,58,82,.08)' }} />
           <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(27,114,199,.1)' }} />
           <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(46,191,154,.1)' }} />
           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${fill}%`, background: mc, borderRadius: 4, transition: 'width .6s ease' }} />
@@ -374,7 +374,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
             <span style={{ fontSize: 48, fontWeight: 800, color: mc, lineHeight: 1, letterSpacing: '-1px' }}>{overall.score ?? '-'}</span>
             <span style={{ fontSize: 15, color: '#bbb' }}>/100</span>
             {scoreDelta != null && scoreDelta !== 0 && (
-              <span style={{ fontSize: 12, fontWeight: 700, color: scoreDelta > 0 ? '#0E7C6D' : '#C2410C', background: scoreDelta > 0 ? 'rgba(46,191,154,0.08)' : 'rgba(232,86,42,0.08)', border: `1px solid ${scoreDelta > 0 ? 'rgba(46,191,154,0.3)' : 'rgba(232,86,42,0.25)'}`, borderRadius: 20, padding: '3px 10px' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: scoreDelta > 0 ? '#0091AE' : '#243A52', background: scoreDelta > 0 ? 'rgba(0,145,174,0.07)' : 'rgba(36,58,82,0.07)', border: `1px solid ${scoreDelta > 0 ? 'rgba(0,145,174,0.2)' : 'rgba(36,58,82,0.15)'}`, borderRadius: 20, padding: '3px 10px' }}>
                 {scoreDelta > 0 ? '↑' : '↓'} {Math.abs(scoreDelta)} pts this month
               </span>
             )}
@@ -382,7 +382,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
           {/* Progress bar with colour zones */}
           <div style={{ position: 'relative', height: 10, borderRadius: 6, background: '#F0F1F4', overflow: 'hidden', marginBottom: 6 }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(232,86,42,.1)' }} />
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(36,58,82,.08)' }} />
             <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(27,114,199,.1)' }} />
             <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(46,191,154,.1)' }} />
             <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${overall.score ?? 0}%`, background: mc, borderRadius: 6, transition: 'width .8s ease' }} />
@@ -400,7 +400,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
                 <span style={{ fontSize: 10, color: '#aaa' }}>Last month</span>
                 <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{lastMonthScore}</span>
                 {scoreDelta !== 0 && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: scoreDelta > 0 ? '#0E7C6D' : '#C2410C' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: scoreDelta > 0 ? '#0091AE' : '#243A52' }}>
                     {scoreDelta > 0 ? '↑' : '↓'}{Math.abs(scoreDelta)}
                   </span>
                 )}
@@ -427,7 +427,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="13" y2="12"/><circle cx="6" cy="4" r="1.5" fill="white"/><circle cx="10" cy="8" r="1.5" fill="white"/><circle cx="6" cy="12" r="1.5" fill="white"/></svg>
               {hasGoals ? 'Edit your targets' : 'Set your targets'}
             </button>
-            <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#E8562A' : '#888', background: 'none', border: `1px solid ${showTriage ? 'rgba(232,86,42,0.3)' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
+            <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#1B72C7' : '#888', background: 'none', border: `1px solid ${showTriage ? 'rgba(27,114,199,0.3)' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
               <Eraser size={12} /> Clean your data{spamCount > 0 && <span style={{ color: '#0091AE', fontWeight: 600 }}> · {spamCount} filtered</span>}
             </button>
           </div>
@@ -572,14 +572,14 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
             <div style={{ padding: '10px 20px', background: '#F7F8FA', borderTop: '1px solid #F3F4F6', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
               To achieve your Goal Pipeline Value, you need approximately <strong>{derivedLeadsGoal.toLocaleString()} new leads</strong> per period.
               {derivedLeadsGoal > leadsCaptDim.value && (
-                <span style={{ color: '#E8562A', marginLeft: 4 }}>You're currently capturing {Math.round(leadsCaptDim.value)} — {Math.round(derivedLeadsGoal - leadsCaptDim.value)} short.</span>
+                <span style={{ color: '#243A52', fontWeight: 600, marginLeft: 4 }}>You're currently capturing {Math.round(leadsCaptDim.value)} — {Math.round(derivedLeadsGoal - leadsCaptDim.value)} short.</span>
               )}
             </div>
           )}
         </div>
       )}
       {hasGoals && gaps.length === 0 && (
-        <div style={{ background: 'rgba(46,191,154,0.08)', border: '1px solid rgba(46,191,154,0.3)', borderRadius: 10, padding: '12px 18px', marginBottom: 12, fontSize: 13, color: '#0E7C6D', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(0,145,174,0.07)', border: '1px solid rgba(0,145,174,0.2)', borderRadius: 10, padding: '12px 18px', marginBottom: 12, fontSize: 13, color: '#0091AE', fontWeight: 600 }}>
           All your targets are on track
         </div>
       )}

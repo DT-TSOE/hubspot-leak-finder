@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 const STAGE_COLORS = {
-  Lead: '#6366F1', MQL: '#8B5CF6', SQL: '#A855F7',
-  Opportunity: '#EC4899', Customer: '#10B981',
+  Lead: '#1B72C7', MQL: '#0091AE', SQL: '#2EBF9A',
+  Opportunity: '#243A52', Customer: '#2EBF9A',
 };
 
 export default function FunnelChart({ funnelStages, biggestLeak, stageContacts }) {

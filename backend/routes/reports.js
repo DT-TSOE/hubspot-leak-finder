@@ -460,10 +460,10 @@ router.get('/speed-to-lead', requireAuth, async (req, res) => {
     };
 
     const distribution = contactedLeads.length > 0 ? [
-      { label: 'Under 1h',   key: 'under1h', count: buckets.under1h.length, color: '#10B981' },
-      { label: '1-6 hours',  key: 'h1to6',   count: buckets.h1to6.length,   color: '#34D399' },
-      { label: '6-24 hours', key: 'h6to24',  count: buckets.h6to24.length,  color: '#F59E0B' },
-      { label: 'Over 24h',   key: 'over24h', count: buckets.over24h.length,  color: '#EF4444' },
+      { label: 'Under 1h',   key: 'under1h', count: buckets.under1h.length, color: '#2EBF9A' },
+      { label: '1-6 hours',  key: 'h1to6',   count: buckets.h1to6.length,   color: '#0091AE' },
+      { label: '6-24 hours', key: 'h6to24',  count: buckets.h6to24.length,  color: '#1B72C7' },
+      { label: 'Over 24h',   key: 'over24h', count: buckets.over24h.length,  color: '#243A52' },
     ] : [];
 
     // Activity summary - calls, emails, meetings in last 30 days + week-over-week

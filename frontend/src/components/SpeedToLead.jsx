@@ -5,10 +5,10 @@ import FunnelLoader from './FunnelLoader';
 import { Phone, Mail, Calendar, Eraser, CheckCircle } from 'lucide-react';
 
 const URGENCY = {
-  critical: { bg:'rgba(232,86,42,0.08)', border:'rgba(232,86,42,0.25)', text:'#C2410C', label:'Critical' },
-  high:     { bg:'rgba(27,114,199,0.08)', border:'rgba(27,114,199,0.25)', text:'#1B72C7', label:'High' },
-  medium:   { bg:'rgba(0,145,174,0.08)', border:'rgba(0,145,174,0.25)', text:'#0091AE', label:'Medium' },
-  low:      { bg:'rgba(46,191,154,0.08)', border:'rgba(46,191,154,0.3)', text:'#2EBF9A', label:'Low' },
+  critical: { bg:'rgba(36,58,82,0.07)',   border:'rgba(36,58,82,0.15)',   text:'#243A52', label:'Critical' },
+  high:     { bg:'rgba(27,114,199,0.07)', border:'rgba(27,114,199,0.2)',  text:'#1B72C7', label:'High' },
+  medium:   { bg:'rgba(0,145,174,0.07)',  border:'rgba(0,145,174,0.2)',   text:'#0091AE', label:'Medium' },
+  low:      { bg:'rgba(46,191,154,0.07)', border:'rgba(46,191,154,0.2)',  text:'#2EBF9A', label:'Low' },
 };
 
 const fmtH = h => {
@@ -81,7 +81,7 @@ export default function SpeedToLead({ days }) {
           <div style={{ flex:1 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#111', marginBottom:2 }}>
               {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with no outreach yet
-              {data.criticalCount > 0 && <span style={{ marginLeft:8, fontSize:12, fontWeight:500, color:'#E8562A' }}>· {data.criticalCount} over 24h</span>}
+              {data.criticalCount > 0 && <span style={{ marginLeft:8, fontSize:12, fontWeight:500, color:'#243A52' }}>· {data.criticalCount} over 24h</span>}
             </div>
             <div style={{ fontSize:12, color:'#888' }}>Response time drops fast. These contacts are waiting.</div>
           </div>

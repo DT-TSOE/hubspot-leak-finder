@@ -4,9 +4,9 @@ import { api } from '../utils/api';
 import FunnelLoader from './FunnelLoader';
 
 const URGENCY = {
-  critical: { bg:'rgba(232,86,42,0.08)', border:'rgba(232,86,42,0.25)', text:'#C2410C', label:'Critical' },
-  high:     { bg:'rgba(27,114,199,0.08)', border:'rgba(27,114,199,0.25)', text:'#1B72C7', label:'High' },
-  medium:   { bg:'rgba(0,145,174,0.08)', border:'rgba(0,145,174,0.25)', text:'#0091AE', label:'Medium' },
+  critical: { bg:'rgba(36,58,82,0.07)',   border:'rgba(36,58,82,0.15)',   text:'#243A52', label:'Critical' },
+  high:     { bg:'rgba(27,114,199,0.07)', border:'rgba(27,114,199,0.2)',  text:'#1B72C7', label:'High' },
+  medium:   { bg:'rgba(0,145,174,0.07)',  border:'rgba(0,145,174,0.2)',   text:'#0091AE', label:'Medium' },
 };
 
 const fmt = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
