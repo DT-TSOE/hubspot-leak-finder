@@ -436,9 +436,9 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
         {/* Pipeline numbers: goal close (hero) → current pipeline → expected close */}
         {openPipelineValue > 0 && (
           <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: 16, borderLeft: '1px solid #F0F1F4', minWidth: 120 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Close Value</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#1B72C7', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Goal Pipeline Value</div>
             {goalCloseValue !== null ? (
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#059669', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#1B72C7', letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt$(goalCloseValue)}</div>
             ) : (
               <>
                 <div style={{ fontSize: 30, fontWeight: 800, color: '#ccc', lineHeight: 1 }}>—</div>
@@ -570,7 +570,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           ))}
           {derivedLeadsGoal != null && derivedLeadsGoal > 0 && leadsCaptDim?.value != null && (
             <div style={{ padding: '10px 20px', background: '#F7F8FA', borderTop: '1px solid #F3F4F6', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
-              To achieve your Goal Close Value, you need approximately <strong>{derivedLeadsGoal.toLocaleString()} new leads</strong> per period.
+              To achieve your Goal Pipeline Value, you need approximately <strong>{derivedLeadsGoal.toLocaleString()} new leads</strong> per period.
               {derivedLeadsGoal > leadsCaptDim.value && (
                 <span style={{ color: '#EF4444', marginLeft: 4 }}>You're currently capturing {Math.round(leadsCaptDim.value)} — {Math.round(derivedLeadsGoal - leadsCaptDim.value)} short.</span>
               )}
@@ -587,18 +587,20 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       {/* Best deals profile */}
       {dealProfiles && !dealProfiles.insufficient && (
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best deals look like this</div>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>Behavioral patterns of your winning segments · based on {dealProfiles.wonCount} won deals</div>
-          <div style={{ display: 'grid', gridTemplateColumns: dealProfiles.fastestClose ? '1fr 1fr' : '1fr', gap: 12 }}>
+          <div style={{ marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid #F0F1F4' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best deals look like this</div>
+            <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Behavioral patterns from {dealProfiles.wonCount} won deals</div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: dealProfiles.fastestClose ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 14 }}>
             {[
-              { title: 'Highest-value customers', tag: 'top 25% by deal size', p: dealProfiles.highestValue, accent: '#059669' },
-              dealProfiles.fastestClose && { title: 'Fastest closes', tag: 'fastest 25% by cycle', p: dealProfiles.fastestClose, accent: '#3B82F6' },
+              { title: 'Highest-value customers', tag: 'top 25% by deal size', p: dealProfiles.highestValue, accent: '#0091AE' },
+              dealProfiles.fastestClose && { title: 'Fastest closes', tag: 'fastest 25% by cycle', p: dealProfiles.fastestClose, accent: '#1B72C7' },
             ].filter(Boolean).map(card => (
-              <div key={card.title} style={{ border: '1px solid #F0F1F4', borderRadius: 10, padding: '14px', borderTop: `3px solid ${card.accent}` }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{card.title}</div>
+              <div key={card.title} style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: card.accent, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{card.title}</div>
                 <div style={{ fontSize: 10.5, color: '#999', marginBottom: 10 }}>{card.tag} · {card.p.sample} deals</div>
                 {profileRows(card.p).map(r => (
-                  <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #F9FAFB', fontSize: 12.5 }}>
+                  <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #EDEEF1', fontSize: 12.5 }}>
                     <span style={{ color: '#888' }}>{r.l}</span>
                     <span style={{ color: '#111', fontWeight: 600, textAlign: 'right' }}>{r.v}</span>
                   </div>
@@ -606,15 +608,15 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 12, background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ flex: 1, fontSize: 12.5, color: '#7C2D12', lineHeight: 1.5 }}>
-              <strong style={{ color: '#111' }}>Want to know who these buyers actually are - and where to find more like them?</strong> Job titles, company profiles, and lookalike targeting.
+          <div style={{ background: 'rgba(27,114,199,0.05)', border: '1px solid rgba(27,114,199,0.15)', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ flex: 1, fontSize: 12.5, color: '#243A52', lineHeight: 1.5 }}>
+              <strong style={{ color: '#111' }}>Want to know who these buyers actually are?</strong> Job titles, company profiles, and lookalike targeting.
             </div>
             {interested ? (
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669', flexShrink: 0 }}>✓ We'll be in touch</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#0091AE', flexShrink: 0 }}>✓ We'll be in touch</span>
             ) : (
               <button onClick={() => { api.recordInterest('customer-profiles').catch(() => {}); setInterested(true); }}
-                style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#fff', background: '#C2410C', border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}>
+                style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#fff', background: '#1B72C7', border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}>
                 I want this →
               </button>
             )}

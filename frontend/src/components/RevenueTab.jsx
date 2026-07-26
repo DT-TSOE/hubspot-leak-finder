@@ -13,8 +13,8 @@ function RevenueTooltip({ active, payload }) {
   return (
     <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:8, padding:'8px 12px', fontSize:12, boxShadow:'0 2px 8px rgba(0,0,0,.08)', pointerEvents:'none' }}>
       <div style={{ fontWeight:700, color:'#111', marginBottom:3 }}>{d.label}</div>
-      <div style={{ color:'#059669', fontWeight:700 }}>${(d.revenue||0).toLocaleString()} won <span style={{ color:'#888', fontWeight:400 }}>· {d.deals} deal{d.deals !== 1 ? 's' : ''}</span></div>
-      {(d.lost > 0) && <div style={{ color:'#EF4444', fontWeight:700, marginTop:1 }}>${(d.lostRevenue||0).toLocaleString()} lost <span style={{ color:'#888', fontWeight:400 }}>· {d.lost} deal{d.lost !== 1 ? 's' : ''}</span></div>}
+      <div style={{ color:'#0091AE', fontWeight:700 }}>${(d.revenue||0).toLocaleString()} won <span style={{ color:'#888', fontWeight:400 }}>· {d.deals} deal{d.deals !== 1 ? 's' : ''}</span></div>
+      {(d.lost > 0) && <div style={{ color:'#CBD6E2', fontWeight:700, marginTop:1 }}>${(d.lostRevenue||0).toLocaleString()} lost <span style={{ color:'#888', fontWeight:400 }}>· {d.lost} deal{d.lost !== 1 ? 's' : ''}</span></div>}
     </div>
   );
 }
@@ -44,8 +44,8 @@ export default function RevenueTab({ data, loading, onNavigate }) {
       {/* Headline metrics */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:14 }}>
         {[
-          { label:'Total Revenue', value:fmt$(data.overview.totalRevenue), color:'#059669' },
-          { label:'Avg Customer LTV', value:fmt$(data.customerLtv?.avgLtv), color:'#059669', sub:'all deals per customer' },
+          { label:'Total Revenue', value:fmt$(data.overview.totalRevenue), color:'#243A52' },
+          { label:'Avg Customer LTV', value:fmt$(data.customerLtv?.avgLtv), color:'#1B72C7', sub:'all deals per customer' },
           { label:'Avg Deal Size', value:fmt$(data.overview.avgDealSize), color:'#111', sub:'per individual deal' },
           { label:'Closed-Won Deals', value:data.overview.totalWonDeals, color:'#111' },
         ].map(m => (
@@ -57,12 +57,12 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         ))}
       </div>
 
-      {/* Customer lifetime value (accounts for multiple deals per customer) */}
+      {/* Customer lifetime value */}
       {data.customerLtv?.distinctCustomers > 0 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Customer lifetime value</div>
           <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>
-            Total won revenue per customer across <strong>all</strong> their deals (not just one). {data.customerLtv.distinctCustomers} customers · <strong style={{ color: data.customerLtv.repeatRate > 0 ? '#059669' : '#888' }}>{data.customerLtv.repeatRate}% bought more than once</strong>.
+            Total won revenue per customer across <strong>all</strong> their deals (not just one). {data.customerLtv.distinctCustomers} customers · <strong style={{ color: data.customerLtv.repeatRate > 0 ? '#0091AE' : '#888' }}>{data.customerLtv.repeatRate}% bought more than once</strong>.
           </div>
           {data.customerLtv.topCustomers?.map((c, i) => (
             <div key={c.label + i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0', borderBottom:i < data.customerLtv.topCustomers.length-1 ? '1px solid #F9FAFB' : 'none' }}>
@@ -70,7 +70,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
                 <div style={{ fontSize:13, fontWeight:500, color:'#222' }}>{c.label}</div>
                 <div style={{ fontSize:11, color:'#999' }}>{c.deals} deal{c.deals !== 1 ? 's' : ''}</div>
               </div>
-              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#059669' : '#333' }}>{fmt$(c.revenue)}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#1B72C7' : '#333' }}>{fmt$(c.revenue)}</div>
             </div>
           ))}
         </div>
@@ -82,11 +82,11 @@ export default function RevenueTab({ data, loading, onNavigate }) {
           <div style={{ marginBottom:14, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
               <div style={{ fontSize:13, fontWeight:600, color:'#111' }}>Won vs lost by month</div>
-              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Closed revenue - won and lost - by close month</div>
+              <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Closed revenue by close month</div>
             </div>
             <div style={{ display:'flex', gap:12, fontSize:11 }}>
-              <span style={{ color:'#555' }}><span style={{ color:'#059669', fontWeight:700 }}>●</span> Won</span>
-              <span style={{ color:'#555' }}><span style={{ color:'#EF4444', fontWeight:700 }}>●</span> Lost</span>
+              <span style={{ color:'#555' }}><span style={{ color:'#0091AE', fontWeight:700 }}>●</span> Won</span>
+              <span style={{ color:'#555' }}><span style={{ color:'#CBD6E2', fontWeight:700 }}>●</span> Lost</span>
             </div>
           </div>
           <div style={{ height:160 }}>
@@ -95,8 +95,8 @@ export default function RevenueTab({ data, loading, onNavigate }) {
                 <XAxis dataKey="label" tick={{ fontSize:11, fill:'#888' }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<RevenueTooltip />} cursor={false} wrapperStyle={{ pointerEvents:'none' }} />
-                <Bar dataKey="revenue" name="Won" radius={[4,4,0,0]} maxBarSize={26} isAnimationActive={false} fill="#059669" />
-                <Bar dataKey="lostRevenue" name="Lost" radius={[4,4,0,0]} maxBarSize={26} isAnimationActive={false} fill="#EF4444" />
+                <Bar dataKey="revenue" name="Won" radius={[4,4,0,0]} maxBarSize={26} isAnimationActive={false} fill="#0091AE" />
+                <Bar dataKey="lostRevenue" name="Lost" radius={[4,4,0,0]} maxBarSize={26} isAnimationActive={false} fill="#CBD6E2" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -113,13 +113,13 @@ export default function RevenueTab({ data, loading, onNavigate }) {
                 <div style={{ fontSize:13, fontWeight:500, color:'#222' }}>{fmtSrc(s.source)}</div>
                 <div style={{ fontSize:11, color:'#999' }}>{s.dealCount} deals · {fmt$(s.totalRevenue)} total</div>
               </div>
-              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#059669' : '#333' }}>{fmt$(s.avgDealSize)}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#1B72C7' : '#333' }}>{fmt$(s.avgDealSize)}</div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Rep performance - only show with 2+ reps */}
+      {/* Rep performance */}
       {data.repPerformance?.length > 1 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:12 }}>Team performance</div>
@@ -129,23 +129,22 @@ export default function RevenueTab({ data, loading, onNavigate }) {
                 <div style={{ fontSize:13, fontWeight:600, color:'#222' }}>{r.name || (r.ownerId === 'Unassigned' ? 'Unassigned' : r.ownerId || 'Unknown')}</div>
                 <div style={{ fontSize:11, color:'#999' }}>{r.won} won · {r.lost} lost · {fmt$(r.avgDealSize)} avg deal</div>
               </div>
-              <div style={{ fontSize:16, fontWeight:700, color:i===0 ? '#059669' : '#555' }}>{r.winRate}%</div>
+              <div style={{ fontSize:16, fontWeight:700, color:i===0 ? '#0091AE' : '#555' }}>{r.winRate}%</div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Deal-stage conversion - forecasting */}
+      {/* Deal-stage conversion */}
       {(() => {
         const p = data.dealStageConversion?.[0];
         if (!p) return null;
-        const c2wColor = p.createdToWon >= 25 ? '#059669' : p.createdToWon >= 12 ? '#F59E0B' : '#EF4444';
         return (
           <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
             <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>Deal-stage conversion - forecasting</div>
             <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Of every deal that ever reached a stage, the share that goes on to win. This is your forecast math.</div>
             <div style={{ display:'flex', alignItems:'baseline', gap:10, marginBottom: p.skipHeavy ? 0 : 12 }}>
-              <span style={{ fontSize:30, fontWeight:800, color:c2wColor, lineHeight:1 }}>{p.createdToWon}%</span>
+              <span style={{ fontSize:30, fontWeight:800, color:'#1B72C7', lineHeight:1 }}>{p.createdToWon}%</span>
               <span style={{ fontSize:12.5, color:'#555', fontWeight:600 }}>created → won</span>
               <span style={{ fontSize:11, color:'#999' }}>· {p.won} of {p.dealCount} deals</span>
             </div>
@@ -165,7 +164,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
                       <td style={{ padding:'7px 6px 7px 0', color:'#333', fontWeight:500 }}>{s.label}</td>
                       <td style={{ padding:'7px 6px', textAlign:'right', color:'#666' }}>{s.everReached}</td>
                       <td style={{ padding:'7px 6px', textAlign:'right', color:'#666' }}>{s.won}</td>
-                      <td style={{ padding:'7px 0 7px 6px', textAlign:'right', fontWeight:700, color: s.conversionPct == null ? '#ccc' : s.conversionPct >= 50 ? '#059669' : s.conversionPct >= 25 ? '#F59E0B' : '#EF4444' }}>
+                      <td style={{ padding:'7px 0 7px 6px', textAlign:'right', fontWeight:700, color: s.conversionPct == null ? '#ccc' : '#243A52' }}>
                         {s.conversionPct == null ? 'low sample' : `${s.conversionPct}%`}
                       </td>
                     </tr>
@@ -182,20 +181,20 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:12 }}>Time to win vs time to lose</div>
           <div style={{ display:'flex', gap:10 }}>
-            <div style={{ flex:1, padding:'12px 14px', background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:8 }}>
-              <div style={{ fontSize:10, color:'#059669', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median to win</div>
-              <div style={{ fontSize:24, fontWeight:700, color:'#059669' }}>{data.winLoseTiming.winMedianDays != null ? `${data.winLoseTiming.winMedianDays}d` : '-'}</div>
+            <div style={{ flex:1, padding:'12px 14px', background:'rgba(0,145,174,0.06)', border:'1px solid rgba(0,145,174,0.2)', borderRadius:8 }}>
+              <div style={{ fontSize:10, color:'#0091AE', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median to win</div>
+              <div style={{ fontSize:24, fontWeight:700, color:'#0091AE' }}>{data.winLoseTiming.winMedianDays != null ? `${data.winLoseTiming.winMedianDays}d` : '-'}</div>
               <div style={{ fontSize:11, color:'#666', marginTop:2 }}>{data.winLoseTiming.wonSample} won deals</div>
             </div>
-            <div style={{ flex:1, padding:'12px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:8 }}>
-              <div style={{ fontSize:10, color:'#DC2626', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median to lose</div>
-              <div style={{ fontSize:24, fontWeight:700, color:'#DC2626' }}>{data.winLoseTiming.loseMedianDays != null ? `${data.winLoseTiming.loseMedianDays}d` : '-'}</div>
+            <div style={{ flex:1, padding:'12px 14px', background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:8 }}>
+              <div style={{ fontSize:10, color:'#888', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median to lose</div>
+              <div style={{ fontSize:24, fontWeight:700, color:'#555' }}>{data.winLoseTiming.loseMedianDays != null ? `${data.winLoseTiming.loseMedianDays}d` : '-'}</div>
               <div style={{ fontSize:11, color:'#666', marginTop:2 }}>{data.winLoseTiming.lostSample} lost deals</div>
             </div>
           </div>
           {data.winLoseTiming.loseMedianDays > data.winLoseTiming.winMedianDays && data.winLoseTiming.winMedianDays != null && (
-            <div style={{ marginTop:10, padding:'10px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:8, fontSize:12, color:'#92400E', lineHeight:1.5 }}>
-              Deals you lose take {data.winLoseTiming.loseMedianDays - data.winLoseTiming.winMedianDays} days longer to die than winners take to close. That’s time your team could reclaim by disqualifying sooner.
+            <div style={{ marginTop:10, padding:'10px 12px', background:'rgba(27,114,199,0.06)', border:'1px solid rgba(27,114,199,0.2)', borderRadius:8, fontSize:12, color:'#243A52', lineHeight:1.5 }}>
+              Deals you lose take {data.winLoseTiming.loseMedianDays - data.winLoseTiming.winMedianDays} days longer to die than winners take to close. That's time your team could reclaim by disqualifying sooner.
             </div>
           )}
         </div>
@@ -209,7 +208,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
             <div style={{ fontSize:11, color:'#888' }}>{data.lostReasons.total} lost deals{data.lostReasons.loggedPct != null ? ` · ${data.lostReasons.loggedPct}% have a reason logged` : ''}</div>
           </div>
           {data.lostReasons.loggedPct != null && data.lostReasons.loggedPct < 70 && (
-            <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:8, padding:'10px 12px', marginBottom:10, fontSize:12, color:'#92400E', lineHeight:1.55 }}>
+            <div style={{ background:'rgba(27,114,199,0.06)', border:'1px solid rgba(27,114,199,0.2)', borderRadius:8, padding:'10px 12px', marginBottom:10, fontSize:12, color:'#243A52', lineHeight:1.55 }}>
               <strong style={{ color:'#111' }}>{100 - data.lostReasons.loggedPct}% of lost deals have no reason logged.</strong> Without this data you're flying blind on why you lose. Ask your team to fill in the close reason every time a deal is marked lost in HubSpot.
             </div>
           )}
@@ -219,7 +218,7 @@ export default function RevenueTab({ data, loading, onNavigate }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:12.5, fontWeight:500, color:'#222' }}>{r.reason}</div>
                   <div style={{ height:5, background:'#F0F1F4', borderRadius:3, marginTop:4, overflow:'hidden' }}>
-                    <div style={{ width:`${r.pct}%`, height:'100%', background:'#EF4444', borderRadius:3 }} />
+                    <div style={{ width:`${r.pct}%`, height:'100%', background:'#1B72C7', borderRadius:3 }} />
                   </div>
                 </div>
                 <div style={{ fontSize:12, color:'#111', fontWeight:700, flexShrink:0, minWidth:36, textAlign:'right' }}>{r.count}</div>
@@ -230,24 +229,23 @@ export default function RevenueTab({ data, loading, onNavigate }) {
         </div>
       )}
 
-      {/* Who buys - revenue by job title */}
+      {/* Who buys */}
       {data.revenueByJobTitle?.hasTitles && data.revenueByJobTitle.rows.length > 0 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>Who actually buys</div>
-          <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Closed-won revenue by the job title on each deal’s primary contact.</div>
+          <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>Closed-won revenue by the job title on each deal's primary contact.</div>
           {data.revenueByJobTitle.rows.map((r, i) => (
             <div key={r.title} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0', borderBottom:i < data.revenueByJobTitle.rows.length-1 ? '1px solid #F9FAFB' : 'none' }}>
               <div>
                 <div style={{ fontSize:13, fontWeight:500, color:'#222' }}>{r.title}</div>
                 <div style={{ fontSize:11, color:'#999' }}>{r.deals} deal{r.deals !== 1 ? 's' : ''} · {fmt$(r.avgDeal)} avg</div>
               </div>
-              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#059669' : '#333' }}>{fmt$(r.revenue)}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:i===0 ? '#1B72C7' : '#333' }}>{fmt$(r.revenue)}</div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Accounting integration hint */}
       <IntegrationHint
         icon={<CreditCard size={18} color="#635BFF" />} name="Stripe, QuickBooks, or Xero"
         feature="Verified Revenue & MRR" benefit="Verify actual revenue vs HubSpot estimates, track MRR trends, and calculate true LTV by source." preview="bars"

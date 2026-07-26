@@ -61,7 +61,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     const locked = item.feature && !features[item.feature];
     return (
       <button data-tour={dataTour} onClick={() => onSection(item.id)}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 13px', border: 'none', background: active ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, borderLeft: active ? '3px solid #0091AE' : '3px solid transparent', textAlign: 'left' }}>
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px 7px 13px', border: 'none', background: active ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 1, textAlign: 'left' }}>
         <span style={{ fontSize: 13, color: active ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: active ? 600 : 400 }}>{item.label}</span>
         <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {item.id === 'insights' && insightCount > 0 && <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)', padding: '1px 5px', borderRadius: 8 }}>{insightCount}</span>}
@@ -76,20 +76,15 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
       <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ width: 32, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="32" height="32" viewBox="0 0 100 98" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7"/>
-              <polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/>
-              <polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/>
-              <polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity="0.7"/>
-              <circle cx="50" cy="87" r="7" fill="#E8562A"/>
-            </svg>
-          </div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: '#FFFFFF', letterSpacing: '-0.3px', lineHeight: 1.2, fontFamily: 'Fraunces, Georgia, serif' }}>PipeChamp</div>
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Pipeline Hunter</div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <svg width="28" height="28" viewBox="0 0 100 98" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7"/>
+            <polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/>
+            <polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/>
+            <polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity="0.7"/>
+            <circle cx="50" cy="87" r="7" fill="#E8562A"/>
+          </svg>
+          <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '-0.3px', fontFamily: 'Fraunces, Georgia, serif' }}>PipeChamp</span>
         </div>
       </div>
 
@@ -97,7 +92,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
       <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
         {/* Scorecard — with live health score badge */}
         <button data-tour="nav-dashboard" onClick={() => onSection('dashboard')}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 13px', border: 'none', background: section === 'dashboard' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, borderLeft: section === 'dashboard' ? '3px solid #0091AE' : '3px solid transparent', textAlign: 'left' }}>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 8px 13px', border: 'none', background: section === 'dashboard' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 8, marginBottom: 4, textAlign: 'left' }}>
           <span style={{ fontSize: 14, color: section === 'dashboard' ? '#FFFFFF' : 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Scorecard</span>
           {healthScore ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
@@ -126,7 +121,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
       {/* Bottom */}
       <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         <button onClick={() => onSection('integrations')}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left', borderLeft: section === 'integrations' ? '3px solid #0091AE' : '3px solid transparent' }}>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
           <span style={{ fontSize: 14 }}>⚡</span>
           <span style={{ fontSize: 12, color: section === 'integrations' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
           {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', display: 'inline-block', flexShrink: 0 }} />}

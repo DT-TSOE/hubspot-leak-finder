@@ -5,10 +5,10 @@ import FunnelLoader from './FunnelLoader';
 import { AlertTriangle, Phone, Mail, Calendar, Eraser, CheckCircle } from 'lucide-react';
 
 const URGENCY = {
-  critical: { bg:'#FEF2F2', border:'#FECACA', text:'#DC2626', label:'Critical' },
-  high:     { bg:'#FFFBEB', border:'#FDE68A', text:'#D97706', label:'High' },
-  medium:   { bg:'#FFFBEB', border:'#FDE68A', text:'#92400E', label:'Medium' },
-  low:      { bg:'#F0FDF4', border:'#BBF7D0', text:'#059669', label:'Low' },
+  critical: { bg:'rgba(232,86,42,0.08)', border:'rgba(232,86,42,0.25)', text:'#C2410C', label:'Critical' },
+  high:     { bg:'rgba(27,114,199,0.08)', border:'rgba(27,114,199,0.25)', text:'#1B72C7', label:'High' },
+  medium:   { bg:'rgba(0,145,174,0.08)', border:'rgba(0,145,174,0.25)', text:'#0091AE', label:'Medium' },
+  low:      { bg:'rgba(46,191,154,0.08)', border:'rgba(46,191,154,0.3)', text:'#2EBF9A', label:'Low' },
 };
 
 const fmtH = h => {
@@ -75,21 +75,20 @@ export default function SpeedToLead({ days }) {
 
   return (
     <div>
-      {/* Hero alert when uncontacted leads exist */}
+      {/* Uncontacted leads banner */}
       {data.uncontactedCount > 0 && (
-        <div style={{ background:'linear-gradient(135deg,#1a1a1a,#2d1a1a)', borderRadius:12, padding:'16px 20px', marginBottom:14, display:'flex', alignItems:'center', gap:16 }}>
-          <div style={{ width:44, height:44, borderRadius:10, background:'rgba(239,68,68,.15)', border:'2px solid #EF4444', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><AlertTriangle size={22} color="#EF4444" /></div>
+        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', marginBottom:14, display:'flex', alignItems:'center', gap:16 }}>
+          <div style={{ width:40, height:40, borderRadius:8, background:'rgba(232,86,42,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><AlertTriangle size={20} color="#E8562A" /></div>
           <div style={{ flex:1 }}>
-            <div style={{ fontSize:10, fontWeight:700, color:'#EF4444', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:3 }}>Needs Immediate Attention</div>
-            <div style={{ fontSize:18, fontWeight:700, color:'#fff', marginBottom:3 }}>
-              {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with zero outreach
-              {data.criticalCount > 0 && <span style={{ marginLeft:10, fontSize:13, fontWeight:600, color:'#EF4444' }}>({data.criticalCount} over 24h)</span>}
+            <div style={{ fontSize:13, fontWeight:700, color:'#111', marginBottom:2 }}>
+              {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with no outreach yet
+              {data.criticalCount > 0 && <span style={{ marginLeft:8, fontSize:12, fontWeight:500, color:'#E8562A' }}>· {data.criticalCount} over 24h</span>}
             </div>
-            <div style={{ fontSize:12, color:'rgba(255,255,255,.6)' }}>These leads have had zero outreach. The longer they wait, the colder they get.</div>
+            <div style={{ fontSize:12, color:'#888' }}>Response time drops fast. These contacts are waiting.</div>
           </div>
           <div style={{ textAlign:'right', flexShrink:0 }}>
-            <div style={{ fontSize:36, fontWeight:900, color:'#EF4444', lineHeight:1 }}>{data.uncontactedCount}</div>
-            <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', marginTop:2 }}>uncontacted</div>
+            <div style={{ fontSize:32, fontWeight:800, color:'#243A52', lineHeight:1 }}>{data.uncontactedCount}</div>
+            <div style={{ fontSize:10, color:'#aaa', marginTop:2 }}>uncontacted</div>
           </div>
         </div>
       )}
@@ -98,19 +97,19 @@ export default function SpeedToLead({ days }) {
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${activitySummary ? 4 : 3}, 1fr)`, gap: 10, marginBottom: 14 }}>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
           <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Median First Contact</div>
-          <div style={{ fontSize:22, fontWeight:700, color: summary.value === null ? '#ccc' : summary.value < 6 ? '#059669' : summary.value < 24 ? '#F59E0B' : '#EF4444' }}>
+          <div style={{ fontSize:22, fontWeight:700, color:'#243A52' }}>
             {fmtH(summary.value)}
           </div>
           {summary.sample > 0 && <div style={{ fontSize:11, color:'#888', marginTop:2 }}>{summary.sample} contacts measured</div>}
         </div>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
           <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Contacted Under 1 Hour</div>
-          <div style={{ fontSize:22, fontWeight:700, color: (summary.under1h ?? 0) > 50 ? '#059669' : '#F59E0B' }}>{summary.under1h ?? 0}%</div>
+          <div style={{ fontSize:22, fontWeight:700, color:'#1B72C7' }}>{summary.under1h ?? 0}%</div>
           <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Best practice: above 50%</div>
         </div>
-        <div style={{ background: data.uncontactedCount > 0 ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${data.uncontactedCount > 0 ? '#FECACA' : '#BBF7D0'}`, borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color: data.uncontactedCount > 0 ? '#DC2626' : '#059669', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Under 24 Hours</div>
-          <div style={{ fontSize:22, fontWeight:700, color: (summary.under24h ?? 0) > 70 ? '#059669' : '#F59E0B' }}>{summary.under24h ?? 0}%</div>
+        <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
+          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Under 24 Hours</div>
+          <div style={{ fontSize:22, fontWeight:700, color:'#0091AE' }}>{summary.under24h ?? 0}%</div>
           <div style={{ fontSize:11, color:'#888', marginTop:2 }}>Target: above 70%</div>
         </div>
         {/* Activity summary - last 30 days */}
@@ -143,7 +142,7 @@ export default function SpeedToLead({ days }) {
               const tw = c.thisWeek, lw = c.lastWeek;
               const delta = (tw != null && lw != null) ? tw - lw : null;
               const up = delta > 0, flat = delta === 0;
-              const dc = delta == null ? '#aaa' : flat ? '#888' : up ? '#059669' : '#DC2626';
+              const dc = delta == null ? '#aaa' : flat ? '#888' : up ? '#0091AE' : '#E8562A';
               return (
                 <div key={a.k} style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:8, padding:'12px 14px' }}>
                   <div style={{ fontSize:11, color:'#888', marginBottom:4 }}>{a.icon} {a.label}</div>
@@ -161,16 +160,16 @@ export default function SpeedToLead({ days }) {
 
       {/* Spam cleanup - junk form-fills skew response time; let the user filter them out */}
       {triageCandidates?.length > 0 && (
-        <div ref={triageRef} style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderLeft:'4px solid #F59E0B', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
+        <div ref={triageRef} style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 16px', marginBottom:14 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
             <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
-              <Eraser size={18} color="#F59E0B" style={{ flexShrink:0 }} />
+              <Eraser size={18} color="#0091AE" style={{ flexShrink:0, marginTop:1 }} />
               <div>
-                <div style={{ fontSize:13.5, fontWeight:700, color:'#111' }}>Clean up spam &amp; junk contacts {spamCount > 0 && <span style={{ color:'#059669' }}>· {spamCount} filtered out</span>}</div>
-                <div style={{ fontSize:11.5, color:'#92400E', marginTop:2, lineHeight:1.5 }}>Junk form-fills skew response time, conversion, and source quality across the whole app. Mark them spam and every metric recalculates without them - one of the highest-impact things you can do.</div>
+                <div style={{ fontSize:13.5, fontWeight:700, color:'#111' }}>Clean up your Data {spamCount > 0 && <span style={{ color:'#0091AE', fontWeight:500 }}>· {spamCount} filtered out</span>}</div>
+                <div style={{ fontSize:11.5, color:'#666', marginTop:2, lineHeight:1.5 }}>Junk contacts skew your metrics across the whole app. Clean data means better decisions — mark spam and every number recalculates without them.</div>
               </div>
             </div>
-            <button onClick={() => setShowTriage(v => !v)} style={{ fontSize:12, fontWeight:700, color:'#fff', background:'#C2410C', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
+            <button onClick={() => setShowTriage(v => !v)} style={{ fontSize:12, fontWeight:600, color:'#0091AE', background:'rgba(0,145,174,0.08)', border:'1px solid rgba(0,145,174,0.3)', borderRadius:8, padding:'8px 14px', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
               {showTriage ? 'Hide' : 'Review contacts →'}
             </button>
           </div>
@@ -268,22 +267,22 @@ export default function SpeedToLead({ days }) {
             <div style={{ fontSize:12, fontWeight:600, color:'#111', marginBottom:4 }}>Speed vs outcome</div>
             <div style={{ fontSize:11, color:'#888', marginBottom:12 }}>How fast you contacted leads on deals you won vs lost</div>
             <div style={{ display:'flex', gap:10, marginBottom:12 }}>
-              <div style={{ flex:1, padding:'12px 14px', background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:8 }}>
-                <div style={{ fontSize:10, color:'#059669', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Won deals</div>
-                <div style={{ fontSize:24, fontWeight:700, color:'#059669' }}>{fmtH(wonVsLost.wonMedian)}</div>
+              <div style={{ flex:1, padding:'12px 14px', background:'rgba(0,145,174,0.06)', border:'1px solid rgba(0,145,174,0.2)', borderRadius:8 }}>
+                <div style={{ fontSize:10, color:'#0091AE', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Won deals</div>
+                <div style={{ fontSize:24, fontWeight:700, color:'#0091AE' }}>{fmtH(wonVsLost.wonMedian)}</div>
                 <div style={{ fontSize:11, color:'#666', marginTop:2 }}>{wonVsLost.wonSample} deals</div>
               </div>
               <div style={{ display:'flex', alignItems:'center', fontSize:13, fontWeight:700, color:'#111' }}>
                 {wonVsLost.ratio ? `${wonVsLost.ratio}× faster` : 'vs'}
               </div>
-              <div style={{ flex:1, padding:'12px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:8 }}>
-                <div style={{ fontSize:10, color:'#DC2626', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Lost deals</div>
-                <div style={{ fontSize:24, fontWeight:700, color:'#DC2626' }}>{fmtH(wonVsLost.lostMedian)}</div>
+              <div style={{ flex:1, padding:'12px 14px', background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:8 }}>
+                <div style={{ fontSize:10, color:'#888', fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Lost deals</div>
+                <div style={{ fontSize:24, fontWeight:700, color:'#555' }}>{fmtH(wonVsLost.lostMedian)}</div>
                 <div style={{ fontSize:11, color:'#666', marginTop:2 }}>{wonVsLost.lostSample} deals</div>
               </div>
             </div>
             {wonVsLost.ratio > 1.5 && (
-              <div style={{ padding:'10px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:8, fontSize:12, color:'#92400E', lineHeight:1.5 }}>
+              <div style={{ padding:'10px 12px', background:'rgba(27,114,199,0.06)', border:'1px solid rgba(27,114,199,0.2)', borderRadius:8, fontSize:12, color:'#243A52', lineHeight:1.5 }}>
                 Won deals were contacted {wonVsLost.ratio}× faster. Set a {fmtH(wonVsLost.wonMedian * 1.5)} response target and your close rate will follow.
               </div>
             )}
@@ -327,9 +326,9 @@ export default function SpeedToLead({ days }) {
           )}
         </div>
       ) : (
-        <div style={{ background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:10, padding:'2rem', textAlign:'center' }}>
-          <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}><CheckCircle size={32} color="#059669" /></div>
-          <div style={{ fontSize:15, fontWeight:600, color:'#059669', marginBottom:6 }}>No uncontacted leads right now</div>
+        <div style={{ background:'rgba(46,191,154,0.06)', border:'1px solid rgba(46,191,154,0.25)', borderRadius:10, padding:'2rem', textAlign:'center' }}>
+          <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}><CheckCircle size={32} color="#2EBF9A" /></div>
+          <div style={{ fontSize:15, fontWeight:600, color:'#243A52', marginBottom:6 }}>No uncontacted leads right now</div>
           <div style={{ fontSize:13, color:'#666', maxWidth:340, margin:'0 auto', lineHeight:1.6 }}>Every recent lead has been reached out to. Keep that response time low.</div>
         </div>
       )}

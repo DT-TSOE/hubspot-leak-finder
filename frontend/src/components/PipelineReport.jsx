@@ -20,9 +20,9 @@ function MetricRow({ items }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${items.length}, 1fr)`, gap: 12, marginBottom: 8 }}>
       {items.map((m, i) => (
-        <div key={i} style={{ background: m.alert ? '#FEF2F2' : '#F7F8FA', border: `1px solid ${m.alert ? '#FECACA' : '#E2E5EA'}`, borderRadius: 8, padding: '12px 14px' }}>
+        <div key={i} style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '12px 14px' }}>
           <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>{m.label}</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: m.alert ? '#DC2626' : m.color || '#111' }}>{m.value}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: m.color || '#111' }}>{m.value}</div>
           {m.sub && <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{m.sub}</div>}
         </div>
       ))}
@@ -81,7 +81,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
     : insights.slice(0, 3);
   const sources = sourceData?.sources?.slice(0, 6) || [];
 
-  const scoreColor = !score?.score ? '#999' : score.score >= 70 ? '#10B981' : score.score >= 50 ? '#F59E0B' : '#EF4444';
+  const scoreColor = !score?.score ? '#999' : '#1B72C7';
   const getMetric = (id) => metrics.find(m => m.id === id);
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -135,7 +135,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           {/* Report header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, paddingBottom: 24, borderBottom: '2px solid #111' }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#43A047', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>PipeChamp · Pipeline Hunter</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#0091AE', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>PipeChamp</div>
               <div style={{ fontSize: 24, fontWeight: 800, color: '#111', letterSpacing: '-0.5px', marginBottom: 4 }}>Pipeline Health Report</div>
               <div style={{ fontSize: 13, color: '#888' }}>Generated {today}</div>
             </div>
@@ -154,11 +154,10 @@ export default function PipelineReport({ funnelData, insightsData }) {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {Object.entries(score.dimensions).map(([key, dim]) => {
                   const labels = { conversion: 'Conversion', speed: 'Speed to Lead', activity: 'Activity', winRate: 'Win Rate', flow: 'Pipeline Flow' };
-                  const c = dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444';
                   return (
-                    <div key={key} style={{ flex: '1 1 140px', background: '#F7F8FA', border: `1px solid ${c}22`, borderLeft: `3px solid ${c}`, borderRadius: 8, padding: '10px 12px' }}>
+                    <div key={key} style={{ flex: '1 1 140px', background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '10px 12px' }}>
                       <div style={{ fontSize: 10, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>{labels[key] || key}</div>
-                      <div style={{ fontSize: 20, fontWeight: 700, color: c }}>{dim.score}</div>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: '#243A52' }}>{dim.score}</div>
                     </div>
                   );
                 })}
@@ -186,7 +185,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
           {show('funnel') && funnel?.funnelStages?.length > 0 && (
             <ReportSection title="Lifecycle Funnel">
               {funnel.biggestLeak && (
-                <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderLeft: '3px solid #EF4444', borderRadius: 7, padding: '10px 14px', marginBottom: 12, fontSize: 13, color: '#DC2626', fontWeight: 600 }}>
+                <div style={{ background: 'rgba(27,114,199,0.06)', border: '1px solid rgba(27,114,199,0.2)', borderRadius: 7, padding: '10px 14px', marginBottom: 12, fontSize: 13, color: '#243A52', fontWeight: 600 }}>
                   <AlertTriangle size={13} style={{ verticalAlign:'text-bottom', marginRight:4 }} /> Biggest Leak: {funnel.biggestLeak.description}
                 </div>
               )}
@@ -203,9 +202,9 @@ export default function PipelineReport({ funnelData, insightsData }) {
                     <tr key={i} style={{ borderBottom: '1px solid #F7F8FA' }}>
                       <td style={{ padding: '8px 12px', fontWeight: 500, color: '#111' }}>{s.label}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{s.count?.toLocaleString()}</td>
-                      <td style={{ padding: '8px 12px', color: s.conversionRate < 20 ? '#F59E0B' : '#059669', fontWeight: 600 }}>{fmtPct(s.conversionRate)}</td>
+                      <td style={{ padding: '8px 12px', color: '#243A52', fontWeight: 600 }}>{fmtPct(s.conversionRate)}</td>
                       <td style={{ padding: '8px 12px', color: '#666' }}>{s.dropOff?.toLocaleString()}</td>
-                      <td style={{ padding: '8px 12px', color: s.dropOffRate > 60 ? '#EF4444' : '#888', fontWeight: s.dropOffRate > 60 ? 700 : 400 }}>{fmtPct(s.dropOffRate)}</td>
+                      <td style={{ padding: '8px 12px', color: '#555', fontWeight: 400 }}>{fmtPct(s.dropOffRate)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -217,13 +216,11 @@ export default function PipelineReport({ funnelData, insightsData }) {
           {show('issues') && topIssues.length > 0 && (
             <ReportSection title="Top Issues Detected">
               {topIssues.map((ins, i) => {
-                const sevColor = { high: '#EF4444', medium: '#F59E0B', low: '#059669' }[ins.severity] || '#888';
                 return (
                   <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: i < topIssues.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
-                    <div style={{ width: 4, flexShrink: 0, borderRadius: 2, background: sevColor }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 3 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: sevColor, textTransform: 'uppercase', letterSpacing: '.05em' }}>{ins.severity}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>{ins.severity}</span>
                         <span style={{ fontSize: 10, color: '#aaa' }}>·</span>
                         <span style={{ fontSize: 10, color: '#888' }}>{ins.type}</span>
                       </div>
@@ -253,8 +250,8 @@ export default function PipelineReport({ funnelData, insightsData }) {
                       <td style={{ padding: '8px 12px', fontWeight: 500, color: '#111' }}>{fmtSource(s.source)}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{s.contacts}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{s.deals}</td>
-                      <td style={{ padding: '8px 12px', color: '#059669', fontWeight: 600 }}>{s.won}</td>
-                      <td style={{ padding: '8px 12px', color: s.winRate >= 40 ? '#059669' : s.winRate >= 20 ? '#F59E0B' : '#EF4444', fontWeight: 600 }}>{fmtPct(s.winRate)}</td>
+                      <td style={{ padding: '8px 12px', color: '#0091AE', fontWeight: 600 }}>{s.won}</td>
+                      <td style={{ padding: '8px 12px', color: '#243A52', fontWeight: 600 }}>{fmtPct(s.winRate)}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{fmt$(s.revenue)}</td>
                       <td style={{ padding: '8px 12px', color: '#333' }}>{fmt$(s.avgDealSize)}</td>
                     </tr>
