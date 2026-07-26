@@ -86,10 +86,10 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
           <span style={{ fontSize: 14, color: section === 'dashboard' ? '#FFFFFF' : 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Scorecard</span>
           {healthScore ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <span style={{ fontSize: 16, fontWeight: 800, lineHeight: 1, color: healthScore.score >= 70 ? '#00A47C' : healthScore.score >= 50 ? '#D97706' : '#E5484D' }}>
+              <span style={{ fontSize: 16, fontWeight: 800, lineHeight: 1, color: healthScore.score >= 70 ? '#2EBF9A' : healthScore.score >= 50 ? '#1B72C7' : 'rgba(255,255,255,0.7)' }}>
                 {healthScore.score}
               </span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: healthScore.score >= 70 ? '#00A47C' : healthScore.score >= 50 ? '#D97706' : '#E5484D', letterSpacing: '.03em' }}>
+              <span style={{ fontSize: 9, fontWeight: 700, color: healthScore.score >= 70 ? '#2EBF9A' : healthScore.score >= 50 ? '#1B72C7' : 'rgba(255,255,255,0.5)', letterSpacing: '.03em' }}>
                 Grade {healthScore.grade}
               </span>
             </div>
