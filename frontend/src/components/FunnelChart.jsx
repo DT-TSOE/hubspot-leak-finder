@@ -52,8 +52,8 @@ export default function FunnelChart({ funnelStages, biggestLeak, stageContacts }
               </div>
               <div onClick={() => canDrill && setOpen(isOpen ? null : s.stage)}
                 title={canDrill ? 'Click to see these accounts' : undefined}
-                style={{ height:28, borderRadius:6, background:'#F3F4F6', overflow:'hidden', border: isLeak ? '1.5px solid #F59E0B' : 'none', cursor: canDrill ? 'pointer' : 'default' }}>
-                <div style={{ height:'100%', width:`${pct}%`, background: isLeak ? `${color}cc` : color, borderRadius:6, display:'flex', alignItems:'center', justifyContent:'space-between', paddingLeft: pct > 12 ? 10 : 0, paddingRight: 8, transition:'width .6s ease', backgroundImage: isLeak ? `repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,.1) 6px, rgba(255,255,255,.1) 12px)` : 'none' }}>
+                style={{ height:28, borderRadius:6, background:'#F3F4F6', overflow:'hidden', cursor: canDrill ? 'pointer' : 'default' }}>
+                <div style={{ height:'100%', width:`${pct}%`, background: color, borderRadius:6, display:'flex', alignItems:'center', justifyContent:'space-between', paddingLeft: pct > 12 ? 10 : 0, paddingRight: 8, transition:'width .6s ease' }}>
                   {pct > 12 && <span style={{ fontSize:11, color:'rgba(255,255,255,.95)', fontWeight:700 }}>{Math.round(pct)}%</span>}
                   {canDrill && pct > 20 && <span style={{ fontSize:10, color:'rgba(255,255,255,.85)', fontWeight:600 }}>{isOpen ? 'hide ▲' : 'view accounts ▾'}</span>}
                 </div>
