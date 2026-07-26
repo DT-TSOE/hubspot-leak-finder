@@ -176,7 +176,7 @@ export default function PipelineReport({ funnelData, insightsData }) {
             <MetricRow items={[
               { label: 'Total Contacts', value: funnelData?.summary?.totalContacts?.toLocaleString() || '-' },
               { label: 'Total Deals', value: funnelData?.summary?.totalDeals?.toLocaleString() || '-' },
-              { label: 'Top Revenue Source', value: fmtSource(getMetric('top_revenue_source')?.value) || '-', color: '#059669' },
+              { label: 'Top Revenue Source', value: fmtSource(getMetric('top_revenue_source')?.value) || '-', color: '#0091AE' },
               { label: 'Worst Conversion Source', value: fmtSource(getMetric('worst_source')?.value) || '-', alert: true },
             ]} />
           </ReportSection>}

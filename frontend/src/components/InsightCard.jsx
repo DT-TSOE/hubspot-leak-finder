@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 const SEV = {
-  high:   { bg:'#FEF2F2', border:'#FECACA', badge:'#DC2626', badgeBg:'#FEE2E2', label:'High priority' },
-  medium: { bg:'#FFFBEB', border:'#FDE68A', badge:'#D97706', badgeBg:'#FEF3C7', label:'Medium priority' },
-  low:    { bg:'#F0FDF4', border:'#BBF7D0', badge:'#059669', badgeBg:'#DCFCE7', label:'Low priority' },
+  high:   { bg:'#FFFFFF', border:'#E2E5EA', badge:'#243A52', badgeBg:'rgba(36,58,82,0.07)', label:'High priority' },
+  medium: { bg:'#FFFFFF', border:'#E2E5EA', badge:'#1B72C7', badgeBg:'rgba(27,114,199,0.07)', label:'Medium priority' },
+  low:    { bg:'#FFFFFF', border:'#E2E5EA', badge:'#0091AE', badgeBg:'rgba(0,145,174,0.07)', label:'Low priority' },
 };
 
 function openPipeCoach(insight) {
@@ -30,7 +30,7 @@ export default function InsightCard({ insight }) {
       </div>
 
       {exp && (
-        <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${sev.border}` }}>
+        <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid #F3F4F6' }}>
           <div style={{ marginBottom:12 }}>
             <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', color:'#999', marginBottom:4 }}>What the data shows</div>
             <p style={{ margin:0, fontSize:13, color:'#333', lineHeight:1.6 }}>{insight.dataPoint}</p>

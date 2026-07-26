@@ -6,14 +6,14 @@ import FunnelLoader from './FunnelLoader';
 const fmt$ = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
 const fmtSrc = s => s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s;
 
-// Color scale for Rev/Lead bar: green (best) → amber → red (worst)
+// Color scale for Rev/Lead bar: brand palette (best → worst)
 function barColor(value, max) {
-  if (!max || max === 0) return '#94A3B8';
+  if (!max || max === 0) return '#CBD6E2';
   const ratio = value / max;
-  if (ratio >= 0.75) return '#059669';
-  if (ratio >= 0.5)  return '#10B981';
-  if (ratio >= 0.25) return '#F59E0B';
-  return '#EF4444';
+  if (ratio >= 0.75) return '#1B72C7';
+  if (ratio >= 0.5)  return '#0091AE';
+  if (ratio >= 0.25) return '#2EBF9A';
+  return '#CBD6E2';
 }
 
 function RevLeadTooltip({ active, payload }) {
@@ -22,7 +22,7 @@ function RevLeadTooltip({ active, payload }) {
   return (
     <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:8, padding:'8px 12px', fontSize:12, boxShadow:'0 2px 8px rgba(0,0,0,.08)', pointerEvents:'none' }}>
       <div style={{ fontWeight:700, color:'#111', marginBottom:3 }}>{d.name}</div>
-      <div style={{ color:'#059669', fontWeight:600 }}>${d.value.toLocaleString()} per lead</div>
+      <div style={{ color:'#0091AE', fontWeight:600 }}>${d.value.toLocaleString()} per lead</div>
       <div style={{ color:'#888', marginTop:2 }}>{d.contacts} contacts · {d.won} won · {d.winRate}% win rate</div>
     </div>
   );
@@ -55,7 +55,7 @@ export default function SourceQuality({ days, onNavigate }) {
   }, []);
 
   if (loading) return <FunnelLoader variant="pulse" size="md" label="Analyzing your sources…" />;
-  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
+  if (error) return <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', color:'#555' }}>Error: {error}</div>;
   if (!data?.sources?.length) {
     return (
       <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'2rem', textAlign:'center' }}>
@@ -178,7 +178,7 @@ export default function SourceQuality({ days, onNavigate }) {
           ].map(b => (
             <span key={b.label} onClick={() => !b.on && onNavigate?.('integrations')}
               style={{ fontSize:11.5, fontWeight:600, padding:'4px 11px', borderRadius:20, cursor: b.on ? 'default' : 'pointer',
-                background: b.on ? '#F0FDF4' : '#F3F4F6', color: b.on ? '#059669' : '#aaa', border:`1px solid ${b.on ? '#BBF7D0' : '#E2E5EA'}` }}>
+                background: b.on ? 'rgba(0,145,174,0.08)' : '#F3F4F6', color: b.on ? '#0091AE' : '#aaa', border:`1px solid ${b.on ? 'rgba(0,145,174,0.3)' : '#E2E5EA'}` }}>
               {b.on ? '✓ ' : '+ '}{b.label}
             </span>
           ))}
@@ -207,9 +207,9 @@ export default function SourceQuality({ days, onNavigate }) {
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.contacts}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.opportunities || 0}</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#666' }}>{s.deals}</td>
-                <td style={{ padding:'8px', textAlign:'right', color:'#059669', fontWeight:600 }}>{s.won}</td>
-                <td style={{ padding:'8px', textAlign:'right', color: s.winRate > 30 ? '#059669' : s.winRate > 15 ? '#F59E0B' : '#EF4444', fontWeight:600 }}>{s.winRate}%</td>
-                <td style={{ padding:'8px', textAlign:'right', color: s.conversionRate >= 5 ? '#059669' : s.conversionRate >= 2 ? '#F59E0B' : '#999', fontWeight:600 }} title="Contacts that became customers">{s.conversionRate}%</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#0091AE', fontWeight:600 }}>{s.won}</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#243A52', fontWeight:600 }}>{s.winRate}%</td>
+                <td style={{ padding:'8px', textAlign:'right', color:'#243A52', fontWeight:600 }} title="Contacts that became customers">{s.conversionRate}%</td>
                 <td style={{ padding:'8px', textAlign:'right', color:'#111', fontWeight:600 }}>{fmt$(s.revenue)}</td>
                 <td style={{ padding:'8px', textAlign:'right', color: s.revPerLead > 0 ? barColor(s.revPerLead, maxRevLead) : '#ccc', fontWeight: s.revPerLead > 0 ? 700 : 400 }}>
                   {s.revPerLead > 0 ? `$${s.revPerLead.toLocaleString()}` : '-'}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 const DIRECTION_CONFIG = {
-  improving: { color: '#059669', bg: '#F0FDF4', border: '#BBF7D0', icon: '↑', label: 'Improving' },
-  declining:  { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', icon: '↓', label: 'Declining' },
-  stable:     { color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A', icon: '→', label: 'Stable' },
+  improving: { color: '#0E7C6D', bg: 'rgba(46,191,154,0.08)', border: 'rgba(46,191,154,0.3)', icon: '↑', label: 'Improving' },
+  declining:  { color: '#C2410C', bg: 'rgba(232,86,42,0.08)', border: 'rgba(232,86,42,0.25)', icon: '↓', label: 'Declining' },
+  stable:     { color: '#1B72C7', bg: 'rgba(27,114,199,0.08)', border: 'rgba(27,114,199,0.25)', icon: '→', label: 'Stable' },
 };
 
 function TrendCard({ trend }) {
@@ -56,7 +56,7 @@ function StageInsightRow({ insight }) {
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{insight.label} to {insight.nextLabel}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: advRate >= 50 ? '#059669' : advRate >= 30 ? '#F59E0B' : '#EF4444', background: advRate >= 50 ? '#F0FDF4' : advRate >= 30 ? '#FFFBEB' : '#FEF2F2', padding: '2px 8px', borderRadius: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#243A52', background: '#F3F4F6', padding: '2px 8px', borderRadius: 8 }}>
                 {advRate}% advance
               </span>
             </div>
@@ -75,8 +75,8 @@ function StageInsightRow({ insight }) {
           {/* Advanced vs Dropped comparison */}
           {hasComparison && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
-              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+              <div style={{ background: 'rgba(46,191,154,0.06)', border: '1px solid rgba(46,191,154,0.25)', borderRadius: 8, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#0E7C6D', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
                   Contacts that advanced ({insight.advanced.count})
                 </div>
                 {insight.advanced.medianTouches != null && (
@@ -90,8 +90,8 @@ function StageInsightRow({ insight }) {
                   </div>
                 )}
               </div>
-              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+              <div style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
                   Contacts that stalled ({insight.dropped.count})
                 </div>
                 {insight.dropped.medianTouches != null && (
@@ -110,7 +110,7 @@ function StageInsightRow({ insight }) {
 
           {/* Predictor */}
           {insight.predictor && (
-            <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
+            <div style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#555', lineHeight: 1.6 }}>
               <strong>Pattern:</strong> {insight.predictor}
             </div>
           )}

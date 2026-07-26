@@ -19,14 +19,14 @@ function profileRows(p) {
   ].filter(Boolean);
 }
 
-const GRADE_COLOR = { A: '#10B981', B: '#34D399', C: '#F59E0B', D: '#F97316', F: '#EF4444' };
-const scoreColor = s => s === null || s === undefined ? '#ccc' : s >= 70 ? '#10B981' : s >= 50 ? '#F59E0B' : '#EF4444';
-const meterColor = s => s == null ? '#ccc' : s >= 70 ? '#10B981' : s >= 40 ? '#D97706' : '#EF4444';
+const GRADE_COLOR = { A: '#2EBF9A', B: '#0091AE', C: '#1B72C7', D: '#E8562A', F: '#243A52' };
+const scoreColor = s => s === null || s === undefined ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 50 ? '#1B72C7' : '#E8562A';
+const meterColor = s => s == null ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 40 ? '#1B72C7' : '#E8562A';
 
 const STATUS_STYLE = {
-  good:     { label: 'Good',     bg: '#F0FDF4', color: '#166534', border: '#BBF7D0' },
-  watch:    { label: 'Watch',    bg: '#FFFBEB', color: '#92400E', border: '#FDE68A' },
-  critical: { label: 'Critical', bg: '#FEF2F2', color: '#991B1B', border: '#FECACA' },
+  good:     { label: 'Good',     bg: 'rgba(46,191,154,0.08)',  color: '#0E7C6D', border: 'rgba(46,191,154,0.3)' },
+  watch:    { label: 'Watch',    bg: 'rgba(27,114,199,0.08)',  color: '#1B72C7', border: 'rgba(27,114,199,0.25)' },
+  critical: { label: 'Critical', bg: 'rgba(232,86,42,0.08)',   color: '#C2410C', border: 'rgba(232,86,42,0.25)' },
 };
 
 function dimStatus(score) {
@@ -47,10 +47,10 @@ function DimensionRow({ dim, comparison, goal }) {
       fill = lowerIsBetter
         ? Math.min(100, Math.round((goal / dim.value) * 100))
         : Math.min(100, Math.round((dim.value / goal) * 100));
-      mc = fill >= 100 ? '#10B981' : fill >= 60 ? '#D97706' : '#EF4444';
+      mc = fill >= 100 ? '#2EBF9A' : fill >= 60 ? '#1B72C7' : '#E8562A';
     } else {
       fill = dim.meterFill != null ? dim.meterFill : dim.score;
-      mc = meterColor(dim.score);
+      mc = meterColor(fill);
     }
     const goalTag = goal != null ? (() => {
       if (dim.key === 'leadsCapt') return `/ ${Math.round(goal)}`;
@@ -69,9 +69,9 @@ function DimensionRow({ dim, comparison, goal }) {
           </div>
         </div>
         <div style={{ position: 'relative', height: 6, borderRadius: 4, background: '#F0F1F4', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(239,68,68,.13)' }} />
-          <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(217,119,6,.13)' }} />
-          <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(16,185,129,.13)' }} />
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(232,86,42,.1)' }} />
+          <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(27,114,199,.1)' }} />
+          <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(46,191,154,.1)' }} />
           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${fill}%`, background: mc, borderRadius: 4, transition: 'width .6s ease' }} />
         </div>
         {comparison && <div style={{ fontSize: 11, color: '#aaa', marginTop: 4 }}>{comparison}</div>}
@@ -258,7 +258,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
 
-  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626', marginBottom:14 }}>Couldn't build scorecard: {error}</div>;
+  if (error) return <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', color:'#555', marginBottom:14 }}>Couldn't build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Calculating your pipeline health...</div>;
 
   const { overall, marketing, sales, revenueImpact, dealStageConversion, personalized, trend, dealProfiles, lifecycleMaintained } = data;
@@ -367,14 +367,14 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       {/* Health meter header */}
       <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '20px 24px', marginBottom: 12, display: 'flex', alignItems: 'flex-start', gap: 24 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#43A047', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>Pipeline health</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#0091AE', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>Pipeline health</div>
 
           {/* Score + delta badge */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 14 }}>
             <span style={{ fontSize: 48, fontWeight: 800, color: mc, lineHeight: 1, letterSpacing: '-1px' }}>{overall.score ?? '-'}</span>
             <span style={{ fontSize: 15, color: '#bbb' }}>/100</span>
             {scoreDelta != null && scoreDelta !== 0 && (
-              <span style={{ fontSize: 12, fontWeight: 700, color: scoreDelta > 0 ? '#059669' : '#DC2626', background: scoreDelta > 0 ? '#F0FDF4' : '#FEF2F2', border: `1px solid ${scoreDelta > 0 ? '#BBF7D0' : '#FECACA'}`, borderRadius: 20, padding: '3px 10px' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: scoreDelta > 0 ? '#0E7C6D' : '#C2410C', background: scoreDelta > 0 ? 'rgba(46,191,154,0.08)' : 'rgba(232,86,42,0.08)', border: `1px solid ${scoreDelta > 0 ? 'rgba(46,191,154,0.3)' : 'rgba(232,86,42,0.25)'}`, borderRadius: 20, padding: '3px 10px' }}>
                 {scoreDelta > 0 ? '↑' : '↓'} {Math.abs(scoreDelta)} pts this month
               </span>
             )}
@@ -382,9 +382,9 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
           {/* Progress bar with colour zones */}
           <div style={{ position: 'relative', height: 10, borderRadius: 6, background: '#F0F1F4', overflow: 'hidden', marginBottom: 6 }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(239,68,68,.13)' }} />
-            <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(217,119,6,.13)' }} />
-            <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(16,185,129,.13)' }} />
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%', background: 'rgba(232,86,42,.1)' }} />
+            <div style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '30%', background: 'rgba(27,114,199,.1)' }} />
+            <div style={{ position: 'absolute', left: '70%', top: 0, bottom: 0, right: 0, background: 'rgba(46,191,154,.1)' }} />
             <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${overall.score ?? 0}%`, background: mc, borderRadius: 6, transition: 'width .8s ease' }} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '40% 30% 30%', fontSize: 10, color: '#bbb', marginBottom: 14 }}>
@@ -400,7 +400,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
                 <span style={{ fontSize: 10, color: '#aaa' }}>Last month</span>
                 <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{lastMonthScore}</span>
                 {scoreDelta !== 0 && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: scoreDelta > 0 ? '#059669' : '#DC2626' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: scoreDelta > 0 ? '#0E7C6D' : '#C2410C' }}>
                     {scoreDelta > 0 ? '↑' : '↓'}{Math.abs(scoreDelta)}
                   </span>
                 )}
@@ -415,7 +415,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
           </div>
 
           {lifecycleMaintained === false && (
-            <div style={{ marginBottom: 10, fontSize: 11, color: '#92400E', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '6px 10px', lineHeight: 1.5 }}>
+            <div style={{ marginBottom: 10, fontSize: 11, color: '#555', background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 8, padding: '6px 10px', lineHeight: 1.5 }}>
               Marketing metrics are limited: this account doesn't tag HubSpot lifecycle stages. The Sales side and deal-based metrics are the reliable read.
             </div>
           )}
@@ -427,8 +427,8 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="13" y2="12"/><circle cx="6" cy="4" r="1.5" fill="white"/><circle cx="10" cy="8" r="1.5" fill="white"/><circle cx="6" cy="12" r="1.5" fill="white"/></svg>
               {hasGoals ? 'Edit your targets' : 'Set your targets'}
             </button>
-            <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#C2410C' : '#888', background: 'none', border: `1px solid ${showTriage ? '#FDE68A' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
-              <Eraser size={12} /> Clean your data{spamCount > 0 && <span style={{ color: '#059669', fontWeight: 600 }}> · {spamCount} filtered</span>}
+            <button onClick={loadTriage} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: showTriage ? '#E8562A' : '#888', background: 'none', border: `1px solid ${showTriage ? 'rgba(232,86,42,0.3)' : '#E2E5EA'}`, borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}>
+              <Eraser size={12} /> Clean your data{spamCount > 0 && <span style={{ color: '#0091AE', fontWeight: 600 }}> · {spamCount} filtered</span>}
             </button>
           </div>
         </div>
@@ -464,15 +464,15 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
       {/* Clean your data triage panel -- expands inline below header */}
       {showTriage && (
-        <div style={{ background: '#fff', border: '1px solid #FDE68A', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
-          <div style={{ padding: '10px 16px', borderBottom: '1px solid #FDE68A', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid #E2E5EA', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Data cleanup</span>
-            {spamCount > 0 && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>· {spamCount} filtered out</span>}
-            <span style={{ fontSize: 11.5, color: '#92400E', flex: 1 }}>Spam contacts skew your response time, conversion, and source quality scores.</span>
+            {spamCount > 0 && <span style={{ fontSize: 12, color: '#0091AE', fontWeight: 600 }}>· {spamCount} filtered out</span>}
+            <span style={{ fontSize: 11.5, color: '#555', flex: 1 }}>Spam contacts skew your response time, conversion, and source quality scores.</span>
             <button onClick={() => setShowTriage(false)} style={{ fontSize: 11, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>Hide ↑</button>
           </div>
           <div style={{ padding: '10px 16px', opacity: marking ? 0.6 : 1, transition: 'opacity .15s' }}>
-            {triageLoading && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>Loading contacts...</div>}
+            {triageLoading && <div style={{ fontSize: 12, color: '#555', padding: '8px 0' }}>Loading contacts...</div>}
             {triageContacts && (() => {
               const SIGNAL_LABELS = { noEmail: 'No email', noName: 'No name', suspiciousEmail: 'Suspicious email', consumerEmail: 'Consumer email', neverTouched: 'Never touched', unknownSource: 'Unknown source' };
               const FILTERS = ['noEmail', 'noName', 'neverTouched', 'consumerEmail', 'suspiciousEmail'];
@@ -486,7 +486,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                     <select value={triageSort} onChange={e => setTriageSort(e.target.value)}
-                      style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, border: '1px solid #FDE68A', background: '#fff', color: '#92400E', cursor: 'pointer' }}>
+                      style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', color: '#555', cursor: 'pointer' }}>
                       <option value="suspicious">Most suspicious first</option>
                       <option value="newest">Newest first</option>
                       <option value="oldest">Oldest first</option>
@@ -494,23 +494,23 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                       {FILTERS.map(f => (
                         <button key={f} onClick={() => setTriageFilter(triageFilter === f ? null : f)}
-                          style={{ fontSize: 10, padding: '3px 8px', borderRadius: 10, border: `1px solid ${triageFilter === f ? '#C2410C' : '#FDE68A'}`, background: triageFilter === f ? '#C2410C' : '#fff', color: triageFilter === f ? '#fff' : '#92400E', cursor: 'pointer', fontWeight: 500 }}>
+                          style={{ fontSize: 10, padding: '3px 8px', borderRadius: 10, border: `1px solid ${triageFilter === f ? '#1B72C7' : '#E2E5EA'}`, background: triageFilter === f ? '#1B72C7' : '#fff', color: triageFilter === f ? '#fff' : '#555', cursor: 'pointer', fontWeight: 500 }}>
                           {SIGNAL_LABELS[f]}
                         </button>
                       ))}
                     </div>
                     <span style={{ fontSize: 11, color: '#aaa', marginLeft: 'auto' }}>{visible.length} contacts</span>
                   </div>
-                  {visible.length === 0 && <div style={{ fontSize: 12, color: '#92400E', padding: '8px 0' }}>No contacts match this filter.</div>}
+                  {visible.length === 0 && <div style={{ fontSize: 12, color: '#555', padding: '8px 0' }}>No contacts match this filter.</div>}
                   {visible.map((c, i) => (
-                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < visible.length - 1 ? '1px solid #FEF3C7' : 'none' }}>
+                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < visible.length - 1 ? '1px solid #F0F1F4' : 'none' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 600, color: c.isSpam ? '#bbb' : '#111', textDecoration: c.isSpam ? 'line-through' : 'none' }}>{c.name}</div>
                         <div style={{ fontSize: 11, color: '#999', marginBottom: c.signals?.length ? 3 : 0 }}>{[c.email, c.source, c.stage].filter(Boolean).join(' · ')}</div>
                         {c.signals?.length > 0 && (
                           <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                             {c.signals.map(s => (
-                              <span key={s} style={{ fontSize: 9.5, padding: '1px 6px', borderRadius: 8, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', fontWeight: 500 }}>
+                              <span key={s} style={{ fontSize: 9.5, padding: '1px 6px', borderRadius: 8, background: '#F3F4F6', color: '#555', border: '1px solid #E2E5EA', fontWeight: 500 }}>
                                 {SIGNAL_LABELS[s]}
                               </span>
                             ))}
@@ -518,7 +518,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
                         )}
                       </div>
                       <button disabled={marking} onClick={() => handleSpam(c.id, c.isSpam)}
-                        style={{ fontSize: 10.5, fontWeight: 700, borderRadius: 6, padding: '4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink: 0, minWidth: 78, textAlign: 'center', background: c.isSpam ? '#F0FDF4' : '#FEF2F2', color: c.isSpam ? '#059669' : '#DC2626', border: `1px solid ${c.isSpam ? '#BBF7D0' : '#FECACA'}` }}>
+                        style={{ fontSize: 10.5, fontWeight: 700, borderRadius: 6, padding: '4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink: 0, minWidth: 78, textAlign: 'center', background: c.isSpam ? 'rgba(0,145,174,0.06)' : '#F3F4F6', color: c.isSpam ? '#0091AE' : '#555', border: `1px solid ${c.isSpam ? 'rgba(0,145,174,0.3)' : '#E2E5EA'}` }}>
                         {c.isSpam ? '↩ Not spam' : 'Mark spam'}
                       </button>
                     </div>
@@ -560,7 +560,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 {gap.impact > 0 && (
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#059669' }}>{fmt$(gap.impact)}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0091AE' }}>{fmt$(gap.impact)}</div>
                     <div style={{ fontSize: 10, color: '#aaa' }}>revenue impact</div>
                   </div>
                 )}
@@ -572,14 +572,14 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
             <div style={{ padding: '10px 20px', background: '#F7F8FA', borderTop: '1px solid #F3F4F6', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
               To achieve your Goal Pipeline Value, you need approximately <strong>{derivedLeadsGoal.toLocaleString()} new leads</strong> per period.
               {derivedLeadsGoal > leadsCaptDim.value && (
-                <span style={{ color: '#EF4444', marginLeft: 4 }}>You're currently capturing {Math.round(leadsCaptDim.value)} — {Math.round(derivedLeadsGoal - leadsCaptDim.value)} short.</span>
+                <span style={{ color: '#E8562A', marginLeft: 4 }}>You're currently capturing {Math.round(leadsCaptDim.value)} — {Math.round(derivedLeadsGoal - leadsCaptDim.value)} short.</span>
               )}
             </div>
           )}
         </div>
       )}
       {hasGoals && gaps.length === 0 && (
-        <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 18px', marginBottom: 12, fontSize: 13, color: '#166534', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(46,191,154,0.08)', border: '1px solid rgba(46,191,154,0.3)', borderRadius: 10, padding: '12px 18px', marginBottom: 12, fontSize: 13, color: '#0E7C6D', fontWeight: 600 }}>
           All your targets are on track
         </div>
       )}

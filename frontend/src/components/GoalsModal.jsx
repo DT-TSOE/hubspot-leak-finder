@@ -78,7 +78,7 @@ export default function GoalsModal({ data, dealProfiles, existingGoals, onClose,
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.55)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '40px 16px' }}
       onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 520, padding: '26px 28px', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#43A047', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Your targets</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#0091AE', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>Your targets</div>
         <div style={{ fontSize: 20, fontWeight: 800, color: '#111', marginBottom: 4 }}>What does good look like for you?</div>
         <div style={{ fontSize: 13, color: '#888', marginBottom: 24, lineHeight: 1.5 }}>
           Suggested targets come from your fastest-closing deals. Accept them or set your own -- your health meters will show how close you are to each goal.
@@ -89,7 +89,7 @@ export default function GoalsModal({ data, dealProfiles, existingGoals, onClose,
           const pct = m.current != null && val > 0
             ? Math.min(100, Math.round(m.lowerIsBetter ? (val / m.current) * 100 : (m.current / val) * 100))
             : null;
-          const barColor = pct == null ? '#ccc' : pct >= 100 ? '#10B981' : pct >= 60 ? '#D97706' : '#EF4444';
+          const barColor = pct == null ? '#ccc' : pct >= 100 ? '#2EBF9A' : pct >= 60 ? '#1B72C7' : '#E8562A';
           const isDefault = val === m.suggested;
 
           return (

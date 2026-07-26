@@ -28,9 +28,9 @@ function DealFunnel({ pipeline }) {
           const pct = max > 0 ? (s.everReached / max) * 100 : 0;
           const prev = stages[i - 1];
           const dropPct = prev ? Math.round(((prev.everReached - s.everReached) / prev.everReached) * 100) : null;
-          const dropColor = dropPct === null ? null : dropPct > 60 ? '#EF4444' : dropPct > 35 ? '#F59E0B' : '#10B981';
+          const dropColor = dropPct === null ? null : dropPct > 60 ? '#E8562A' : dropPct > 35 ? '#1B72C7' : '#0091AE';
           const color = STAGE_COLORS[i % STAGE_COLORS.length];
-          const convColor = s.conversionPct === null ? '#ccc' : s.conversionPct >= 30 ? '#059669' : s.conversionPct >= 15 ? '#D97706' : '#EF4444';
+          const convColor = s.conversionPct === null ? '#ccc' : '#243A52';
           return (
             <div key={s.stageId}>
               {i > 0 && dropPct !== null && (
@@ -79,8 +79,8 @@ function DealFunnel({ pipeline }) {
           <div key={b.label}>
             {dropPct !== null && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0 3px 2px', marginBottom: 3 }}>
-                <div style={{ width: 2, height: 14, background: 'rgba(239,68,68,.3)', borderRadius: 1, marginLeft: 6, flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#EF4444' }}>↓ {dropPct}% didn't close</span>
+                <div style={{ width: 2, height: 14, background: 'rgba(232,86,42,.3)', borderRadius: 1, marginLeft: 6, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#E8562A' }}>↓ {dropPct}% didn't close</span>
                 <span style={{ fontSize: 11, color: '#aaa' }}>({total - won} deals lost or open)</span>
               </div>
             )}
@@ -123,10 +123,10 @@ export default function SalesPipeline({ funnelData, days }) {
   const avgDeal = scorecard?.context?.avgDealSize ?? 0;
 
   const statCards = [
-    winRateDim?.value != null && { label: 'Win Rate', value: `${Math.round(winRateDim.value)}%`, color: winRateDim.value >= 30 ? '#059669' : '#EF4444' },
+    winRateDim?.value != null && { label: 'Win Rate', value: `${Math.round(winRateDim.value)}%`, color: '#243A52' },
     avgDeal > 0 && { label: 'Avg Deal Size', value: fmt$(avgDeal), color: '#111' },
     openPipeline > 0 && { label: 'Open Pipeline', value: fmt$(openPipeline), color: '#111' },
-    speedDim?.value != null && { label: 'Speed to Lead', value: fmtH(speedDim.value), color: speedDim.value <= 4 ? '#059669' : speedDim.value <= 24 ? '#D97706' : '#EF4444' },
+    speedDim?.value != null && { label: 'Speed to Lead', value: fmtH(speedDim.value), color: '#243A52' },
     cycleDim?.value != null && { label: 'Avg Sales Cycle', value: fmtDays(cycleDim.value), color: '#111' },
   ].filter(Boolean);
 
@@ -188,7 +188,7 @@ export default function SalesPipeline({ funnelData, days }) {
                       <tr key={s.stageId} style={{ borderTop: '1px solid #F3F4F6' }}>
                         <td style={{ padding: '7px 8px 7px 0', color: '#333', fontWeight: 500 }}>{s.label}</td>
                         <td style={{ padding: '7px 8px', textAlign: 'right', color: '#666' }}>{s.everReached}</td>
-                        <td style={{ padding: '7px 0 7px 8px', textAlign: 'right', fontWeight: 700, color: s.conversionPct === null ? '#ccc' : s.conversionPct >= 30 ? '#059669' : s.conversionPct >= 15 ? '#D97706' : '#EF4444' }}>
+                        <td style={{ padding: '7px 0 7px 8px', textAlign: 'right', fontWeight: 700, color: s.conversionPct === null ? '#ccc' : '#243A52' }}>
                           {s.conversionPct === null ? <span style={{ color: '#ccc', fontWeight: 400 }}>low sample</span> : `${s.conversionPct}%`}
                         </td>
                       </tr>

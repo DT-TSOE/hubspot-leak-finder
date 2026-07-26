@@ -32,13 +32,13 @@ export default function GmDashboard({ onScoreLoad, onTabChange, days }) {
   useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
 
   if (loading) return <FunnelLoader variant="seq" size="lg" label="Building your pipeline health report…" />;
-  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
+  if (error) return <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', color:'#555' }}>Error: {error}</div>;
   if (!data) return null;
 
   const URGENCY_STYLE = {
-    critical: { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', label: 'Critical' },
-    high:     { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', label: 'High' },
-    medium:   { color: '#059669', bg: '#F0FDF4', border: '#BBF7D0', label: 'Medium' },
+    critical: { color: '#C2410C', bg: 'rgba(232,86,42,0.08)', border: 'rgba(232,86,42,0.25)', label: 'Critical' },
+    high:     { color: '#1B72C7', bg: 'rgba(27,114,199,0.08)', border: 'rgba(27,114,199,0.25)', label: 'High' },
+    medium:   { color: '#0E7C6D', bg: 'rgba(46,191,154,0.08)', border: 'rgba(46,191,154,0.3)', label: 'Medium' },
   };
   const OPP_TAB = { uncontacted: 'lead-response', stuck_deals: 'at-risk', funnel: 'marketing', speed: 'lead-response', activity: 'lead-response' };
   const METRIC_TAB = { win_rate: 'revenue', sales_cycle: 'revenue', speed: 'lead-response', biggest_leak: 'marketing' };

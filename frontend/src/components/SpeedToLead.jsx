@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 import FunnelLoader from './FunnelLoader';
-import { AlertTriangle, Phone, Mail, Calendar, Eraser, CheckCircle } from 'lucide-react';
+import { Phone, Mail, Calendar, Eraser, CheckCircle } from 'lucide-react';
 
 const URGENCY = {
   critical: { bg:'rgba(232,86,42,0.08)', border:'rgba(232,86,42,0.25)', text:'#C2410C', label:'Critical' },
@@ -68,7 +68,7 @@ export default function SpeedToLead({ days }) {
   };
 
   if (loading) return <FunnelLoader variant="journey" size="md" label="Calculating response times…" />;
-  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
+  if (error) return <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', color:'#555' }}>Error: {error}</div>;
   if (!data) return null;
 
   const { summary, distribution, contactsByBucket, wonVsLost, activitySummary, activityComparison, triageCandidates, spamCount } = data;
@@ -78,7 +78,6 @@ export default function SpeedToLead({ days }) {
       {/* Uncontacted leads banner */}
       {data.uncontactedCount > 0 && (
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', marginBottom:14, display:'flex', alignItems:'center', gap:16 }}>
-          <div style={{ width:40, height:40, borderRadius:8, background:'rgba(232,86,42,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><AlertTriangle size={20} color="#E8562A" /></div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#111', marginBottom:2 }}>
               {data.uncontactedCount} lead{data.uncontactedCount !== 1 ? 's' : ''} with no outreach yet
@@ -186,7 +185,7 @@ export default function SpeedToLead({ days }) {
                   </div>
                   <button disabled={marking} onClick={() => handleSpam(c.id, c.isSpam)}
                     style={{ fontSize:10.5, fontWeight:700, borderRadius:6, padding:'4px 10px', cursor: marking ? 'default' : 'pointer', flexShrink:0, minWidth:78, textAlign:'center',
-                      background: c.isSpam ? '#F0FDF4' : '#FEF2F2', color: c.isSpam ? '#059669' : '#DC2626', border:`1px solid ${c.isSpam ? '#BBF7D0' : '#FECACA'}` }}>
+                      background: c.isSpam ? 'rgba(0,145,174,0.06)' : '#F7F8FA', color: c.isSpam ? '#0091AE' : '#555', border:`1px solid ${c.isSpam ? 'rgba(0,145,174,0.3)' : '#E2E5EA'}` }}>
                     {c.isSpam ? '↩ Not spam' : 'Mark spam'}
                   </button>
                 </div>
@@ -197,7 +196,7 @@ export default function SpeedToLead({ days }) {
       )}
 
       {/* Response time distribution + Won vs Lost side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: distribution?.length ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: (distribution?.length > 0 && wonVsLost.wonMedian !== null && wonVsLost.lostMedian !== null) ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 14 }}>
 
         {/* Histogram */}
         {distribution?.length > 0 && (

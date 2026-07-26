@@ -18,7 +18,7 @@ export default function FunnelChart({ funnelStages, biggestLeak, stageContacts }
         const color = STAGE_COLORS[s.label] || '#6B7280';
         const prev = funnelStages[i - 1];
         const dropPct = prev ? Math.round(((prev.count - s.count) / prev.count) * 100) : null;
-        const dropColor = dropPct === null ? null : dropPct > 60 ? '#EF4444' : dropPct > 35 ? '#F59E0B' : '#10B981';
+        const dropColor = dropPct === null ? null : dropPct > 60 ? '#E8562A' : dropPct > 35 ? '#1B72C7' : '#0091AE';
         const accounts = stageContacts?.[s.stage] || [];
         const canDrill = accounts.length > 0;
         const isOpen = open === s.stage;
@@ -32,7 +32,7 @@ export default function FunnelChart({ funnelStages, biggestLeak, stageContacts }
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                   <span style={{ fontSize:12, fontWeight:700, color:dropColor }}>↓ {dropPct}% drop-off</span>
                   <span style={{ fontSize:11, color:'#999' }}>({s.dropOff?.toLocaleString()} left {prev.label})</span>
-                  {isLeak && <span style={{ fontSize:10, background:'#FEF3C7', color:'#92400E', border:'1px solid #F59E0B', borderRadius:4, padding:'1px 7px', fontWeight:600 }}>Biggest leak</span>}
+                  {isLeak && <span style={{ fontSize:10, background:'rgba(232,86,42,0.08)', color:'#E8562A', border:'1px solid rgba(232,86,42,0.3)', borderRadius:4, padding:'1px 7px', fontWeight:600 }}>Biggest leak</span>}
                 </div>
               </div>
             )}
@@ -44,7 +44,7 @@ export default function FunnelChart({ funnelStages, biggestLeak, stageContacts }
                 <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                   <span style={{ fontSize:12, color:'#888' }}>{s.count.toLocaleString()} contacts</span>
                   {i > 0 && (
-                    <span style={{ fontSize:12, fontWeight:700, color: s.conversionRate < 25 ? '#EF4444' : s.conversionRate < 50 ? '#F59E0B' : '#059669' }}>
+                    <span style={{ fontSize:12, fontWeight:700, color: '#243A52' }}>
                       {s.conversionRate}% from {prev?.label}
                     </span>
                   )}

@@ -65,7 +65,6 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
         <span style={{ fontSize: 13, color: active ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: active ? 600 : 400 }}>{item.label}</span>
         <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {item.id === 'insights' && insightCount > 0 && <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)', padding: '1px 5px', borderRadius: 8 }}>{insightCount}</span>}
-          {item.id === 'at-risk' && atRiskCount > 0 && <span style={{ fontSize: 9, background: '#FEE2E2', color: '#DC2626', padding: '1px 5px', borderRadius: 8 }}>{atRiskCount}</span>}
           {locked && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>🔒</span>}
         </span>
       </button>

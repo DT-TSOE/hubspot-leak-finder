@@ -10,7 +10,7 @@ export default function StageTimingTable({ stageTimes }) {
           {rows.map((r,i)=>(
             <tr key={i} style={{ borderBottom:'1px solid #F9FAFB' }}>
               <td style={{ padding:'9px 10px', fontWeight:500, color:'#222' }}>{r.from} → {r.to}</td>
-              <td style={{ padding:'9px 10px', color:r.medianDays>30?'#EF4444':r.medianDays>14?'#F59E0B':'#059669', fontWeight:600 }}>{r.medianDays}d</td>
+              <td style={{ padding:'9px 10px', color:'#243A52', fontWeight:600 }}>{r.medianDays}d</td>
               <td style={{ padding:'9px 10px', color:'#999' }}>{r.meanDays}d</td>
               <td style={{ padding:'9px 10px', color:'#999' }}>{r.sampleSize}</td>
             </tr>

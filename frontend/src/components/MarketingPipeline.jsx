@@ -85,7 +85,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
     <div>
       {/* Honest note: this account doesn't tag lifecycle stages */}
       {funnel.lifecycleMaintained === false && (
-        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 14px', marginBottom: 12, fontSize: 12.5, color: '#92400E', lineHeight: 1.55 }}>
+        <div style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 10, padding: '12px 14px', marginBottom: 12, fontSize: 12.5, color: '#555', lineHeight: 1.55 }}>
           <strong style={{ color: '#111' }}>This account doesn't tag HubSpot lifecycle stages,</strong> so the Lead → MQL → SQL funnel below will look sparse. That's a data-tagging gap, not a real marketing problem. Your deal-based metrics (win rate, revenue, deal-stage conversion) are the reliable view.
         </div>
       )}
@@ -173,7 +173,7 @@ export default function MarketingPipeline({ funnelData, onNavigate }) {
         {[
           { label: 'Leads', value: leadCount.toLocaleString(), color: '#111' },
           { label: 'SQLs', value: sqlCount.toLocaleString(), color: '#111' },
-          { label: 'Lead → SQL', value: `${conv}%`, color: parseFloat(conv) < 10 ? '#EF4444' : '#059669' },
+          { label: 'Lead → SQL', value: `${conv}%`, color: '#111' },
         ].map(m => (
           <div key={m.label} style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '13px 16px', textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>{m.label}</div>

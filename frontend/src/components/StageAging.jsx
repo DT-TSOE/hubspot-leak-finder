@@ -4,9 +4,9 @@ import { api } from '../utils/api';
 import FunnelLoader from './FunnelLoader';
 
 const URGENCY = {
-  critical: { bg:'#FEF2F2', border:'#FECACA', text:'#DC2626', label:'Critical' },
-  high: { bg:'#FFFBEB', border:'#FDE68A', text:'#D97706', label:'High' },
-  medium: { bg:'#FFFBEB', border:'#FDE68A', text:'#92400E', label:'Medium' },
+  critical: { bg:'rgba(232,86,42,0.08)', border:'rgba(232,86,42,0.25)', text:'#C2410C', label:'Critical' },
+  high:     { bg:'rgba(27,114,199,0.08)', border:'rgba(27,114,199,0.25)', text:'#1B72C7', label:'High' },
+  medium:   { bg:'rgba(0,145,174,0.08)', border:'rgba(0,145,174,0.25)', text:'#0091AE', label:'Medium' },
 };
 
 const fmt = n => n != null && n > 0 ? '$' + Math.round(n).toLocaleString() : '-';
@@ -86,11 +86,11 @@ export default function StageAging({ days }) {
   }, [days]);
 
   if (loading) return <FunnelLoader variant="journey" size="md" label="Finding stuck records…" />;
-  if (error) return <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'14px 18px', color:'#DC2626' }}>Error: {error}</div>;
+  if (error) return <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', color:'#555' }}>Error: {error}</div>;
   if (!data || data.total === 0) {
     return (
-      <div style={{ background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:10, padding:'2rem', textAlign:'center' }}>
-        <div style={{ fontSize:15, fontWeight:700, color:'#059669', marginBottom:4 }}>No stuck deals right now</div>
+      <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'2rem', textAlign:'center' }}>
+        <div style={{ fontSize:15, fontWeight:700, color:'#0091AE', marginBottom:4 }}>No stuck deals right now</div>
         <div style={{ fontSize:13, color:'#666' }}>When deals or contacts sit in the same stage too long, they'll appear here ranked by revenue at risk.</div>
       </div>
     );
@@ -109,17 +109,17 @@ export default function StageAging({ days }) {
           <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Total Stuck</div>
           <div style={{ fontSize:22, fontWeight:700, color:'#111' }}>{data.total}</div>
         </div>
-        <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color:'#DC2626', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Critical</div>
-          <div style={{ fontSize:22, fontWeight:700, color:'#DC2626' }}>{data.critical}</div>
+        <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
+          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Critical</div>
+          <div style={{ fontSize:22, fontWeight:700, color:'#243A52' }}>{data.critical}</div>
         </div>
-        <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color:'#D97706', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>High</div>
-          <div style={{ fontSize:22, fontWeight:700, color:'#D97706' }}>{data.high}</div>
+        <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
+          <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>High</div>
+          <div style={{ fontSize:22, fontWeight:700, color:'#243A52' }}>{data.high}</div>
         </div>
-        <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:10, padding:'12px 14px' }}>
-          <div style={{ fontSize:10, color:'#DC2626', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Revenue at Risk</div>
-          <div style={{ fontSize:22, fontWeight:700, color:'#DC2626' }}>{fmt(data.totalRevenueAtRisk)}</div>
+        <div style={{ background:'rgba(27,114,199,0.05)', border:'1px solid rgba(27,114,199,0.15)', borderRadius:10, padding:'12px 14px' }}>
+          <div style={{ fontSize:10, color:'#1B72C7', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Revenue at Risk</div>
+          <div style={{ fontSize:22, fontWeight:700, color:'#1B72C7' }}>{fmt(data.totalRevenueAtRisk)}</div>
         </div>
       </div>
 
@@ -134,11 +134,11 @@ export default function StageAging({ days }) {
               <div key={o.ownerId} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < data.byOwner.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
                 <div style={{ width: 150, flexShrink: 0, fontSize: 13, fontWeight: 500, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.name}</div>
                 <div style={{ flex: 1, height: 8, background: '#F0F1F4', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{ width: `${(o.count / maxCount) * 100}%`, height: '100%', background: o.critical > 0 ? '#EF4444' : '#F59E0B', borderRadius: 4 }} />
+                  <div style={{ width: `${(o.count / maxCount) * 100}%`, height: '100%', background: '#0091AE', borderRadius: 4 }} />
                 </div>
                 <div style={{ width: 60, textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#111', flexShrink: 0 }}>{o.count}</div>
-                <div style={{ width: 70, textAlign: 'right', fontSize: 11, color: o.critical > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.critical > 0 ? `${o.critical} crit` : '-'}</div>
-                <div style={{ width: 80, textAlign: 'right', fontSize: 12, fontWeight: 600, color: o.revenueAtRisk > 0 ? '#DC2626' : '#aaa', flexShrink: 0 }}>{o.revenueAtRisk > 0 ? fmtK(o.revenueAtRisk) : '-'}</div>
+                <div style={{ width: 70, textAlign: 'right', fontSize: 11, color: o.critical > 0 ? '#243A52' : '#aaa', flexShrink: 0 }}>{o.critical > 0 ? `${o.critical} crit` : '-'}</div>
+                <div style={{ width: 80, textAlign: 'right', fontSize: 12, fontWeight: 600, color: o.revenueAtRisk > 0 ? '#1B72C7' : '#aaa', flexShrink: 0 }}>{o.revenueAtRisk > 0 ? fmtK(o.revenueAtRisk) : '-'}</div>
               </div>
             );
           })}
@@ -162,8 +162,8 @@ export default function StageAging({ days }) {
                 style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '8px 6px', borderBottom: i < data.stageBreakdown.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center', cursor: 'pointer', borderRadius: 6, background: selectedStage === s.stage ? '#F7F8FA' : 'transparent' }}>
                 <span style={{ fontSize: 13, color: '#111', fontWeight: selectedStage === s.stage ? 700 : 500 }}>{fmtStage(s.stage)}</span>
                 <span style={{ fontSize: 13, color: '#333', textAlign: 'right', fontWeight: 500 }}>{s.count}</span>
-                <span style={{ fontSize: 13, color: s.avgDays > 30 ? '#F59E0B' : '#666', textAlign: 'right', fontWeight: s.avgDays > 30 ? 600 : 400 }}>{s.avgDays}d</span>
-                <span style={{ fontSize: 13, color: s.revenueAtRisk > 0 ? '#DC2626' : '#999', textAlign: 'right', fontWeight: s.revenueAtRisk > 0 ? 700 : 400 }}>{fmt(s.revenueAtRisk)}</span>
+                <span style={{ fontSize: 13, color: s.avgDays > 30 ? '#1B72C7' : '#666', textAlign: 'right', fontWeight: s.avgDays > 30 ? 600 : 400 }}>{s.avgDays}d</span>
+                <span style={{ fontSize: 13, color: s.revenueAtRisk > 0 ? '#0091AE' : '#999', textAlign: 'right', fontWeight: s.revenueAtRisk > 0 ? 700 : 400 }}>{fmt(s.revenueAtRisk)}</span>
               </div>
             ))}
           </div>
@@ -215,7 +215,7 @@ export default function StageAging({ days }) {
                 <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>{r.name}</div>
                 <div style={{ fontSize:11, color:'#666' }}>
                   {fmtStage(r.stage)} · {r.daysInStage}d in stage · target {r.threshold}d
-                  {r.revenueAtRisk ? <span style={{ color:'#DC2626', fontWeight:600 }}> · {fmt(r.revenueAtRisk)} at risk</span> : null}
+                  {r.revenueAtRisk ? <span style={{ color:'#1B72C7', fontWeight:600 }}> · {fmt(r.revenueAtRisk)} at risk</span> : null}
                 </div>
                 <div style={{ fontSize:11, color:u.text, marginTop:3, lineHeight:1.5 }}>{r.action}</div>
               </div>

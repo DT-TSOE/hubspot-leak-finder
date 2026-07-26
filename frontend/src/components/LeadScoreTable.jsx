@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-const RISK = { high:{bg:'#FEF2F2',text:'#DC2626',border:'#FECACA',label:'High Risk'}, medium:{bg:'#FFFBEB',text:'#D97706',border:'#FDE68A',label:'Medium Risk'}, low:{bg:'#F0FDF4',text:'#059669',border:'#BBF7D0',label:'Low Risk'} };
+const RISK = { high:{bg:'rgba(232,86,42,0.08)',text:'#C2410C',border:'rgba(232,86,42,0.3)',label:'Needs attention'}, medium:{bg:'rgba(27,114,199,0.08)',text:'#1B72C7',border:'rgba(27,114,199,0.25)',label:'Watch'}, low:{bg:'rgba(46,191,154,0.08)',text:'#0E7C6D',border:'rgba(46,191,154,0.3)',label:'On track'} };
 
 export default function LeadScoreTable({ leads }) {
   const [filter, setFilter] = useState('all');
@@ -42,8 +42,8 @@ export default function LeadScoreTable({ leads }) {
                       <span style={{ fontSize:10, color:s.text, fontWeight:500, whiteSpace:'nowrap' }}>{s.label}</span>
                     </div>
                   </td>
-                  <td style={{ padding:'9px 8px', color:l.daysInStage>30?'#EF4444':'#666', whiteSpace:'nowrap' }}>{l.daysInStage}d</td>
-                  <td style={{ padding:'9px 8px', color:l.touches===0?'#EF4444':'#666' }}>{l.touches}</td>
+                  <td style={{ padding:'9px 8px', color:'#666', whiteSpace:'nowrap' }}>{l.daysInStage}d</td>
+                  <td style={{ padding:'9px 8px', color:'#666' }}>{l.touches}</td>
                   <td style={{ padding:'9px 8px' }}>
                     <div style={{ display:'flex', flexWrap:'wrap', gap:3 }}>
                       {l.flags.map((f,i)=><span key={i} style={{ fontSize:10, padding:'2px 6px', borderRadius:4, background:s.bg, color:s.text, border:`1px solid ${s.border}` }}>{f}</span>)}

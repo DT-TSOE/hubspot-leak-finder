@@ -56,16 +56,19 @@ const StripeLogo = () => (
 const QuickBooksLogo = () => (
   <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
     <rect width="60" height="60" rx="12" fill="#2CA01C"/>
-    <circle cx="30" cy="30" r="18" fill="white" opacity="0.15"/>
-    <text x="30" y="37" textAnchor="middle" fill="white" fontSize="18" fontWeight="800" fontFamily="Arial, sans-serif">QB</text>
+    <circle cx="23" cy="30" r="11" stroke="white" strokeWidth="4" fill="none"/>
+    <line x1="30" y1="37" x2="35" y2="43" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+    <line x1="33" y1="18" x2="33" y2="42" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+    <path d="M33 18 Q44 18 44 25 Q44 32 33 32" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M33 30 Q46 30 46 36 Q46 42 33 42" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 const XeroLogo = () => (
   <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
     <rect width="60" height="60" rx="12" fill="#00B4D8"/>
-    <circle cx="30" cy="30" r="16" fill="white" opacity="0.15"/>
-    <text x="30" y="38" textAnchor="middle" fill="white" fontSize="22" fontWeight="800" fontFamily="Arial, sans-serif">x</text>
+    <line x1="17" y1="17" x2="43" y2="43" stroke="white" strokeWidth="7" strokeLinecap="round"/>
+    <line x1="43" y1="17" x2="17" y2="43" stroke="white" strokeWidth="7" strokeLinecap="round"/>
   </svg>
 );
 
@@ -118,12 +121,12 @@ function SeedButton() {
             <div style={{ fontSize: 12, color: '#888' }}>Creates 77 contacts, 17 deals, and 5 lead sources in your HubSpot account. Only use on a test account.</div>
           </div>
           <button onClick={run} disabled={status === 'running'}
-            style={{ marginLeft: 20, flexShrink: 0, padding: '8px 18px', borderRadius: 8, border: 'none', background: status === 'done' ? '#059669' : status === 'error' ? '#DC2626' : '#111', color: '#fff', fontSize: 12, fontWeight: 700, cursor: status === 'running' ? 'wait' : 'pointer', opacity: status === 'running' ? 0.7 : 1 }}>
+            style={{ marginLeft: 20, flexShrink: 0, padding: '8px 18px', borderRadius: 8, border: 'none', background: status === 'done' ? '#2EBF9A' : status === 'error' ? '#E8562A' : '#111', color: '#fff', fontSize: 12, fontWeight: 700, cursor: status === 'running' ? 'wait' : 'pointer', opacity: status === 'running' ? 0.7 : 1 }}>
             {status === 'idle' ? 'Load test data' : status === 'running' ? 'Running…' : status === 'done' ? 'Done' : 'Error'}
           </button>
         </div>
-        {log && <pre ref={logRef} style={{ margin: 0, padding: '10px 12px', background: '#111', color: '#4CAF50', fontSize: 11, borderRadius: 7, maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{log}</pre>}
-        {status === 'done' && <div style={{ marginTop: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>Reload the page to see your data.</div>}
+        {log && <pre ref={logRef} style={{ margin: 0, padding: '10px 12px', background: '#111', color: '#2EBF9A', fontSize: 11, borderRadius: 7, maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{log}</pre>}
+        {status === 'done' && <div style={{ marginTop: 10, fontSize: 12, color: '#0091AE', fontWeight: 600 }}>Reload the page to see your data.</div>}
       </div>
     </div>
   );
@@ -208,7 +211,7 @@ function IntegrationCard({ integration, status }) {
   return (
     <div style={{
       background: '#fff',
-      border: `1px solid ${isConnected ? '#BBF7D0' : '#E5E7EB'}`,
+      border: `1px solid ${isConnected ? 'rgba(46,191,154,0.3)' : '#E5E7EB'}`,
       borderRadius: 14,
       padding: '20px',
       display: 'flex',
@@ -223,7 +226,7 @@ function IntegrationCard({ integration, status }) {
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
     >
       {/* Connected stripe */}
-      {isConnected && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #059669, #2EBF9A)' }} />}
+      {isConnected && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #1B72C7, #0091AE)' }} />}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
@@ -237,10 +240,10 @@ function IntegrationCard({ integration, status }) {
           </div>
         </div>
         {isConnected && (
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 8, background: '#ECFDF5', color: '#059669', border: '1px solid #BBF7D0', flexShrink: 0 }}>Connected</span>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 8, background: 'rgba(0,145,174,0.1)', color: '#0091AE', border: '1px solid rgba(0,145,174,0.3)', flexShrink: 0 }}>Connected</span>
         )}
         {isSoon && (
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 8, background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A', flexShrink: 0 }}>Coming soon</span>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 8, background: '#F3F4F6', color: '#888', border: '1px solid #E2E5EA', flexShrink: 0 }}>Coming soon</span>
         )}
       </div>
 
@@ -251,7 +254,7 @@ function IntegrationCard({ integration, status }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {integration.unlocks.map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <span style={{ fontSize: 11, color: isConnected ? '#059669' : '#CBD6E2', flexShrink: 0 }}>✓</span>
+            <span style={{ fontSize: 11, color: isConnected ? '#0091AE' : '#CBD6E2', flexShrink: 0 }}>✓</span>
             <span style={{ fontSize: 12, color: isConnected ? '#374151' : '#9CA3AF' }}>{item}</span>
           </div>
         ))}
@@ -266,7 +269,7 @@ function IntegrationCard({ integration, status }) {
       )}
       {status === 'error' && integration.connectUrl && (
         <a href={`${BASE}${integration.connectUrl}`}
-          style={{ display: 'block', textAlign: 'center', padding: '9px', borderRadius: 8, background: '#FEF2F2', color: '#DC2626', fontSize: 12, fontWeight: 700, textDecoration: 'none', border: '1px solid #FECACA', marginTop: 'auto' }}>
+          style={{ display: 'block', textAlign: 'center', padding: '9px', borderRadius: 8, background: 'rgba(232,86,42,0.06)', color: '#C2410C', fontSize: 12, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(232,86,42,0.25)', marginTop: 'auto' }}>
           Reconnect →
         </a>
       )}
@@ -315,7 +318,7 @@ export default function Integrations() {
 
       {connected.length > 0 && (
         <div style={{ marginBottom: 32 }}>
-          <SectionLabel color="#059669">Connected ({connected.length})</SectionLabel>
+          <SectionLabel color="#0091AE">Connected ({connected.length})</SectionLabel>
           <Grid items={connected} />
         </div>
       )}

@@ -3,9 +3,9 @@ import { api } from '../utils/api';
 import { Bell, Zap, Thermometer, PauseCircle, UserMinus, TrendingDown, AlertTriangle, CheckCircle, Mail } from 'lucide-react';
 
 const SEV = {
-  urgent: { color:'#DC2626', bg:'#FEF2F2', border:'#FECACA', dot:'#EF4444', label:'Urgent' },
-  warning: { color:'#D97706', bg:'#FFFBEB', border:'#FDE68A', dot:'#F59E0B', label:'Watch' },
-  info: { color:'#1D4ED8', bg:'#EFF6FF', border:'#BFDBFE', dot:'#3B82F6', label:'Info' },
+  urgent:  { color:'#E8562A', bg:'rgba(232,86,42,0.06)', border:'rgba(232,86,42,0.2)', dot:'#E8562A', label:'Urgent' },
+  warning: { color:'#1B72C7', bg:'rgba(27,114,199,0.06)', border:'rgba(27,114,199,0.2)', dot:'#1B72C7', label:'Watch' },
+  info:    { color:'#0091AE', bg:'rgba(0,145,174,0.06)', border:'rgba(0,145,174,0.2)', dot:'#0091AE', label:'Info' },
 };
 
 const TYPE_ICONS = {
@@ -72,12 +72,10 @@ export default function NotificationBell() {
   return (
     <div ref={ref} style={{ position:'relative' }}>
       {/* Bell button */}
-      <button onClick={handleOpen} style={{ position:'relative', width:34, height:34, borderRadius:8, background: urgentCount > 0 ? '#FEF2F2' : '#fff', border:`1px solid ${urgentCount > 0 ? '#FECACA' : '#E2E5EA'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>
-        <Bell size={16} color={urgentCount > 0 ? '#DC2626' : '#555'} />
+      <button onClick={handleOpen} style={{ position:'relative', width:34, height:34, borderRadius:8, background:'#fff', border:'1px solid #E2E5EA', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Bell size={16} color="#555" />
         {unreadCount > 0 && (
-          <div style={{ position:'absolute', top:-4, right:-4, width:16, height:16, borderRadius:'50%', background: urgentCount > 0 ? '#EF4444' : '#F59E0B', border:'2px solid #fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, color:'#fff', fontWeight:700 }}>
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </div>
+          <div style={{ position:'absolute', top:-3, right:-3, width:8, height:8, borderRadius:'50%', background:'#E8562A', border:'2px solid #fff' }} />
         )}
       </button>
 
@@ -124,7 +122,7 @@ export default function NotificationBell() {
           <div style={{ maxHeight:380, overflowY:'auto' }}>
             {alerts.length === 0 && !loading && (
               <div style={{ padding:'24px 16px', textAlign:'center' }}>
-                <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}><CheckCircle size={28} color="#059669" /></div>
+                <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}><CheckCircle size={28} color="#2EBF9A" /></div>
                 <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:4 }}>Pipeline looks healthy</div>
                 <div style={{ fontSize:12, color:'#888' }}>No urgent issues right now. PipeCoach is watching.</div>
               </div>
