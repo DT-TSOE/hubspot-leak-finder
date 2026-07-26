@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — PipeChamp</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --navy:#243A52; --blue:#1B72C7; --orange:#E8562A; --light:#F7F8FA; --border:#E5E7EB; --text:#111827; --sub:#4B5563; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.7; background: #fff; }
+    a { color: var(--blue); }
+    nav { background: var(--navy); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-size: 17px; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .nav-back { font-size: 14px; color: rgba(255,255,255,.6); text-decoration: none; }
+    .nav-back:hover { color: #fff; }
+    .page { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+    .page-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .page-label { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; }
+    h1 { font-size: 36px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+    .page-sub { font-size: 18px; color: var(--sub); }
+    h2 { font-size: 20px; font-weight: 700; margin: 40px 0 14px; }
+    p { font-size: 16px; color: #374151; margin-bottom: 16px; }
+    .contact-card {
+      background: var(--light); border: 1px solid var(--border);
+      border-radius: 14px; padding: 32px; margin: 32px 0;
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .contact-icon { font-size: 32px; flex-shrink: 0; }
+    .contact-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .contact-card p { margin: 0; font-size: 15px; color: var(--sub); }
+    .contact-card a { font-weight: 600; color: var(--blue); }
+    .faq { margin-top: 56px; }
+    .faq-item { border-bottom: 1px solid var(--border); padding: 24px 0; }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-q { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+    .faq-a { font-size: 15px; color: var(--sub); line-height: 1.65; }
+    footer { background: #111827; padding: 32px 24px; text-align: center; }
+    footer p { font-size: 13px; color: rgba(255,255,255,.3); }
+    footer a { color: rgba(255,255,255,.5); margin: 0 12px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="24" height="24" viewBox="0 0 100 98" fill="none"><polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7"/><polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/><polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/><polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity=".7"/><circle cx="50" cy="87" r="7" fill="#E8562A"/></svg>
+    PipeChamp
+  </a>
+  <a href="/" class="nav-back">← Back to home</a>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-label">Help</div>
+    <h1>Support</h1>
+    <p class="page-sub">We're here to help. Reach out and we'll get back to you fast.</p>
+  </div>
+
+  <div class="contact-card">
+    <div class="contact-icon">✉️</div>
+    <div>
+      <h3>Email support</h3>
+      <p>For any questions, bugs, or feedback: <a href="mailto:support@pipechamp.app">support@pipechamp.app</a><br/>We aim to reply within one business day.</p>
+    </div>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q">What HubSpot data does PipeChamp access?</div>
+      <div class="faq-a">PipeChamp reads contact records, deal records, and owner information. It never reads email content, notes, or attachments. See our <a href="/privacy">Privacy Policy</a> for the full list of scopes and how data is used.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does PipeChamp write to my HubSpot account?</div>
+      <div class="faq-a">No. PipeChamp is read-only. It analyses your existing data and displays insights — it never creates, modifies, or deletes any records in your HubSpot account.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How do I disconnect PipeChamp from my HubSpot?</div>
+      <div class="faq-a">Go to your HubSpot account → Settings → Integrations → Connected Apps, find PipeChamp, and click Disconnect. This immediately revokes our access.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why do some metrics show as empty?</div>
+      <div class="faq-a">PipeChamp calculates metrics from your deal history. If your HubSpot account doesn't track lifecycle stages or doesn't have enough closed deals, some metrics will show as low sample size. Deal-stage conversion requires at least a few closed deals to be meaningful.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is my data stored by PipeChamp?</div>
+      <div class="faq-a">No contact or deal records are stored. Only aggregate monthly scores (like your overall grade and win rate percentage) are stored to power the trend feature. These never contain names, emails, or individual record data.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How do I connect Google Analytics or Search Console?</div>
+      <div class="faq-a">Inside the app, go to the Integrations tab and click Connect on the relevant integration. You'll be taken through Google's standard OAuth flow. You can disconnect at any time from your Google account's third-party app permissions.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What HubSpot plan do I need?</div>
+      <div class="faq-a">PipeChamp works with any HubSpot plan that includes CRM access, including the free tier. Some metrics (like detailed stage history) require deals to have been moved through stages within HubSpot.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>
+    <a href="/">Home</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+  </p>
+  <p style="margin-top:12px">© 2026 PipeChamp. Not affiliated with HubSpot, Inc.</p>
+</footer>
+
+</body>
+</html>

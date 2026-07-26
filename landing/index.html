@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PipeChamp — HubSpot Pipeline Intelligence</title>
+  <meta name="description" content="PipeChamp grades your HubSpot pipeline health and shows you exactly where revenue is leaking. Win rate, stage conversion, speed-to-lead — in 60 seconds." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #243A52;
+      --blue: #1B72C7;
+      --teal: #0091AE;
+      --mint: #2EBF9A;
+      --orange: #E8562A;
+      --muted: #CBD6E2;
+      --light: #F7F8FA;
+      --text: #111827;
+      --sub: #4B5563;
+      --border: #E5E7EB;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(36, 58, 82, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 0 24px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: 700; color: #fff;
+    }
+    .nav-logo svg { flex-shrink: 0; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-size: 14px; color: rgba(255,255,255,.7); font-weight: 500; transition: color .15s; }
+    .nav-links a:hover { color: #fff; }
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--orange); color: #fff;
+      padding: 9px 18px; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      transition: background .15s, transform .1s;
+    }
+    .btn-nav:hover { background: #d14a22; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      background: var(--navy);
+      padding: 140px 24px 100px;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 12px; font-weight: 600; color: var(--mint);
+      letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800; color: #fff;
+      line-height: 1.1; letter-spacing: -.02em;
+      max-width: 780px; margin: 0 auto 24px;
+      text-wrap: balance;
+    }
+    .hero h1 span { color: var(--orange); }
+    .hero p {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: rgba(255,255,255,.65);
+      max-width: 580px; margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+    .hero-ctas {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--orange); color: #fff;
+      padding: 14px 28px; border-radius: 10px;
+      font-size: 16px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(232,86,42,.35);
+      transition: background .15s, transform .1s, box-shadow .15s;
+    }
+    .btn-primary:hover { background: #d14a22; transform: translateY(-2px); box-shadow: 0 6px 28px rgba(232,86,42,.45); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,.7);
+      padding: 14px 20px; border-radius: 10px;
+      font-size: 15px; font-weight: 500;
+      transition: color .15s;
+    }
+    .btn-secondary:hover { color: #fff; }
+    .hero-note {
+      margin-top: 20px;
+      font-size: 13px; color: rgba(255,255,255,.4);
+    }
+
+    /* GRADE CARD */
+    .grade-showcase {
+      max-width: 900px; margin: 64px auto 0;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .grade-bar {
+      background: rgba(255,255,255,.04); padding: 10px 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .grade-bar span { width: 10px; height: 10px; border-radius: 50%; display: block; }
+    .grade-bar .r { background: #EF4444; }
+    .grade-bar .y { background: #F59E0B; }
+    .grade-bar .g { background: #10B981; }
+    .grade-bar p { font-size: 12px; color: rgba(255,255,255,.3); margin-left: 4px; }
+    .grade-content {
+      padding: 32px;
+      display: grid; grid-template-columns: 1fr 2fr; gap: 32px;
+      align-items: center;
+    }
+    .grade-badge {
+      display: flex; flex-direction: column; align-items: center;
+      background: rgba(255,255,255,.04); border-radius: 12px; padding: 28px;
+    }
+    .grade-letter {
+      font-size: 96px; font-weight: 900; line-height: 1;
+      color: #F59E0B;
+    }
+    .grade-label { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 8px; }
+    .grade-metrics { display: flex; flex-direction: column; gap: 14px; }
+    .metric-row { display: flex; flex-direction: column; gap: 6px; }
+    .metric-top { display: flex; justify-content: space-between; align-items: center; }
+    .metric-name { font-size: 13px; color: rgba(255,255,255,.6); font-weight: 500; }
+    .metric-val { font-size: 13px; font-weight: 700; }
+    .metric-val.good { color: #2EBF9A; }
+    .metric-val.warn { color: #F59E0B; }
+    .metric-val.bad { color: #EF4444; }
+    .metric-bar-bg { height: 6px; background: rgba(255,255,255,.08); border-radius: 3px; }
+    .metric-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+
+    /* SECTION WRAPPER */
+    .section { padding: 96px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; color: var(--text);
+      line-height: 1.15; letter-spacing: -.02em;
+      text-wrap: balance; margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 18px; color: var(--sub);
+      max-width: 560px; line-height: 1.65;
+    }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px; margin-top: 56px;
+    }
+    .feature-card {
+      background: var(--light);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      transition: border-color .2s, transform .15s;
+    }
+    .feature-card:hover { border-color: var(--muted); transform: translateY(-2px); }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px; font-size: 22px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--sub); line-height: 1.6; }
+
+    /* HOW IT WORKS */
+    .hiw { background: var(--light); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 32px; margin-top: 56px;
+    }
+    .step { position: relative; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--navy); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .step p { font-size: 14px; color: var(--sub); line-height: 1.65; }
+
+    /* WHO IT'S FOR */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px; margin-top: 48px;
+    }
+    .audience-card {
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+      border-left: 4px solid var(--blue);
+    }
+    .audience-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .audience-card p { font-size: 14px; color: var(--sub); line-height: 1.6; }
+
+    /* CTA SECTION */
+    .cta-section {
+      background: var(--navy);
+      text-align: center; padding: 96px 24px;
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800; color: #fff;
+      letter-spacing: -.02em; margin-bottom: 16px;
+      text-wrap: balance;
+    }
+    .cta-section p {
+      font-size: 18px; color: rgba(255,255,255,.6);
+      margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+    .cta-trust {
+      margin-top: 20px; font-size: 13px;
+      color: rgba(255,255,255,.35);
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .cta-trust span { display: flex; align-items: center; gap: 5px; }
+
+    /* FOOTER */
+    footer {
+      background: #111827;
+      padding: 48px 24px;
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 24px;
+    }
+    .footer-logo { font-size: 16px; font-weight: 700; color: #fff; }
+    .footer-links {
+      display: flex; gap: 28px;
+    }
+    .footer-links a { font-size: 14px; color: rgba(255,255,255,.45); transition: color .15s; }
+    .footer-links a:hover { color: rgba(255,255,255,.8); }
+    .footer-copy { font-size: 13px; color: rgba(255,255,255,.25); margin-top: 24px; text-align: center; }
+
+    @media (max-width: 640px) {
+      .grade-content { grid-template-columns: 1fr; }
+      .nav-links a:not(.btn-nav) { display: none; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <svg width="28" height="28" viewBox="0 0 100 98" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7" opacity=".9"/>
+      <polygon points="18,23 82,23 72,39 28,39" fill="#0091AE" opacity=".9"/>
+      <polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A" opacity=".9"/>
+      <polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity=".7"/>
+      <circle cx="50" cy="87" r="7" fill="#E8562A"/>
+    </svg>
+    PipeChamp
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="https://app.pipechamp.app" class="btn-nav">
+      Connect HubSpot →
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">HubSpot Pipeline Intelligence</div>
+  <h1>Find out why your deals <span>aren't closing</span></h1>
+  <p>PipeChamp connects to HubSpot and grades your pipeline health — win rate, stage conversion, speed-to-lead — in 60 seconds.</p>
+  <div class="hero-ctas">
+    <a href="https://app.pipechamp.app" class="btn-primary">
+      Grade My Pipeline Free →
+    </a>
+    <a href="#how-it-works" class="btn-secondary">
+      See how it works ↓
+    </a>
+  </div>
+  <p class="hero-note">Free to connect · No credit card · Read-only HubSpot access</p>
+
+  <!-- GRADE PREVIEW -->
+  <div class="grade-showcase">
+    <div class="grade-bar">
+      <span class="r"></span><span class="y"></span><span class="g"></span>
+      <p>PipeChamp — Pipeline Health Report</p>
+    </div>
+    <div class="grade-content">
+      <div class="grade-badge">
+        <div class="grade-letter">B+</div>
+        <div class="grade-label">Pipeline Health Score</div>
+      </div>
+      <div class="grade-metrics">
+        <div class="metric-row">
+          <div class="metric-top">
+            <span class="metric-name">Win Rate</span>
+            <span class="metric-val warn">22% — Below average</span>
+          </div>
+          <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:22%;background:#F59E0B"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-top">
+            <span class="metric-name">Speed to Lead</span>
+            <span class="metric-val bad">18h avg — Too slow</span>
+          </div>
+          <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:30%;background:#EF4444"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-top">
+            <span class="metric-name">Proposal → Close Rate</span>
+            <span class="metric-val good">61% — Strong</span>
+          </div>
+          <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:61%;background:#2EBF9A"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-top">
+            <span class="metric-name">Avg Sales Cycle</span>
+            <span class="metric-val warn">34 days</span>
+          </div>
+          <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:45%;background:#F59E0B"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-label">What you get</div>
+    <h2 class="section-title">Everything your pipeline is hiding from you</h2>
+    <p class="section-sub">PipeChamp pulls your HubSpot deal data and surfaces the metrics that actually explain why revenue is stalling.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EFF6FF">📊</div>
+        <h3>Pipeline Health Score</h3>
+        <p>A single letter grade (A–F) across marketing and sales, weighted by what actually drives revenue for your business type.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ECFDF5">🎯</div>
+        <h3>Deal Stage Conversion</h3>
+        <p>See exactly which stage is killing your deals. Of every deal that enters a stage, what % actually wins? No more guessing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFF7ED">⚡</div>
+        <h3>Speed to Lead</h3>
+        <p>How fast your team responds to new contacts. Leads contacted within 5 minutes are 9× more likely to convert.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FEF2F2">💸</div>
+        <h3>Revenue Leak Detection</h3>
+        <p>Dollar-value estimate of deals at risk from slow follow-up, stalled stages, and contacts going cold.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F5F3FF">🤖</div>
+        <h3>AI Pipeline Coach</h3>
+        <p>Ask plain-English questions about your pipeline. "Which rep has the best win rate?" "What's our biggest drop-off stage?"</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ECFDF5">📈</div>
+        <h3>Month-over-Month Trends</h3>
+        <p>Your score tracked over time, so you can see whether your pipeline is improving or deteriorating.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section hiw" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">From zero to pipeline grade in 60 seconds</h2>
+    <p class="section-sub">No setup, no data entry, no spreadsheets. PipeChamp reads your HubSpot data and does the analysis for you.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Connect your HubSpot account</h3>
+        <p>One click to authorise read access. PipeChamp only reads your deal and contact data — it never writes to your HubSpot account.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Get your pipeline grade instantly</h3>
+        <p>Your pipeline health score and all supporting metrics appear in seconds. No configuration, no manual tagging, no waiting.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>See exactly what to fix</h3>
+        <p>Each metric comes with a benchmark comparison and specific recommendations — not vague advice, but the actual next action.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label">Who it's for</div>
+    <h2 class="section-title">Built for people who live in HubSpot</h2>
+    <p class="section-sub">Whether you're running your own pipeline or managing it for clients, PipeChamp gives you the view HubSpot doesn't.</p>
+
+    <div class="audience-grid">
+      <div class="audience-card">
+        <h3>HubSpot Agencies & Consultants</h3>
+        <p>Run a pipeline audit for any client in seconds. Show the gaps, justify the recommendations, and back up your HubSpot upgrade advice with data.</p>
+      </div>
+      <div class="audience-card">
+        <h3>Sales Leaders</h3>
+        <p>Stop asking reps to self-report. Get an objective view of what's happening at every deal stage and where the team is losing deals it shouldn't.</p>
+      </div>
+      <div class="audience-card">
+        <h3>Founders & Revenue Ops</h3>
+        <p>You're in HubSpot every day but still don't know your real win rate. PipeChamp surfaces the numbers buried in your deal history.</p>
+      </div>
+      <div class="audience-card">
+        <h3>Marketing Teams</h3>
+        <p>Connect Google Analytics and Search Console to see your full funnel — from first impression through to closed deal — in one place.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready to see your pipeline score?</h2>
+  <p>Connect your HubSpot account and get your grade in under a minute.</p>
+  <a href="https://app.pipechamp.app" class="btn-primary" style="font-size:17px;padding:16px 32px;">
+    Grade My Pipeline Free →
+  </a>
+  <div class="cta-trust">
+    <span>✓ Free to use</span>
+    <span>✓ Read-only HubSpot access</span>
+    <span>✓ No credit card required</span>
+    <span>✓ Your data stays yours</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PipeChamp</div>
+    <div class="footer-links">
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+      <a href="/support">Support</a>
+      <a href="https://app.pipechamp.app">Launch App</a>
+    </div>
+  </div>
+  <p class="footer-copy">© 2026 PipeChamp. Not affiliated with HubSpot, Inc.</p>
+</footer>
+
+</body>
+</html>

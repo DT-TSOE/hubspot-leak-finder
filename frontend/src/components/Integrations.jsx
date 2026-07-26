@@ -1,7 +1,93 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
-import { Database, BarChart2, Search, Target, Share2, CreditCard, BookOpen, Globe, Bell } from 'lucide-react';
 
+// ── Real brand logos ──────────────────────────────────────────────────────────
+const HubSpotLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <circle cx="30" cy="30" r="30" fill="#FF7A59"/>
+    <path d="M34.5 22.5v-4.2a3.3 3.3 0 0 0 1.9-3 3.3 3.3 0 0 0-3.3-3.3 3.3 3.3 0 0 0-3.3 3.3c0 1.3.8 2.5 1.9 3v4.2a9.4 9.4 0 0 0-4.4 1.9l-11.5-9a3.7 3.7 0 0 0 .1-.9 3.7 3.7 0 1 0-3.7 3.7c.7 0 1.3-.2 1.9-.5l11.3 8.8a9.4 9.4 0 0 0-1.4 5 9.4 9.4 0 0 0 4 7.6l-3 3a2.7 2.7 0 0 0-.8-.1 2.7 2.7 0 1 0 2.7 2.7 2.7 2.7 0 0 0-.1-.8l3-3a9.4 9.4 0 0 0 5.6 1.9 9.4 9.4 0 0 0 9.4-9.4 9.4 9.4 0 0 0-9.8-9.9zm.4 15.1a5.3 5.3 0 1 1 0-10.6 5.3 5.3 0 0 1 0 10.6z" fill="white"/>
+  </svg>
+);
+
+const GA4Logo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
+    <rect x="10" y="32" width="10" height="18" rx="3" fill="#F9AB00"/>
+    <rect x="25" y="20" width="10" height="30" rx="3" fill="#E37400"/>
+    <rect x="40" y="10" width="10" height="40" rx="3" fill="#4285F4"/>
+  </svg>
+);
+
+const SearchConsoleLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
+    <circle cx="27" cy="27" r="13" stroke="#4285F4" strokeWidth="5" fill="none"/>
+    <line x1="37" y1="37" x2="50" y2="50" stroke="#34A853" strokeWidth="5" strokeLinecap="round"/>
+    <circle cx="27" cy="27" r="7" fill="#FBBC04" opacity="0.4"/>
+    <circle cx="27" cy="27" r="3" fill="#EA4335"/>
+  </svg>
+);
+
+const GoogleAdsLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
+    <polygon points="30,8 56,52 4,52" fill="none" stroke="#FBBC04" strokeWidth="5"/>
+    <polygon points="30,8 56,52 4,52" fill="#FBBC04" opacity="0.1"/>
+    <circle cx="14" cy="46" r="7" fill="#4285F4"/>
+    <circle cx="46" cy="46" r="7" fill="#34A853"/>
+    <circle cx="30" cy="14" r="7" fill="#EA4335"/>
+  </svg>
+);
+
+const MetaLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#1877F2"/>
+    <path d="M10 30c0-7 4-13 10-13 4 0 7 3 10 8 3-5 6-8 10-8 6 0 10 6 10 13 0 5-2 9-5 11l-5-7c2-1 3-3 3-4 0-3-1-5-3-5s-4 2-6 8l3 5h-6l-3-5c-2-6-4-8-6-8-2 0-3 2-3 5 0 1 1 3 3 4l-5 7c-3-2-5-6-5-11z" fill="white"/>
+  </svg>
+);
+
+const StripeLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#635BFF"/>
+    <path d="M28 22c0-2 2-3 4-3 3 0 6 1 9 3l3-9c-3-2-8-3-12-3-8 0-14 5-14 12 0 12 16 10 16 16 0 2-2 3-5 3-4 0-8-1-12-4l-3 9c4 2 9 4 15 4 8 0 14-4 14-12 0-12-15-10-15-16z" fill="white"/>
+  </svg>
+);
+
+const QuickBooksLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#2CA01C"/>
+    <circle cx="30" cy="30" r="18" fill="white" opacity="0.15"/>
+    <text x="30" y="37" textAnchor="middle" fill="white" fontSize="18" fontWeight="800" fontFamily="Arial, sans-serif">QB</text>
+  </svg>
+);
+
+const XeroLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#00B4D8"/>
+    <circle cx="30" cy="30" r="16" fill="white" opacity="0.15"/>
+    <text x="30" y="38" textAnchor="middle" fill="white" fontSize="22" fontWeight="800" fontFamily="Arial, sans-serif">x</text>
+  </svg>
+);
+
+const SlackLogo = () => (
+  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
+    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
+    <rect x="10" y="25" width="14" height="7" rx="3.5" fill="#E01E5A"/>
+    <rect x="10" y="18" width="7" height="14" rx="3.5" fill="#E01E5A"/>
+    <rect x="7" y="25" width="7" height="7" rx="3.5" fill="#E01E5A" opacity="0.5"/>
+    <rect x="36" y="28" width="14" height="7" rx="3.5" fill="#36C5F0"/>
+    <rect x="43" y="28" width="7" height="14" rx="3.5" fill="#36C5F0"/>
+    <rect x="43" y="35" width="7" height="7" rx="3.5" fill="#36C5F0" opacity="0.5"/>
+    <rect x="25" y="10" width="7" height="14" rx="3.5" fill="#2EB67D"/>
+    <rect x="25" y="10" width="14" height="7" rx="3.5" fill="#2EB67D"/>
+    <rect x="25" y="7" width="7" height="7" rx="3.5" fill="#2EB67D" opacity="0.5"/>
+    <rect x="28" y="36" width="7" height="14" rx="3.5" fill="#ECB22E"/>
+    <rect x="21" y="36" width="14" height="7" rx="3.5" fill="#ECB22E"/>
+    <rect x="28" y="43" width="7" height="7" rx="3.5" fill="#ECB22E" opacity="0.5"/>
+  </svg>
+);
+
+// ── Seed button (dev only) ────────────────────────────────────────────────────
 function SeedButton() {
   const [status, setStatus] = useState('idle');
   const [log, setLog] = useState('');
@@ -29,79 +115,166 @@ function SeedButton() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: log ? 12 : 0 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 3 }}>Load test data</div>
-            <div style={{ fontSize: 12, color: '#888' }}>Creates 77 contacts, 17 deals, and 5 lead sources in your HubSpot account so every PipeChamp feature has data to show. Only use on a test account.</div>
+            <div style={{ fontSize: 12, color: '#888' }}>Creates 77 contacts, 17 deals, and 5 lead sources in your HubSpot account. Only use on a test account.</div>
           </div>
           <button onClick={run} disabled={status === 'running'}
             style={{ marginLeft: 20, flexShrink: 0, padding: '8px 18px', borderRadius: 8, border: 'none', background: status === 'done' ? '#059669' : status === 'error' ? '#DC2626' : '#111', color: '#fff', fontSize: 12, fontWeight: 700, cursor: status === 'running' ? 'wait' : 'pointer', opacity: status === 'running' ? 0.7 : 1 }}>
-            {status === 'idle' ? 'Load test data' : status === 'running' ? 'Running...' : status === 'done' ? 'Done' : 'Error'}
+            {status === 'idle' ? 'Load test data' : status === 'running' ? 'Running…' : status === 'done' ? 'Done' : 'Error'}
           </button>
         </div>
         {log && <pre ref={logRef} style={{ margin: 0, padding: '10px 12px', background: '#111', color: '#4CAF50', fontSize: 11, borderRadius: 7, maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{log}</pre>}
-        {status === 'done' && <div style={{ marginTop: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>Reload the page and switch tabs to see your data.</div>}
+        {status === 'done' && <div style={{ marginTop: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>Reload the page to see your data.</div>}
       </div>
     </div>
   );
 }
 
+// ── Integration definitions ───────────────────────────────────────────────────
 const INTEGRATIONS = [
   {
-    id: 'hubspot', name: 'HubSpot', category: 'CRM', logo: <Database size={22} color="#FF7A59" />, color: '#FF7A59',
-    description: 'Your deal pipeline, contacts, lifecycle stages, and revenue data. The foundation everything else builds on.',
-    unlocks: ['Pipeline health score', 'Funnel analysis', 'Lead scoring', 'Stage aging', 'Source quality'],
+    id: 'hubspot', name: 'HubSpot CRM', category: 'CRM',
+    logo: <HubSpotLogo />,
+    description: 'Your deal pipeline, contacts, lifecycle stages, and revenue data.',
+    unlocks: ['Pipeline health score', 'Funnel analysis', 'Stage aging', 'Lead scoring'],
     getStatus: async () => { const s = await api.authStatus(); return s.connected ? 'connected' : 'disconnected'; },
   },
   {
-    id: 'ga4', name: 'Google Analytics 4', category: 'Analytics', logo: <BarChart2 size={22} color="#4285F4" />, color: '#4285F4',
-    description: 'Website traffic by channel — see which pages and campaigns actually generate pipeline.',
-    unlocks: ['Traffic → Lead conversion', 'Sessions and users by channel', 'Which campaigns drive pipeline'],
+    id: 'ga4', name: 'Google Analytics 4', category: 'Analytics',
+    logo: <GA4Logo />,
+    description: 'Website traffic by channel — sessions, users, and which campaigns drive pipeline.',
+    unlocks: ['Traffic → Lead conversion', 'Sessions by channel', 'Campaign attribution'],
     connectUrl: '/ga4/connect',
     getStatus: async () => { const s = await api.ga4Status(); return s.connected ? 'connected' : 'available'; },
   },
   {
-    id: 'search-console', name: 'Google Search Console', category: 'SEO', logo: <Search size={22} color="#34A853" />, color: '#34A853',
-    description: 'Search impressions, clicks, and top queries — the very top of your acquisition funnel.',
-    unlocks: ['Real impressions on the Marketing funnel', 'Top search queries driving traffic', 'Clicks and CTR by query'],
+    id: 'search-console', name: 'Google Search Console', category: 'SEO',
+    logo: <SearchConsoleLogo />,
+    description: 'Search impressions, clicks, and top queries at the top of your acquisition funnel.',
+    unlocks: ['Impression data on Marketing funnel', 'Top queries driving traffic', 'CTR by search term'],
     connectUrl: '/gsc/connect',
     getStatus: async () => { const s = await api.gscStatus(); return s.connected ? 'connected' : 'available'; },
   },
   {
-    id: 'google-ads', name: 'Google Ads', category: 'Paid Media', logo: <Target size={22} color="#FBBC04" />, color: '#FBBC04',
+    id: 'google-ads', name: 'Google Ads', category: 'Paid Media',
+    logo: <GoogleAdsLogo />,
     description: 'Which ad campaigns and keywords generate closed deals, not just clicks.',
-    unlocks: ['Cost per lead by campaign', 'Cost per acquisition by keyword', 'ROAS from actual closed revenue'],
+    unlocks: ['Cost per lead by campaign', 'True ROAS from closed revenue', 'Keyword → win rate'],
     comingSoon: true,
   },
   {
-    id: 'meta-ads', name: 'Meta Ads', category: 'Paid Media', logo: <Share2 size={22} color="#1877F2" />, color: '#1877F2',
-    description: 'Facebook and Instagram ad performance mapped all the way to pipeline outcomes.',
+    id: 'meta-ads', name: 'Meta Ads', category: 'Paid Media',
+    logo: <MetaLogo />,
+    description: 'Facebook and Instagram ad performance mapped to real pipeline outcomes.',
     unlocks: ['Which campaigns close deals', 'Cost per acquisition by ad set', 'Audience quality by win rate'],
     comingSoon: true,
   },
   {
-    id: 'stripe', name: 'Stripe', category: 'Revenue', logo: <CreditCard size={22} color="#635BFF" />, color: '#635BFF',
+    id: 'stripe', name: 'Stripe', category: 'Revenue',
+    logo: <StripeLogo />,
     description: 'Verify actual revenue against HubSpot deal amounts and track real MRR.',
-    unlocks: ['Actual revenue vs HubSpot estimates', 'MRR and ARR trend', 'True customer LTV', 'Payment failure signals'],
+    unlocks: ['Actual revenue vs HubSpot estimates', 'MRR and ARR trend', 'True customer LTV'],
     comingSoon: true,
   },
   {
-    id: 'quickbooks', name: 'QuickBooks Online', category: 'Revenue', logo: <BookOpen size={22} color="#2CA01C" />, color: '#2CA01C',
-    description: 'Connect your accounting data for verified revenue and true customer value.',
-    unlocks: ['Actual invoiced and paid revenue', 'True LTV by source', 'Revenue vs pipeline accuracy'],
+    id: 'quickbooks', name: 'QuickBooks Online', category: 'Revenue',
+    logo: <QuickBooksLogo />,
+    description: 'Connect accounting data for verified revenue and true customer value.',
+    unlocks: ['Invoiced and paid revenue', 'True LTV by source', 'Revenue vs pipeline accuracy'],
     comingSoon: true,
   },
   {
-    id: 'xero', name: 'Xero', category: 'Revenue', logo: <Globe size={22} color="#00B4D8" />, color: '#00B4D8',
+    id: 'xero', name: 'Xero', category: 'Revenue',
+    logo: <XeroLogo />,
     description: 'Accounting integration for verified revenue data across your pipeline.',
-    unlocks: ['Actual revenue vs HubSpot deal values', 'Customer payment history', 'Invoice to close time by source'],
+    unlocks: ['Revenue vs HubSpot deal values', 'Customer payment history', 'Invoice to close time'],
     comingSoon: true,
   },
   {
-    id: 'slack', name: 'Slack', category: 'Notifications', logo: <Bell size={22} color="#4A154B" />, color: '#4A154B',
+    id: 'slack', name: 'Slack', category: 'Notifications',
+    logo: <SlackLogo />,
     description: 'Weekly pipeline digest and critical alerts delivered straight to your team.',
-    unlocks: ['Weekly health score digest', 'Alert when leads go 24h uncontacted', 'At-risk deal notifications'],
+    unlocks: ['Weekly health score digest', 'Uncontacted lead alerts', 'At-risk deal notifications'],
     comingSoon: true,
   },
 ];
 
+// ── Card ──────────────────────────────────────────────────────────────────────
+function IntegrationCard({ integration, status }) {
+  const isConnected = status === 'connected';
+  const isSoon = status === 'soon' || integration.comingSoon;
+  const isAvailable = status === 'available' || status === 'disconnected' || status === 'error';
+  const BASE = process.env.REACT_APP_API_URL || '';
+
+  return (
+    <div style={{
+      background: '#fff',
+      border: `1px solid ${isConnected ? '#BBF7D0' : '#E5E7EB'}`,
+      borderRadius: 14,
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12,
+      opacity: isSoon ? 0.65 : 1,
+      transition: 'box-shadow .15s, transform .15s',
+      position: 'relative',
+      overflow: 'hidden',
+    }}
+      onMouseEnter={e => { if (!isSoon) { e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+    >
+      {/* Connected stripe */}
+      {isConnected && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #059669, #2EBF9A)' }} />}
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {integration.logo}
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 2 }}>{integration.name}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#888', background: '#F3F4F6', borderRadius: 5, padding: '2px 7px', display: 'inline-block' }}>{integration.category}</div>
+          </div>
+        </div>
+        {isConnected && (
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 8, background: '#ECFDF5', color: '#059669', border: '1px solid #BBF7D0', flexShrink: 0 }}>Connected</span>
+        )}
+        {isSoon && (
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 8, background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A', flexShrink: 0 }}>Coming soon</span>
+        )}
+      </div>
+
+      {/* Description */}
+      <p style={{ fontSize: 13, color: '#555', lineHeight: 1.55, margin: 0 }}>{integration.description}</p>
+
+      {/* Unlocks */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {integration.unlocks.map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <span style={{ fontSize: 11, color: isConnected ? '#059669' : '#CBD6E2', flexShrink: 0 }}>✓</span>
+            <span style={{ fontSize: 12, color: isConnected ? '#374151' : '#9CA3AF' }}>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      {isAvailable && integration.connectUrl && (
+        <a href={`${BASE}${integration.connectUrl}`}
+          style={{ display: 'block', textAlign: 'center', padding: '9px', borderRadius: 8, background: '#111', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', marginTop: 'auto' }}>
+          Connect →
+        </a>
+      )}
+      {status === 'error' && integration.connectUrl && (
+        <a href={`${BASE}${integration.connectUrl}`}
+          style={{ display: 'block', textAlign: 'center', padding: '9px', borderRadius: 8, background: '#FEF2F2', color: '#DC2626', fontSize: 12, fontWeight: 700, textDecoration: 'none', border: '1px solid #FECACA', marginTop: 'auto' }}>
+          Reconnect →
+        </a>
+      )}
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function Integrations() {
   const [statuses, setStatuses] = useState({});
 
@@ -115,121 +288,49 @@ export default function Integrations() {
           setStatuses(prev => ({ ...prev, [integration.id]: 'error' }));
         }
       } else {
-        setStatuses(prev => ({ ...prev, [integration.id]: integration.comingSoon ? 'soon' : 'available' }));
+        setStatuses(prev => ({ ...prev, [integration.id]: 'soon' }));
       }
     });
   }, []);
 
   const connected = INTEGRATIONS.filter(i => statuses[i.id] === 'connected');
-  const available = INTEGRATIONS.filter(i => statuses[i.id] === 'available' || statuses[i.id] === 'disconnected' || statuses[i.id] === 'error' || statuses[i.id] === 'loading');
-  const soon = INTEGRATIONS.filter(i => statuses[i.id] === 'soon' || i.comingSoon);
+  const available = INTEGRATIONS.filter(i => ['available', 'disconnected', 'error'].includes(statuses[i.id]));
+  const soon = INTEGRATIONS.filter(i => statuses[i.id] === 'soon' || (i.comingSoon && !statuses[i.id]));
 
-  const IntegrationCard = ({ integration, status, showConnect = false }) => {
-    const isConnected = status === 'connected';
-    return (
-      <div style={{ background: '#fff', border: `1px solid ${isConnected ? '#BBF7D0' : '#E2E5EA'}`, borderRadius: 12, padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: `${integration.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
-            {integration.logo}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>{integration.name}</div>
-              {isConnected && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: '#ECFDF5', color: '#059669', border: '1px solid #BBF7D0' }}>Connected</span>}
-              {status === 'error' && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: '#FEF2F2', color: '#DC2626' }}>Error</span>}
-            </div>
-            <div style={{ fontSize: 12, color: '#666', lineHeight: 1.5 }}>{integration.description}</div>
-          </div>
-        </div>
+  const Grid = ({ items }) => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
+      {items.map(i => <IntegrationCard key={i.id} integration={i} status={statuses[i.id]} />)}
+    </div>
+  );
 
-        {/* Unlocks */}
-        <div style={{ background: isConnected ? '#F0FDF4' : '#F7F8FA', borderRadius: 8, padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: isConnected ? '#059669' : '#aaa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
-            {isConnected ? 'Unlocked' : 'Unlocks'}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {integration.unlocks.map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 7 }}>
-                <span style={{ color: isConnected ? '#059669' : '#ccc', fontSize: 12, flexShrink: 0, marginTop: 1 }}>{isConnected ? '✓' : '○'}</span>
-                <span style={{ fontSize: 12, color: isConnected ? '#333' : '#999' }}>{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        {showConnect && integration.connectUrl && !isConnected && (
-          <a href={`${process.env.REACT_APP_API_URL || ''}${integration.connectUrl}`}
-            style={{ display: 'block', textAlign: 'center', padding: '10px', borderRadius: 8, background: '#111', color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-            Connect {integration.name} →
-          </a>
-        )}
-        {status === 'disconnected' && integration.connectUrl && (
-          <a href={`${process.env.REACT_APP_API_URL || ''}${integration.connectUrl}`}
-            style={{ display: 'block', textAlign: 'center', padding: '10px', borderRadius: 8, background: '#fff', color: '#111', fontSize: 13, fontWeight: 700, textDecoration: 'none', border: '1px solid #E2E5EA' }}>
-            Reconnect →
-          </a>
-        )}
-      </div>
-    );
-  };
+  const SectionLabel = ({ color, children }) => (
+    <div style={{ fontSize: 10, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{children}</div>
+  );
 
   return (
     <div>
-      {/* Intro */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, color: '#666', lineHeight: 1.7, maxWidth: 600 }}>
-          Every connection unlocks more of your revenue picture. HubSpot alone gives you pipeline health — add your ad platforms and you get cost-per-acquisition, add accounting tools and you get verified revenue.
-        </div>
-      </div>
+      <p style={{ fontSize: 13, color: '#666', lineHeight: 1.7, maxWidth: 600, marginBottom: 28 }}>
+        Every connection unlocks more of your revenue picture. HubSpot alone gives you pipeline health — add ad platforms for cost-per-acquisition, add accounting tools for verified revenue.
+      </p>
 
-      {/* Connected */}
       {connected.length > 0 && (
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-            ✓ Connected ({connected.length})
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-            {connected.map(i => <IntegrationCard key={i.id} integration={i} status={statuses[i.id]} />)}
-          </div>
+        <div style={{ marginBottom: 32 }}>
+          <SectionLabel color="#059669">Connected ({connected.length})</SectionLabel>
+          <Grid items={connected} />
         </div>
       )}
 
-      {/* Available to connect */}
       {available.length > 0 && (
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-            Available to connect
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-            {available.map(i => <IntegrationCard key={i.id} integration={i} status={statuses[i.id]} showConnect />)}
-          </div>
+        <div style={{ marginBottom: 32 }}>
+          <SectionLabel color="#1B72C7">Available to connect</SectionLabel>
+          <Grid items={available} />
         </div>
       )}
 
-      {/* Coming soon */}
       {soon.length > 0 && (
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-            Coming soon
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-            {soon.map(integration => (
-              <div key={integration.id} style={{ background: '#fff', border: '1px solid #F3F4F6', borderRadius: 12, padding: '20px', opacity: 0.6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `${integration.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
-                    {integration.logo}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 2 }}>{integration.name}</div>
-                    <div style={{ fontSize: 12, color: '#999', lineHeight: 1.5 }}>{integration.description}</div>
-                  </div>
-                </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#D97706', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '5px 10px', display: 'inline-block' }}>Coming soon</div>
-              </div>
-            ))}
-          </div>
+        <div style={{ marginBottom: 32 }}>
+          <SectionLabel color="#9CA3AF">Coming soon</SectionLabel>
+          <Grid items={soon} />
         </div>
       )}
 

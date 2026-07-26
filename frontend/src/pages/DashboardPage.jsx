@@ -77,8 +77,14 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
       {/* Logo */}
       <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>
-            <img src="/el-pipeador.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} onError={e => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '🤼'; }} />
+          <div style={{ width: 32, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="32" height="32" viewBox="0 0 100 98" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7"/>
+              <polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/>
+              <polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/>
+              <polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity="0.7"/>
+              <circle cx="50" cy="87" r="7" fill="#E8562A"/>
+            </svg>
           </div>
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, color: '#FFFFFF', letterSpacing: '-0.3px', lineHeight: 1.2, fontFamily: 'Fraunces, Georgia, serif' }}>PipeChamp</div>
