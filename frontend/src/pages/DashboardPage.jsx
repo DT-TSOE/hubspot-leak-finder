@@ -362,7 +362,13 @@ export default function DashboardPage({ onDisconnect }) {
       <div style={{ marginLeft: SIDEBAR_W, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <TopBar section={section} loading={loading} onRefresh={() => loadMain(days)} insightsData={insightsData} />
 
-        <main style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px' }}>
+        {section === 'integrations' && (
+          <div style={{ padding: '20px 28px 100px' }}>
+            <Integrations />
+          </div>
+        )}
+
+        <main style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px', display: section === 'integrations' ? 'none' : undefined }}>
 
           <ContentDateBar section={section} days={days} onDays={handleDays} onLockedDays={() => setShowUpgrade(true)} />
 
@@ -498,14 +504,6 @@ export default function DashboardPage({ onDisconnect }) {
         </main>
       </div>
 
-      {/* INTEGRATIONS - outside funnelData gate so it always renders */}
-      {section === 'integrations' && (
-        <div style={{ marginLeft: SIDEBAR_W, flex: 1 }}>
-          <div style={{ maxWidth: 960, width: '100%', margin: '0 auto', padding: '20px 24px 100px' }}>
-            <Integrations />
-          </div>
-        </div>
-      )}
 
       {/* Floating PipeCoach button on all sections except ask-coach */}
       {section !== 'ask-coach' && (
