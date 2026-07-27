@@ -74,9 +74,9 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
   return (
     <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
-      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <button onClick={() => onSection('dashboard')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'block' }}>
-          <img src="/logos/logo-horizontal-all-navy.png" alt="PipeChamp" style={{ height: 52, filter: 'brightness(0) invert(1)', display: 'block' }} />
+      <div style={{ padding: '12px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <button onClick={() => onSection('dashboard')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'block', width: '100%' }}>
+          <img src="/logos/logo-horizontal-all-navy.png" alt="PipeChamp" style={{ width: '100%', height: 'auto', filter: 'brightness(0) invert(1)', display: 'block' }} />
         </button>
       </div>
 
