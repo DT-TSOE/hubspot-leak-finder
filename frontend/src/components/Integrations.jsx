@@ -1,93 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
 
-// ── Real brand logos ──────────────────────────────────────────────────────────
-const HubSpotLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <circle cx="30" cy="30" r="30" fill="#FF7A59"/>
-    <path d="M34.5 22.5v-4.2a3.3 3.3 0 0 0 1.9-3 3.3 3.3 0 0 0-3.3-3.3 3.3 3.3 0 0 0-3.3 3.3c0 1.3.8 2.5 1.9 3v4.2a9.4 9.4 0 0 0-4.4 1.9l-11.5-9a3.7 3.7 0 0 0 .1-.9 3.7 3.7 0 1 0-3.7 3.7c.7 0 1.3-.2 1.9-.5l11.3 8.8a9.4 9.4 0 0 0-1.4 5 9.4 9.4 0 0 0 4 7.6l-3 3a2.7 2.7 0 0 0-.8-.1 2.7 2.7 0 1 0 2.7 2.7 2.7 2.7 0 0 0-.1-.8l3-3a9.4 9.4 0 0 0 5.6 1.9 9.4 9.4 0 0 0 9.4-9.4 9.4 9.4 0 0 0-9.8-9.9zm.4 15.1a5.3 5.3 0 1 1 0-10.6 5.3 5.3 0 0 1 0 10.6z" fill="white"/>
-  </svg>
-);
-
-const GA4Logo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
-    <rect x="10" y="32" width="10" height="18" rx="3" fill="#F9AB00"/>
-    <rect x="25" y="20" width="10" height="30" rx="3" fill="#E37400"/>
-    <rect x="40" y="10" width="10" height="40" rx="3" fill="#4285F4"/>
-  </svg>
-);
-
-const SearchConsoleLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
-    <circle cx="27" cy="27" r="13" stroke="#4285F4" strokeWidth="5" fill="none"/>
-    <line x1="37" y1="37" x2="50" y2="50" stroke="#34A853" strokeWidth="5" strokeLinecap="round"/>
-    <circle cx="27" cy="27" r="7" fill="#FBBC04" opacity="0.4"/>
-    <circle cx="27" cy="27" r="3" fill="#EA4335"/>
-  </svg>
-);
-
-const GoogleAdsLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
-    <polygon points="30,8 56,52 4,52" fill="none" stroke="#FBBC04" strokeWidth="5"/>
-    <polygon points="30,8 56,52 4,52" fill="#FBBC04" opacity="0.1"/>
-    <circle cx="14" cy="46" r="7" fill="#4285F4"/>
-    <circle cx="46" cy="46" r="7" fill="#34A853"/>
-    <circle cx="30" cy="14" r="7" fill="#EA4335"/>
-  </svg>
-);
-
-const MetaLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#1877F2"/>
-    <path d="M10 30c0-7 4-13 10-13 4 0 7 3 10 8 3-5 6-8 10-8 6 0 10 6 10 13 0 5-2 9-5 11l-5-7c2-1 3-3 3-4 0-3-1-5-3-5s-4 2-6 8l3 5h-6l-3-5c-2-6-4-8-6-8-2 0-3 2-3 5 0 1 1 3 3 4l-5 7c-3-2-5-6-5-11z" fill="white"/>
-  </svg>
-);
-
-const StripeLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#635BFF"/>
-    <path d="M28 22c0-2 2-3 4-3 3 0 6 1 9 3l3-9c-3-2-8-3-12-3-8 0-14 5-14 12 0 12 16 10 16 16 0 2-2 3-5 3-4 0-8-1-12-4l-3 9c4 2 9 4 15 4 8 0 14-4 14-12 0-12-15-10-15-16z" fill="white"/>
-  </svg>
-);
-
-const QuickBooksLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#2CA01C"/>
-    <circle cx="23" cy="30" r="11" stroke="white" strokeWidth="4" fill="none"/>
-    <line x1="30" y1="37" x2="35" y2="43" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-    <line x1="33" y1="18" x2="33" y2="42" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-    <path d="M33 18 Q44 18 44 25 Q44 32 33 32" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M33 30 Q46 30 46 36 Q46 42 33 42" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const XeroLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#00B4D8"/>
-    <line x1="17" y1="17" x2="43" y2="43" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-    <line x1="43" y1="17" x2="17" y2="43" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-  </svg>
-);
-
-const SlackLogo = () => (
-  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-    <rect width="60" height="60" rx="12" fill="#F9F9F9"/>
-    <rect x="10" y="25" width="14" height="7" rx="3.5" fill="#E01E5A"/>
-    <rect x="10" y="18" width="7" height="14" rx="3.5" fill="#E01E5A"/>
-    <rect x="7" y="25" width="7" height="7" rx="3.5" fill="#E01E5A" opacity="0.5"/>
-    <rect x="36" y="28" width="14" height="7" rx="3.5" fill="#36C5F0"/>
-    <rect x="43" y="28" width="7" height="14" rx="3.5" fill="#36C5F0"/>
-    <rect x="43" y="35" width="7" height="7" rx="3.5" fill="#36C5F0" opacity="0.5"/>
-    <rect x="25" y="10" width="7" height="14" rx="3.5" fill="#2EB67D"/>
-    <rect x="25" y="10" width="14" height="7" rx="3.5" fill="#2EB67D"/>
-    <rect x="25" y="7" width="7" height="7" rx="3.5" fill="#2EB67D" opacity="0.5"/>
-    <rect x="28" y="36" width="7" height="14" rx="3.5" fill="#ECB22E"/>
-    <rect x="21" y="36" width="14" height="7" rx="3.5" fill="#ECB22E"/>
-    <rect x="28" y="43" width="7" height="7" rx="3.5" fill="#ECB22E" opacity="0.5"/>
-  </svg>
+// ── Brand logo badge — real logos via Simple Icons CDN ────────────────────────
+const LogoBadge = ({ slug, bg, size = 26 }) => (
+  <div style={{ background: bg, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+    <img
+      src={`https://cdn.simpleicons.org/${slug}/ffffff`}
+      width={size} height={size}
+      alt=""
+      style={{ display: 'block' }}
+      onError={e => { e.target.style.display = 'none'; }}
+    />
+  </div>
 );
 
 // ── Seed button (dev only) ────────────────────────────────────────────────────
@@ -136,14 +60,14 @@ function SeedButton() {
 const INTEGRATIONS = [
   {
     id: 'hubspot', name: 'HubSpot CRM', category: 'CRM',
-    logo: <HubSpotLogo />,
+    logo: <LogoBadge slug="hubspot" bg="#FF7A59" />,
     description: 'Your deal pipeline, contacts, lifecycle stages, and revenue data.',
     unlocks: ['Pipeline health score', 'Funnel analysis', 'Stage aging', 'Lead scoring'],
     getStatus: async () => { const s = await api.authStatus(); return s.connected ? 'connected' : 'disconnected'; },
   },
   {
     id: 'ga4', name: 'Google Analytics 4', category: 'Analytics',
-    logo: <GA4Logo />,
+    logo: <LogoBadge slug="googleanalytics" bg="#E37400" />,
     description: 'Website traffic by channel — sessions, users, and which campaigns drive pipeline.',
     unlocks: ['Traffic → Lead conversion', 'Sessions by channel', 'Campaign attribution'],
     connectUrl: '/ga4/connect',
@@ -151,7 +75,7 @@ const INTEGRATIONS = [
   },
   {
     id: 'search-console', name: 'Google Search Console', category: 'SEO',
-    logo: <SearchConsoleLogo />,
+    logo: <LogoBadge slug="googlesearchconsole" bg="#458CF5" />,
     description: 'Search impressions, clicks, and top queries at the top of your acquisition funnel.',
     unlocks: ['Impression data on Marketing funnel', 'Top queries driving traffic', 'CTR by search term'],
     connectUrl: '/gsc/connect',
@@ -159,42 +83,42 @@ const INTEGRATIONS = [
   },
   {
     id: 'google-ads', name: 'Google Ads', category: 'Paid Media',
-    logo: <GoogleAdsLogo />,
+    logo: <LogoBadge slug="googleads" bg="#4285F4" />,
     description: 'Which ad campaigns and keywords generate closed deals, not just clicks.',
     unlocks: ['Cost per lead by campaign', 'True ROAS from closed revenue', 'Keyword → win rate'],
     comingSoon: true,
   },
   {
     id: 'meta-ads', name: 'Meta Ads', category: 'Paid Media',
-    logo: <MetaLogo />,
+    logo: <LogoBadge slug="meta" bg="#0082FB" />,
     description: 'Facebook and Instagram ad performance mapped to real pipeline outcomes.',
     unlocks: ['Which campaigns close deals', 'Cost per acquisition by ad set', 'Audience quality by win rate'],
     comingSoon: true,
   },
   {
     id: 'stripe', name: 'Stripe', category: 'Revenue',
-    logo: <StripeLogo />,
+    logo: <LogoBadge slug="stripe" bg="#635BFF" />,
     description: 'Verify actual revenue against HubSpot deal amounts and track real MRR.',
     unlocks: ['Actual revenue vs HubSpot estimates', 'MRR and ARR trend', 'True customer LTV'],
     comingSoon: true,
   },
   {
     id: 'quickbooks', name: 'QuickBooks Online', category: 'Revenue',
-    logo: <QuickBooksLogo />,
+    logo: <LogoBadge slug="quickbooks" bg="#2CA01C" />,
     description: 'Connect accounting data for verified revenue and true customer value.',
     unlocks: ['Invoiced and paid revenue', 'True LTV by source', 'Revenue vs pipeline accuracy'],
     comingSoon: true,
   },
   {
     id: 'xero', name: 'Xero', category: 'Revenue',
-    logo: <XeroLogo />,
+    logo: <LogoBadge slug="xero" bg="#13B5EA" />,
     description: 'Accounting integration for verified revenue data across your pipeline.',
     unlocks: ['Revenue vs HubSpot deal values', 'Customer payment history', 'Invoice to close time'],
     comingSoon: true,
   },
   {
     id: 'slack', name: 'Slack', category: 'Notifications',
-    logo: <SlackLogo />,
+    logo: <LogoBadge slug="slack" bg="#4A154B" />,
     description: 'Weekly pipeline digest and critical alerts delivered straight to your team.',
     unlocks: ['Weekly health score digest', 'Uncontacted lead alerts', 'At-risk deal notifications'],
     comingSoon: true,
