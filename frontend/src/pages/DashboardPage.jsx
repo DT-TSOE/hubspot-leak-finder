@@ -76,7 +76,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
       {/* Logo */}
       <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <div onClick={() => onSection('dashboard')} style={{ cursor: 'pointer', display: 'inline-block' }}>
-          <img src="/logos/logo-horizontal-white-on-navy.png" alt="PipeChamp" style={{ height: 56, width: 'auto', mixBlendMode: 'lighten', display: 'block' }} />
+          <img src="/logos/logo-horizontal-all-navy.png" alt="PipeChamp" style={{ height: 48, width: 'auto', filter: 'brightness(0) invert(1)', display: 'block' }} />
         </div>
       </div>
 
