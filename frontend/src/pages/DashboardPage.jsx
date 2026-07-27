@@ -75,8 +75,8 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
       <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <div onClick={() => onSection('dashboard')} style={{ cursor: 'pointer', overflow: 'hidden', height: 34, width: 182 }}>
-          <img src="/logos/logo-horizontal-all-navy.png" alt="PipeChamp" style={{ height: 184, width: 'auto', filter: 'brightness(0) invert(1)', display: 'block', marginTop: -69, marginLeft: -47 }} />
+        <div onClick={() => onSection('dashboard')} style={{ cursor: 'pointer', overflow: 'hidden', height: 26, width: 137 }}>
+          <img src="/logos/logo-horizontal-all-navy.png" alt="PipeChamp" style={{ height: 138, width: 'auto', filter: 'brightness(0) invert(1)', display: 'block', marginTop: -52, marginLeft: -35 }} />
         </div>
       </div>
 
@@ -116,7 +116,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
           style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
           <span style={{ fontSize: 14 }}>⚡</span>
           <span style={{ fontSize: 12, color: section === 'integrations' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
-          {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#1B72C7', display: 'inline-block', flexShrink: 0 }} />}
+          {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#E8562A', display: 'inline-block', flexShrink: 0 }} />}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
