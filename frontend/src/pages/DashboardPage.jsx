@@ -116,14 +116,14 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
           style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'integrations' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
           <span style={{ fontSize: 14 }}>⚡</span>
           <span style={{ fontSize: 12, color: section === 'integrations' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
-          {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', display: 'inline-block', flexShrink: 0 }} />}
+          {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#1B72C7', display: 'inline-block', flexShrink: 0 }} />}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
             {PLANS[plan]?.name || 'Free'}
           </span>
           {plan !== 'pro' && (
-            <button onClick={onUpgrade} style={{ fontSize: 11, fontWeight: 600, color: '#FF7A59', background: 'transparent', border: '1px solid #FF7A59', borderRadius: 5, padding: '3px 8px', cursor: 'pointer' }}>
+            <button onClick={onUpgrade} style={{ fontSize: 11, fontWeight: 600, color: '#2EBF9A', background: 'transparent', border: '1px solid rgba(46,191,154,0.5)', borderRadius: 5, padding: '3px 8px', cursor: 'pointer' }}>
               Upgrade
             </button>
           )}

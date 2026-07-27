@@ -269,7 +269,7 @@ function IntegrationCard({ integration, status }) {
       )}
       {status === 'error' && integration.connectUrl && (
         <a href={`${BASE}${integration.connectUrl}`}
-          style={{ display: 'block', textAlign: 'center', padding: '9px', borderRadius: 8, background: 'rgba(232,86,42,0.06)', color: '#C2410C', fontSize: 12, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(232,86,42,0.25)', marginTop: 'auto' }}>
+          style={{ display: 'block', textAlign: 'center', padding: '9px', borderRadius: 8, background: 'rgba(27,114,199,0.07)', color: '#1B72C7', fontSize: 12, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(27,114,199,0.25)', marginTop: 'auto' }}>
           Reconnect →
         </a>
       )}
