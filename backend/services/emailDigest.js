@@ -6,7 +6,7 @@
 
 const axios = require('axios');
 
-function buildEmailHTML(digest, appUrl = 'https://hubspot-leak-finder.vercel.app') {
+function buildEmailHTML(digest, appUrl = 'https://pipechamp.app') {
   const urgentHTML = digest.urgent.length > 0 ? `
     <div style="margin-bottom:24px;">
       <div style="font-size:13px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">
@@ -110,7 +110,7 @@ async function sendDigestEmail(toEmail, digest, appUrl) {
 
   try {
     const res = await axios.post('https://api.resend.com/emails', {
-      from: 'PipeChamp <alerts@pipechamp.io>',
+      from: 'PipeChamp <alerts@pipechamp.app>',
       to: toEmail,
       subject: digest.subject,
       html
