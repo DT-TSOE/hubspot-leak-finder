@@ -75,8 +75,15 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
     <aside style={{ position: 'fixed', top: 0, left: 0, width: SIDEBAR_W, height: '100vh', background: '#33475B', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
       {/* Logo */}
       <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <div onClick={() => onSection('dashboard')} style={{ cursor: 'pointer', overflow: 'hidden', height: 29 }}>
-          <img src="/logos/logo-horizontal-fullcolor.png" alt="PipeChamp" style={{ width: 200, height: 'auto', display: 'block', marginTop: -46 }} />
+        <div onClick={() => onSection('dashboard')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="22" height="28" viewBox="0 0 44 54" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <path d="M1 2C1 1.45 1.45 1 2 1H42C42.55 1 43 1.45 43 2V7L29 18H15L1 7V2Z" fill="#243A52"/>
+            <path d="M15 18H29L38 11V17L29 28H15L6 17V11L15 18Z" fill="#1B72C7"/>
+            <path d="M15 28H29L35 22V28L29 38H15L9 28V22L15 28Z" fill="#0091AE"/>
+            <path d="M15 38H29L31 34V39L26 46H18L13 39V34L15 38Z" fill="#2EBF9A"/>
+            <circle cx="22" cy="51" r="3" fill="#E8562A"/>
+          </svg>
+          <span style={{ color: '#fff', fontFamily: "Georgia,'Times New Roman',serif", fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', lineHeight: 1, whiteSpace: 'nowrap' }}>PipeChamp</span>
         </div>
       </div>
 
