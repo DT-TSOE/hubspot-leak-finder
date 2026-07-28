@@ -11,7 +11,18 @@ const isProd = process.env.NODE_ENV === 'production';
 
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
+const ALLOWED_ORIGINS = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'https://pipechamp.app',
+  'https://www.pipechamp.app',
+];
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) cb(null, true);
+    else cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '100kb' }));
 // cookie-session stores tokens in a signed cookie — survives Railway restarts/redeploys
 // with no external session store needed
