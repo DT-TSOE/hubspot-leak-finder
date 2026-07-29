@@ -246,7 +246,7 @@ export default function SpeedToLead({ days }) {
                     </div>
                     <div style={{ fontSize:11, color:'#666', flexShrink:0 }}>{fmtH(c.hours)} response</div>
                     <a href={c.hubspotUrl} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0 }}>Open →</a>
+                      style={{ fontSize:11, fontWeight:600, color:'#F77333', textDecoration:'none', flexShrink:0 }}>Open →</a>
                   </div>
                 ))}
                 {contactsByBucket[selectedBucket].length > 10 && (
@@ -312,7 +312,7 @@ export default function SpeedToLead({ days }) {
                   {fmtH(r.hoursSinceCreated)} ago
                 </div>
                 <a href={r.hubspotUrl} target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap' }}>
+                  style={{ fontSize:11, fontWeight:600, color:'#F77333', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap' }}>
                   Open in HubSpot →
                 </a>
               </div>

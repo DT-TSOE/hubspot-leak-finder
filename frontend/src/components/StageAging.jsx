@@ -220,7 +220,7 @@ export default function StageAging({ days }) {
                 <div style={{ fontSize:11, color:u.text, marginTop:3, lineHeight:1.5 }}>{r.action}</div>
               </div>
               <a href={r.hubspotUrl} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize:11, fontWeight:600, color:'#FF7A59', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap', marginTop:2 }}>
+                style={{ fontSize:11, fontWeight:600, color:'#F77333', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap', marginTop:2 }}>
                 Open →
               </a>
             </div>

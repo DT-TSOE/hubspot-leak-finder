@@ -12,7 +12,7 @@ const FunnelSVG = ({ size = 20 }) => (
     <polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/>
     <polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/>
     <polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity="0.7"/>
-    <circle cx="50" cy="87" r="7" fill="#E8562A"/>
+    <circle cx="50" cy="87" r="7" fill="#F77333"/>
   </svg>
 );
 
