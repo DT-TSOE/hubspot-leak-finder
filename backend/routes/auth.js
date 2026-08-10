@@ -3,7 +3,8 @@ const router = express.Router();
 const axios = require('axios');
 const HubSpotService = require('../services/hubspot');
 
-const SCOPES = ['crm.objects.contacts.read','crm.objects.contacts.write','crm.objects.deals.read','crm.objects.owners.read'].join(' ');
+// Read-only: PipeChamp only reads HubSpot data, never writes. Keep least-privilege for marketplace review.
+const SCOPES = ['crm.objects.contacts.read','crm.objects.deals.read','crm.objects.owners.read'].join(' ');
 
 router.get('/connect', (req, res) => {
   const params = new URLSearchParams({ client_id:process.env.HUBSPOT_CLIENT_ID, redirect_uri:process.env.HUBSPOT_REDIRECT_URI, scope:SCOPES, response_type:'code' });
