@@ -3,29 +3,30 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PipeChamp — Find where your HubSpot pipeline is leaking</title>
-<meta name="description" content="PipeChamp grades your HubSpot pipeline health and shows you exactly where revenue is leaking — win rate, stage conversion, speed to lead — in 60 seconds." />
+<title>PipeChamp: Find the leaks in your HubSpot sales funnel</title>
+<meta name="description" content="PipeChamp scores your HubSpot pipeline health and shows you exactly where revenue is leaking: win rate, stage conversion, speed to lead, in 30 seconds." />
 <link rel="canonical" href="https://pipechamp.app/" />
 <meta name="theme-color" content="#243A52" />
 
 <!-- Favicons -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
 <link rel="icon" href="/assets/favicon.ico" sizes="any" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png" />
-<link rel="apple-touch-icon" href="/assets/favicon-32.png" />
+<link rel="apple-touch-icon" href="/assets/favicon-180.png" />
 
 <!-- Open Graph / Twitter -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="PipeChamp" />
 <meta property="og:title" content="Find where your HubSpot pipeline is leaking" />
-<meta property="og:description" content="Connect HubSpot and get a pipeline health score in 60 seconds. Every drop-off, stuck deal, and slow follow-up, ranked by revenue impact." />
+<meta property="og:description" content="Connect HubSpot and get pipeline insights in 30 seconds. Every drop-off, stuck deal, and slow follow-up, ranked by revenue impact." />
 <meta property="og:url" content="https://pipechamp.app/" />
 <meta property="og:image" content="https://pipechamp.app/assets/og-card.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Find where your HubSpot pipeline is leaking" />
-<meta name="twitter:description" content="Connect HubSpot and get a pipeline health score in 60 seconds, ranked by revenue impact." />
+<meta name="twitter:description" content="Connect HubSpot and get pipeline insights in 30 seconds, ranked by revenue impact." />
 <meta name="twitter:image" content="https://pipechamp.app/assets/og-card.png" />
 
 <!-- Fonts -->
@@ -215,28 +216,69 @@
   .gain:hover { background: var(--bg2); }
   .gain:nth-child(3), .gain:nth-child(6) { border-right: none; }
   .gain:nth-child(4), .gain:nth-child(5), .gain:nth-child(6) { border-bottom: none; }
-  .gain-bar { width: 32px; height: 3px; background: var(--blue); border-radius: 2px; margin-bottom: 16px; }
-  .gain h3 { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -.01em; }
+  .gain-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .gain-icon svg { width: 21px; height: 21px; }
+  .gain:nth-child(1) .gain-icon { background: rgba(27,114,199,.12); color: var(--blue); }
+  .gain:nth-child(2) .gain-icon { background: rgba(0,145,174,.12); color: var(--teal); }
+  .gain:nth-child(3) .gain-icon { background: rgba(46,191,154,.15); color: #1f8f73; }
+  .gain:nth-child(4) .gain-icon { background: rgba(232,86,42,.12); color: var(--orange); }
+  .gain:nth-child(5) .gain-icon { background: rgba(27,114,199,.12); color: var(--blue); }
+  .gain:nth-child(6) .gain-icon { background: rgba(0,145,174,.12); color: var(--teal); }
+  .gain h3 { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 8px; letter-spacing: -.01em; }
   .gain p { font-size: 13px; color: var(--text2); line-height: 1.6; }
 
   /* HOW */
   .how { background: var(--bg2); }
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 48px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--card); }
-  .step { padding: 32px; }
-  .step:not(:last-child) { border-right: 1px solid var(--border); }
-  .step-n { font-size: 11px; font-weight: 800; color: var(--teal); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px; }
-  .step h3 { font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: var(--text); margin-bottom: 8px; }
-  .step p { font-size: 13px; color: var(--text2); line-height: 1.65; }
+  .timeline { display: flex; gap: 24px; margin-top: 60px; }
+  .tl-step { flex: 1; position: relative; }
+  .tl-step:not(:last-child)::after { content: ''; position: absolute; top: 27px; left: 62px; right: -24px; height: 2px; background: var(--border); z-index: 0; }
+  .tl-node { position: relative; z-index: 1; width: 54px; height: 54px; border-radius: 15px; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px -10px rgba(36,58,82,.55); }
+  .tl-node svg { width: 24px; height: 24px; }
+  .tl-n { font-size: 11px; font-weight: 800; color: var(--teal); letter-spacing: .1em; text-transform: uppercase; margin: 22px 0 6px; }
+  .tl-step h3 { font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: var(--text); margin-bottom: 8px; }
+  .tl-step p { font-size: 13px; color: var(--text2); line-height: 1.65; padding-right: 20px; }
 
   /* FEATURE DETAIL */
   .feature-detail { background: var(--bg); }
   .fd-row { display: flex; align-items: center; gap: 64px; flex-wrap: wrap; }
+  .fd-row + .fd-row { margin-top: 96px; }
+  .hl-dot { color: var(--orange); }
   .fd-copy { flex: 1; min-width: 260px; }
   .fd-copy h3 { font-size: 26px; font-weight: 800; letter-spacing: -.025em; color: var(--text); margin-bottom: 12px; }
   .fd-copy p { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
   .fd-points { display: flex; flex-direction: column; gap: 10px; }
   .fd-point { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text2); }
   .fd-point-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); flex-shrink: 0; margin-top: 6px; }
+  .fd-row--rev { flex-direction: row-reverse; }
+  .fd-visual { flex-shrink: 0; width: 400px; max-width: 100%; }
+  .fd-shot { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #fff; box-shadow: 0 28px 56px -26px rgba(16,24,40,.42); }
+  /* At-risk mock */
+  .risk-card { background: #fff; border: 1px solid #e8ebf0; border-radius: 14px; padding: 8px 18px; box-shadow: 0 28px 56px -26px rgba(16,24,40,.42); }
+  .risk-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f0f2f5; }
+  .risk-row:last-child { border-bottom: none; }
+  .risk-name { font-size: 13.5px; font-weight: 700; color: #111827; }
+  .risk-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .risk-val { font-size: 13.5px; font-weight: 800; color: #111827; text-align: right; font-variant-numeric: tabular-nums; }
+  .risk-chip { display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .risk-chip.hi { background: rgba(232,86,42,.12); color: #c0392b; }
+  .risk-chip.md { background: rgba(36,58,82,.08); color: #33475B; }
+  /* Integration chips */
+  .intg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .intg-chip { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 13.5px; font-weight: 600; color: var(--text); }
+  .intg-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mint); flex-shrink: 0; }
+  /* Funnel mockup panel */
+  .fnl { padding: 22px 22px 20px; }
+  .fnl-head { font-size: 13.5px; font-weight: 800; color: #0f1b2a; margin-bottom: 18px; letter-spacing: -.01em; }
+  .fnl-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; gap: 10px; }
+  .fnl-label { font-size: 13px; font-weight: 700; color: #111827; }
+  .fnl-val { font-size: 12px; color: #8a97a6; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fnl-val b { color: #111827; font-weight: 700; }
+  .fnl-track { height: 28px; background: #eef1f5; border-radius: 7px; overflow: hidden; }
+  .fnl-bar { height: 100%; border-radius: 7px; min-width: 8%; }
+  .fnl-drop { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 700; color: #a3b0bf; margin: 8px 0 12px; padding-left: 4px; }
+  .fnl-drop .amt { color: #5b6b7c; }
+  .fnl-drop.leak .amt { color: var(--orange); }
+  .fnl-flag { font-size: 9.5px; font-weight: 800; color: var(--orange); border: 1px solid rgba(232,86,42,.4); border-radius: 5px; padding: 2px 7px; }
 
   /* PRICING */
   .pricing { background: var(--bg2); }
@@ -301,7 +343,11 @@
     .laptop-wrap-sm { width: 100%; max-width: 400px; }
     .hero-visual { width: 100%; max-width: 480px; }
     .browser-mock { transform: none; }
-    .fd-row { flex-direction: column; }
+    .fd-row, .fd-row--rev { flex-direction: column; }
+    .timeline { flex-direction: column; gap: 26px; }
+    .tl-step:not(:last-child)::after { display: none; }
+    .fd-visual { width: 100%; }
+    .intg-grid { grid-template-columns: 1fr 1fr; }
     footer { padding: 40px 20px 32px; }
   }
 </style>
@@ -323,8 +369,8 @@
 <div class="hero">
   <div class="hero-copy">
     <div class="eyebrow">Pipeline Intelligence for HubSpot</div>
-    <h1>HubSpot shows you what's in your pipeline.<br><em>We tell you where it's leaking.</em></h1>
-    <p>Connect your HubSpot and get a pipeline health score in 60 seconds. Every drop-off, stuck deal, and slow follow-up, with a clear action ranked by revenue impact.</p>
+    <h1>HubSpot shows you what's in your pipeline<span class="hl-dot">.</span><br><em>We tell you where it's broken<span class="hl-dot">.</span></em></h1>
+    <p>Connect HubSpot and get pipeline insights in 30 seconds. Instantly see why your deals aren't closing and how to fix them.</p>
     <a href="https://pipechamp.app/connect" class="btn-primary">Start free trial</a>
     <div class="hero-sub">No credit card required. 14 days free. Read-only access.</div>
   </div>
@@ -332,10 +378,6 @@
   <!-- HERO VISUAL: real product screenshot in a browser frame -->
   <div class="hero-visual">
     <div class="browser-mock">
-      <div class="bm-bar">
-        <div class="bm-dots"><span></span><span></span><span></span></div>
-        <div class="bm-url">pipechamp.app/scorecard</div>
-      </div>
       <img class="bm-img" src="/assets/scorecard.png" alt="PipeChamp Scorecard dashboard: pipeline health score 37 out of 100, Marketing grade F, Sales grade C, goal pipeline value $877,738" />
     </div>
   </div>
@@ -345,8 +387,8 @@
 <div class="trust">
   <div class="trust-inner">
     <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Read-only HubSpot access</div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>60-second setup</div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>We never store your contacts</div>
+    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>30-second setup</div>
+    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>We never store your data</div>
     <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Cancel anytime</div>
   </div>
 </div>
@@ -355,7 +397,7 @@
 <section class="section pains" id="pains">
   <div class="inner">
     <div class="label">Sound familiar?</div>
-    <div class="title">HubSpot tells you your pipeline is full.<br>It does not tell you why you are missing quota.</div>
+    <div class="title">Your HubSpot pipeline looks full<span class="hl-dot">.</span><br>But your deals aren't closing<span class="hl-dot">.</span></div>
     <div class="pains-grid">
       <div class="pain-card"><p>I pull reports for an hour and still cannot explain to my CEO why we are behind.</p></div>
       <div class="pain-card"><p>Deals go quiet in the proposal stage and I only find out when they close lost.</p></div>
@@ -368,38 +410,38 @@
 <!-- GAINS -->
 <section class="section gains">
   <div class="inner">
-    <div class="label">What changes</div>
-    <div class="title">You stop guessing. You start fixing.</div>
+    <div class="label">Uncover the leaks</div>
+    <div class="title">Stop guessing, Start closing<span class="hl-dot">.</span></div>
     <div class="gains-grid">
       <div class="gain">
-        <div class="gain-bar"></div>
-        <h3>Know your score before your 9am standup</h3>
+        <div class="gain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></div>
+        <h3>Know where you stand before your 9am standup</h3>
         <p>A single A-F grade that tells you exactly how healthy your pipeline is right now, broken down by every dimension that matters.</p>
       </div>
       <div class="gain">
-        <div class="gain-bar" style="background:var(--teal)"></div>
+        <div class="gain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
         <h3>Catch dying deals two weeks earlier</h3>
         <p>Every deal in your pipeline gets a risk score. You see which ones are about to go dark before they actually do.</p>
       </div>
       <div class="gain">
-        <div class="gain-bar" style="background:var(--mint)"></div>
+        <div class="gain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
         <h3>Pinpoint the broken stage in your funnel</h3>
         <p>See exactly where leads stop moving forward. Is it lead to MQL? MQL to SQL? You will know in seconds.</p>
       </div>
       <div class="gain">
-        <div class="gain-bar" style="background:var(--orange)"></div>
+        <div class="gain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8" rx="1"/><rect x="12" y="6" width="3" height="12" rx="1"/><rect x="17" y="13" width="3" height="5" rx="1"/></svg></div>
         <h3>Walk into every QBR with hard numbers</h3>
         <p>Speed to lead, stage aging, win rates by source. Real data about your real process, not HubSpot default reports.</p>
       </div>
       <div class="gain">
-        <div class="gain-bar"></div>
+        <div class="gain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div>
         <h3>Know which sources actually close</h3>
         <p>Stop investing in channels that fill your pipeline and never convert. See which lead sources turn into revenue.</p>
       </div>
       <div class="gain">
-        <div class="gain-bar" style="background:var(--teal)"></div>
+        <div class="gain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
         <h3>Get a fix, not just a finding</h3>
-        <p>Every problem comes with a specific action ranked by estimated revenue impact. You know what to fix first.</p>
+        <p>Every problem comes with a specific action you can take in HubSpot to improve.</p>
       </div>
     </div>
   </div>
@@ -409,20 +451,23 @@
 <section class="section how" id="how">
   <div class="inner">
     <div class="label">How it works</div>
-    <div class="title">Three steps. Sixty seconds.</div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-n">Step 01</div>
+    <div class="title">Insights in 30 seconds<span class="hl-dot">.</span></div>
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="tl-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg></div>
+        <div class="tl-n">Step 01</div>
         <h3>Connect HubSpot</h3>
         <p>One click OAuth. Read-only access. We never write to your CRM, never store your contacts, and never share your data.</p>
       </div>
-      <div class="step">
-        <div class="step-n">Step 02</div>
-        <h3>Get your score</h3>
-        <p>Instant A-F pipeline health grade across six dimensions. See your overall score and exactly which areas are pulling it down.</p>
+      <div class="tl-step">
+        <div class="tl-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <div class="tl-n">Step 02</div>
+        <h3>Set your goals</h3>
+        <p>Immediately see what is holding you back from reaching your targets.</p>
       </div>
-      <div class="step">
-        <div class="step-n">Step 03</div>
+      <div class="tl-step">
+        <div class="tl-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div class="tl-n">Step 03</div>
         <h3>Fix the leaks</h3>
         <p>Specific actions ranked by revenue impact. Each finding includes what is happening, why it matters, and what to do about it.</p>
       </div>
@@ -433,72 +478,104 @@
 <!-- FEATURE DETAIL -->
 <section class="section feature-detail" id="features">
   <div class="inner">
+
+    <!-- Scorecard -->
     <div class="fd-row">
+      <div class="fd-copy">
+        <div class="label">Scorecard</div>
+        <h3>Know where you stand at a glance</h3>
+        <p>All the info you need in one place. No more digging through dashboards or building custom reports.</p>
+        <div class="fd-points">
+          <div class="fd-point"><div class="fd-point-dot"></div>Set your business targets and see what your pipeline could be worth</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Connect Google Analytics and your other data sources</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>See what your best deals and highest-value customers look like</div>
+        </div>
+      </div>
+      <div class="fd-visual">
+        <div class="fd-shot">
+          <img class="bm-img" src="/assets/scorecard.png" alt="PipeChamp Scorecard dashboard showing overall pipeline health, Marketing and Sales grades, and pipeline value" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Funnel Analysis -->
+    <div class="fd-row fd-row--rev">
       <div class="fd-copy">
         <div class="label">Funnel Analysis</div>
         <h3>See exactly where your leads stop converting</h3>
-        <p>Your funnel looks fine until you measure stage-by-stage conversion rates. Most pipelines have one broken stage responsible for the majority of lost revenue.</p>
+        <p>A breakdown of every stage of your funnel, so you can see exactly where deals are getting stuck or lost.</p>
         <div class="fd-points">
-          <div class="fd-point"><div class="fd-point-dot"></div>Marketing to lead, lead to MQL, MQL to SQL, SQL to close</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Marketing and Sales funnel breakdowns</div>
           <div class="fd-point"><div class="fd-point-dot"></div>Drop-off percentage and estimated revenue impact at each stage</div>
           <div class="fd-point"><div class="fd-point-dot"></div>Benchmarks against what a healthy pipeline looks like</div>
         </div>
       </div>
-      <div class="laptop-wrap-sm">
-        <div class="laptop">
-          <div class="laptop-screen">
-            <div class="laptop-notch"></div>
-            <div class="browser-chrome">
-              <div class="browser-dots"><span></span><span></span><span></span></div>
-              <div class="browser-url">pipechamp.app/marketing</div>
-            </div>
-            <div class="app-ui">
-              <div class="app-sidebar">
-                <div class="app-sidebar-logo">PipeChamp</div>
-                <div class="app-nav-item">Scorecard</div>
-                <div class="app-nav-item active">Marketing</div>
-                <div class="app-nav-item">Sales</div>
-                <div class="app-nav-item">Leads</div>
-                <div class="app-nav-item">Revenue</div>
-              </div>
-              <div class="app-main">
-                <div class="app-title">Funnel Drop-off</div>
-                <div class="mock-funnel">
-                  <div class="mock-funnel-row">
-                    <div class="mock-funnel-label">Impressions</div>
-                    <div class="mock-funnel-bar-wrap"><div class="mock-funnel-bar" style="width:100%;background:#1B72C7"><span class="mock-funnel-num">12,400</span></div></div>
-                  </div>
-                  <div class="mock-funnel-row">
-                    <div class="mock-funnel-label">Visitors</div>
-                    <div class="mock-funnel-bar-wrap"><div class="mock-funnel-bar" style="width:72%;background:#1B72C7"><span class="mock-funnel-num">8,900</span></div></div>
-                    <div class="mock-drop">-28%</div>
-                  </div>
-                  <div class="mock-funnel-row">
-                    <div class="mock-funnel-label">Leads</div>
-                    <div class="mock-funnel-bar-wrap"><div class="mock-funnel-bar" style="width:38%;background:#0091AE"><span class="mock-funnel-num">340</span></div></div>
-                    <div class="mock-drop">-96%</div>
-                  </div>
-                  <div class="mock-funnel-row">
-                    <div class="mock-funnel-label">MQL</div>
-                    <div class="mock-funnel-bar-wrap"><div class="mock-funnel-bar" style="width:22%;background:#0091AE"><span class="mock-funnel-num">120</span></div></div>
-                    <div class="mock-drop">-65%</div>
-                  </div>
-                  <div class="mock-funnel-row">
-                    <div class="mock-funnel-label">SQL</div>
-                    <div class="mock-funnel-bar-wrap"><div class="mock-funnel-bar" style="width:12%;background:#2EBF9A"><span class="mock-funnel-num">44</span></div></div>
-                    <div class="mock-drop">-63%</div>
-                  </div>
-                  <div class="mock-funnel-row">
-                    <div class="mock-funnel-label">Closed</div>
-                    <div class="mock-funnel-bar-wrap"><div class="mock-funnel-bar" style="width:6%;background:#2EBF9A"><span class="mock-funnel-num">17</span></div></div>
-                    <div class="mock-drop">-61%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <div class="fd-visual">
+        <div class="fd-shot fnl" role="img" aria-label="PipeChamp acquisition funnel fully connected: Impressions 3,494,820, Traffic 236,346, Lead 8,321, MQL 1,279, SQL 1,236, with the biggest leak between Lead and MQL">
+          <div class="fnl-head">Acquisition funnel</div>
+          <div class="fnl-stage">
+            <div class="fnl-top"><span class="fnl-label">Impressions</span><span class="fnl-val"><b>3,494,820</b></span></div>
+            <div class="fnl-track"><div class="fnl-bar" style="width:100%;background:#1B72C7"></div></div>
           </div>
-          <div class="laptop-base"></div>
-          <div class="laptop-foot"></div>
+          <div class="fnl-drop"><span>&darr;</span><span class="amt">93% drop-off</span><span>3.26M left</span></div>
+          <div class="fnl-stage">
+            <div class="fnl-top"><span class="fnl-label">Traffic</span><span class="fnl-val"><b>236,346</b></span></div>
+            <div class="fnl-track"><div class="fnl-bar" style="width:82%;background:#1B72C7"></div></div>
+          </div>
+          <div class="fnl-drop"><span>&darr;</span><span class="amt">96% drop-off</span><span>228K left</span></div>
+          <div class="fnl-stage">
+            <div class="fnl-top"><span class="fnl-label">Lead</span><span class="fnl-val"><b>8,321</b> contacts</span></div>
+            <div class="fnl-track"><div class="fnl-bar" style="width:58%;background:#1B72C7"></div></div>
+          </div>
+          <div class="fnl-drop leak"><span>&darr;</span><span class="amt">85% drop-off</span><span>7,042 left</span><span class="fnl-flag">Biggest leak</span></div>
+          <div class="fnl-stage">
+            <div class="fnl-top"><span class="fnl-label">MQL</span><span class="fnl-val"><b>1,279</b> &middot; 15.4% from Lead</span></div>
+            <div class="fnl-track"><div class="fnl-bar" style="width:32%;background:#0091AE"></div></div>
+          </div>
+          <div class="fnl-drop"><span>&darr;</span><span class="amt">3% drop-off</span><span>43 left</span></div>
+          <div class="fnl-stage">
+            <div class="fnl-top"><span class="fnl-label">SQL</span><span class="fnl-val"><b>1,236</b> &middot; 96.6% from MQL</span></div>
+            <div class="fnl-track"><div class="fnl-bar" style="width:28%;background:#2EBF9A"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deal Risk Analysis -->
+    <div class="fd-row">
+      <div class="fd-copy">
+        <div class="label">Deal Risk Analysis</div>
+        <h3>Save more deals</h3>
+        <p>Know exactly what risks kill your deals, and flag them before they happen.</p>
+        <div class="fd-points">
+          <div class="fd-point"><div class="fd-point-dot"></div>See how much revenue is at risk, and why</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Prioritize your sales activity</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Clean up your pipeline for more accurate insights</div>
+        </div>
+      </div>
+      <div class="fd-visual">
+        <div class="fd-shot">
+          <img class="bm-img" src="/assets/atrisk.png" alt="PipeChamp At Risk deal list: critical deals with days in stage, revenue at risk, and recommended next action" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Integrations -->
+    <div class="fd-row fd-row--rev">
+      <div class="fd-copy">
+        <div class="label">Integrations</div>
+        <h3>Connect PipeChamp into your workflow</h3>
+        <p>Plug in the tools you already use to get the full picture of your funnel and stay up to date.</p>
+        <div class="fd-points">
+          <div class="fd-point"><div class="fd-point-dot"></div>Google Analytics and Search Console for website and marketing data</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Meta and Google Ads to see how your spend is performing</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Stripe, QuickBooks, and Xero for true revenue impact</div>
+          <div class="fd-point"><div class="fd-point-dot"></div>Slack for pipeline updates, alerts, and notifications</div>
+        </div>
+      </div>
+      <div class="fd-visual">
+        <div class="fd-shot">
+          <img class="bm-img" src="/assets/integrations.png" alt="PipeChamp Integrations page: HubSpot CRM connected, Google Analytics and Search Console available to connect" />
         </div>
       </div>
     </div>
@@ -509,7 +586,7 @@
 <section class="section pricing" id="pricing">
   <div class="inner">
     <div class="label">Pricing</div>
-    <div class="title">Simple. No surprises.</div>
+    <div class="title">Simple<span class="hl-dot">.</span> No surprises<span class="hl-dot">.</span></div>
     <p class="sub">One plan, everything included. Start with a 14-day free trial, cancel anytime.</p>
     <div class="pricing-grid">
       <div class="price-card pro">
@@ -536,7 +613,7 @@
 <!-- BOTTOM CTA -->
 <section class="cta-bottom">
   <div class="inner">
-    <h2>See your pipeline score<br><em>in 60 seconds.</em></h2>
+    <h2>Unblock your pipeline<br><em>in 30 seconds<span class="hl-dot">.</span></em></h2>
     <p>Connect HubSpot. No credit card. No setup. Just answers.</p>
     <a href="https://pipechamp.app/connect" class="btn-primary" style="font-size:16px;padding:16px 36px;">Start free trial</a>
     <div class="cta-fine">Read-only access. We never store your contacts. Cancel anytime.</div>
