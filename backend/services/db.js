@@ -25,6 +25,18 @@ async function init() {
       UNIQUE (portal_id, period)
     );
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      portal_id TEXT PRIMARY KEY,
+      stripe_customer_id TEXT,
+      stripe_subscription_id TEXT,
+      plan TEXT,
+      status TEXT,
+      trial_end TIMESTAMPTZ,
+      current_period_end TIMESTAMPTZ,
+      updated_at TIMESTAMPTZ DEFAULT now()
+    );
+  `);
   ready = true;
 }
 
@@ -86,4 +98,33 @@ async function deletePortal(portalId) {
   } catch (e) { console.error('deletePortal error:', e.message); }
 }
 
-module.exports = { enabled, saveSnapshot, getPreviousSnapshot, getSnapshotHistory, currentPeriod, deletePortal };
+// ---- Subscriptions (Stripe billing) ----
+async function upsertSubscription(portalId, f) {
+  if (!pool || !portalId) return;
+  try {
+    await init();
+    await pool.query(
+      `INSERT INTO subscriptions (portal_id, stripe_customer_id, stripe_subscription_id, plan, status, trial_end, current_period_end, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7, now())
+       ON CONFLICT (portal_id) DO UPDATE SET
+         stripe_customer_id = COALESCE(EXCLUDED.stripe_customer_id, subscriptions.stripe_customer_id),
+         stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+         plan = EXCLUDED.plan, status = EXCLUDED.status,
+         trial_end = EXCLUDED.trial_end, current_period_end = EXCLUDED.current_period_end,
+         updated_at = now()`,
+      [String(portalId), f.stripe_customer_id || null, f.stripe_subscription_id || null,
+       f.plan || null, f.status || null, f.trial_end || null, f.current_period_end || null]
+    );
+  } catch (e) { console.error('upsertSubscription error:', e.message); }
+}
+
+async function getSubscription(portalId) {
+  if (!pool || !portalId) return null;
+  try {
+    await init();
+    const r = await pool.query(`SELECT * FROM subscriptions WHERE portal_id = $1`, [String(portalId)]);
+    return r.rows[0] || null;
+  } catch (e) { console.error('getSubscription error:', e.message); return null; }
+}
+
+module.exports = { enabled, saveSnapshot, getPreviousSnapshot, getSnapshotHistory, currentPeriod, deletePortal, upsertSubscription, getSubscription };

@@ -23,6 +23,8 @@ app.use(cors({
   },
   credentials: true,
 }));
+// Stripe webhook needs the RAW body for signature verification — register BEFORE express.json.
+app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), require('./routes/billing').webhookHandler);
 app.use(express.json({ limit: '100kb' }));
 // cookie-session stores tokens in a signed cookie — survives Railway restarts/redeploys
 // with no external session store needed
@@ -58,6 +60,7 @@ app.use('/api/reports', require('./routes/reports'));
 app.use('/ga4', require('./routes/ga4'));
 app.use('/gsc', require('./routes/gsc'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/billing', require('./routes/billing').router);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', env: isProd ? 'production' : 'development' }));
 app.use((err, req, res, next) => { console.error(err.stack); res.status(500).json({ error: 'Something went wrong.' }); });

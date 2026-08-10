@@ -1,15 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PLANS, setPlan, getCurrentPlan } from '../utils/plan';
 import { Lock } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function UpgradePrompt({ feature, requiredPlan = 'starter', inline = false, children }) {
   const plan = PLANS[requiredPlan];
+  const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = () => {
-    // TODO: Replace with Stripe checkout when billing is live
-    // For now simulate upgrade
-    setPlan(requiredPlan);
-    window.location.reload();
+  // Single paid plan (Pro $99/mo, 14-day trial) — send the user to Stripe Checkout.
+  const handleUpgrade = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const { url } = await api.billingCheckout();
+      if (url) window.location.href = url;
+      else throw new Error('no url');
+    } catch (e) {
+      setLoading(false);
+      alert('Could not start checkout. Please try again in a moment.');
+    }
   };
 
   if (inline) {
@@ -40,8 +49,8 @@ export default function UpgradePrompt({ feature, requiredPlan = 'starter', inlin
       {requiredPlan === 'starter' && (
         <div style={{ marginTop:16, paddingTop:14, borderTop:'1px solid #F3F4F6' }}>
           <div style={{ fontSize:11, color:'#999', marginBottom:8 }}>Or unlock everything with Pro</div>
-          <button onClick={() => { setPlan('pro'); window.location.reload(); }} style={{ fontSize:12, fontWeight:600, color:'#111', background:'transparent', border:'1px solid #E2E5EA', borderRadius:7, padding:'7px 16px', cursor:'pointer' }}>
-            Get Pro - $49/mo
+          <button onClick={handleUpgrade} disabled={loading} style={{ fontSize:12, fontWeight:600, color:'#111', background:'transparent', border:'1px solid #E2E5EA', borderRadius:7, padding:'7px 16px', cursor:'pointer' }}>
+            Get Pro - $99/mo
           </button>
         </div>
       )}
