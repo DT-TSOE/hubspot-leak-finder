@@ -12,7 +12,8 @@ async function requireAuth(req, res, next) {
       );
       req.session.tokens = { access_token:r.data.access_token, refresh_token:r.data.refresh_token, expires_at: Date.now() + (r.data.expires_in*1000) };
     } catch {
-      req.session.destroy();
+      // Refresh failed — tokens were revoked (user uninstalled the app in HubSpot) or expired.
+      req.session = null; // cookie-session: null clears it (there is no .destroy())
       return res.status(401).json({ error: 'Session expired. Please reconnect.' });
     }
   }

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const HubSpotService = require('../services/hubspot');
+const db = require('../services/db');
 
 // Read-only: PipeChamp only reads HubSpot data, never writes. Keep least-privilege for marketplace review.
 const SCOPES = ['crm.objects.contacts.read','crm.objects.deals.read','crm.objects.owners.read'].join(' ');
@@ -28,10 +29,29 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/status', (req, res) => res.json({ connected: !!req.session.tokens }));
-router.post('/disconnect', (req, res) => {
-  HubSpotService.invalidateCache(req.sessionOptions?.signed ? req.session['.sig'] : 'no-session');
-  req.session = null; // cookie-session: set to null to clear
-  res.json({ success: true });
+
+// Disconnect: revoke the token on HubSpot's side (so PipeChamp is removed from the
+// account's Connected Apps) and purge that portal's stored data. HubSpot has no
+// uninstall webhook — revoking the refresh token is the supported disconnect path.
+router.post('/disconnect', async (req, res) => {
+  const tokens = req.session?.tokens;
+  const sessionId = req.session?.id;
+  try {
+    if (tokens?.access_token) {
+      try {
+        const portalId = await new HubSpotService(tokens.access_token).getPortalId();
+        if (portalId) await db.deletePortal(portalId);
+      } catch { /* best-effort data purge */ }
+    }
+    if (tokens?.refresh_token) {
+      await axios.delete(`https://api.hubapi.com/oauth/v1/refresh-tokens/${tokens.refresh_token}`)
+        .catch(() => { /* already revoked / network — nothing to do */ });
+    }
+  } finally {
+    HubSpotService.invalidateCache(sessionId);
+    req.session = null;
+    res.json({ success: true });
+  }
 });
 
 module.exports = router;

@@ -77,4 +77,13 @@ async function getSnapshotHistory(portalId, limit = 12) {
   } catch (e) { console.error('getSnapshotHistory error:', e.message); return []; }
 }
 
-module.exports = { enabled, saveSnapshot, getPreviousSnapshot, getSnapshotHistory, currentPeriod };
+// Delete all stored data for a portal (called on disconnect/uninstall).
+async function deletePortal(portalId) {
+  if (!pool || !portalId) return;
+  try {
+    await init();
+    await pool.query(`DELETE FROM scorecard_snapshots WHERE portal_id = $1`, [String(portalId)]);
+  } catch (e) { console.error('deletePortal error:', e.message); }
+}
+
+module.exports = { enabled, saveSnapshot, getPreviousSnapshot, getSnapshotHistory, currentPeriod, deletePortal };
