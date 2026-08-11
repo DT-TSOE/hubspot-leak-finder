@@ -20,6 +20,7 @@ import DateRangePicker from '../components/DateRangePicker';
 import PipelineInsights from '../components/PipelineInsights';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
+import Account from '../components/Account';
 
 const SIDEBAR_W = 220;
 
@@ -49,7 +50,7 @@ const ALL_ITEMS = [
   ...NAV.filter(n => n.type === 'group').flatMap(g => g.items),
 ];
 
-const NO_DATE_SECTIONS = new Set(['ask-coach', 'integrations', 'exports', 'at-risk']);
+const NO_DATE_SECTIONS = new Set(['ask-coach', 'integrations', 'exports', 'at-risk', 'account']);
 
 function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connected, insightCount, atRiskCount, healthScore }) {
   const colors = { free: { bg: '#F3F4F6', text: '#555' }, starter: { bg: '#EFF6FF', text: '#1D4ED8' }, pro: { bg: '#ECFDF5', text: '#059669' } };
@@ -117,6 +118,11 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
           <span style={{ fontSize: 14 }}>⚡</span>
           <span style={{ fontSize: 12, color: section === 'integrations' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'integrations' ? 600 : 400 }}>Integrations</span>
           {!ga4Connected && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#E8562A', display: 'inline-block', flexShrink: 0 }} />}
+        </button>
+        <button onClick={() => onSection('account')}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'account' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
+          <span style={{ fontSize: 14 }}>⚙</span>
+          <span style={{ fontSize: 12, color: section === 'account' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'account' ? 600 : 400 }}>Account</span>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
@@ -217,7 +223,7 @@ function InsightFilters({ activeType, activeSeverity, onTypeChange, onSeverityCh
   );
 }
 
-const VALID_SECTIONS = new Set(['dashboard','growth-funnel','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations']);
+const VALID_SECTIONS = new Set(['dashboard','growth-funnel','at-risk','lead-sources','lead-response','revenue','exports','insights','ask-coach','integrations','account']);
 
 export default function DashboardPage({ onDisconnect }) {
   const [section, setSection] = useState(() => {
@@ -243,6 +249,12 @@ export default function DashboardPage({ onDisconnect }) {
 
   const features = getPlanFeatures();
   const plan = getCurrentPlan();
+
+  // Returning from Stripe Checkout -> land on Account and clean the URL.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('billing')) { setSection('account'); window.history.replaceState({}, '', '/account'); }
+  }, []);
 
   const loadMain = useCallback(async (d) => {
     setLoading(true); setError(null);
@@ -381,6 +393,8 @@ export default function DashboardPage({ onDisconnect }) {
 
           {/* DASHBOARD */}
           {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={navigateTo} onScoreLoad={setHealthScore} days={days} />}
+
+          {section === 'account' && <Account onDisconnect={handleDisconnect} />}
 
           {!loading && !error && funnelData && (
 
