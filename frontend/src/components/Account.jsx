@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api, connectUrl } from '../utils/api';
 
-const portalLabel = (c) => c.portalName || (c.portalId ? `Portal ${c.portalId}` : 'HubSpot');
+const portalLabel = (c) => c.portalName || (c.portalId ? `Account ${c.portalId}` : 'HubSpot');
 
 // Manage all connected HubSpot portals: switch active, disconnect one, add another.
 function HubSpotAccounts({ onDisconnect }) {

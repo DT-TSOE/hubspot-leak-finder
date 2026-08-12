@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { api, connectUrl } from '../utils/api';
 
-const label = (c) => c.portalName || (c.portalId ? `Portal ${c.portalId}` : 'HubSpot');
+const label = (c) => c.portalName || (c.portalId ? `Account ${c.portalId}` : 'HubSpot');
 
 // Header control: shows the active HubSpot portal and lets Pro users switch between
 // or add connected accounts. Free users see "Add account" locked with an upgrade nudge.
