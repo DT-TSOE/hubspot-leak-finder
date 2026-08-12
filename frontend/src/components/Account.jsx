@@ -103,6 +103,11 @@ export default function Account({ onDisconnect, onNavigate }) {
     if (onNavigate) onNavigate('dashboard');
   };
 
+  const goToSetup = () => {
+    try { sessionStorage.setItem('pc_open_onboarding', '1'); } catch { /* ignore */ }
+    if (onNavigate) onNavigate('dashboard');
+  };
+
   const statusLine = () => {
     if (!status || status.status === 'none') return 'No active subscription';
     if (status.status === 'trialing' && status.trialEnd) return `Free trial — ends ${fmt(status.trialEnd)}`;
@@ -153,6 +158,14 @@ export default function Account({ onDisconnect, onNavigate }) {
           Set your business targets so PipeChamp tunes your scorecard to what matters for your pipeline.
         </div>
         <button onClick={goToGoals} style={primaryBtn('#111827')}>Set your goals</button>
+      </div>
+
+      <div style={card}>
+        <div style={label}>Business setup</div>
+        <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, marginBottom: 16 }}>
+          Update the quick questions that tune your scorecard — your business type, which HubSpot hubs you run, and your primary goal.
+        </div>
+        <button onClick={goToSetup} style={primaryBtn('#111827')}>Update your setup</button>
       </div>
 
       <HubSpotAccounts onDisconnect={onDisconnect} />

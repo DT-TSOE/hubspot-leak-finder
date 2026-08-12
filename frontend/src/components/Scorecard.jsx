@@ -101,7 +101,7 @@ const GA4_PREVIEW_ROWS = [
   { label: 'Top traffic channel', value: 'Organic search' },
 ];
 
-function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, comparisons, showGa4Cta, onTabChange, goals }) {
+function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, comparisons, showGa4Cta, onTabChange, goals, onEditSetup, onConnectMarketing }) {
   const color = grade ? (GRADE_COLOR[grade] || '#ccc') : '#ccc';
   return (
     <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', position: 'relative', overflow: 'hidden' }}>
@@ -118,10 +118,24 @@ function FunnelCard({ title, subtitle, grade, dimensions, locked, unlockHint, co
         {dimensions.filter(d => !d.hidden).map(d => <DimensionRow key={d.key} dim={d} comparison={comparisons?.[d.key]} goal={goals?.[d.key]} />)}
       </div>
       {locked && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', background: 'rgba(255,255,255,.45)' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', background: 'rgba(255,255,255,.72)' }}>
           <div style={{ marginBottom: 6, display:'flex', justifyContent:'center' }}><Lock size={22} color="#111" /></div>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 4 }}>Your {title} grade is locked</div>
           <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, maxWidth: 260 }}>{unlockHint}</div>
+          {(onConnectMarketing || onEditSetup) && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {onConnectMarketing && (
+                <button onClick={onConnectMarketing} style={{ background: '#111', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,.18)' }}>
+                  Connect marketing tools →
+                </button>
+              )}
+              {onEditSetup && (
+                <button onClick={onEditSetup} style={{ background: '#fff', color: '#374151', border: '1px solid #E2E5EA', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  Update your setup
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
       {showGa4Cta && (
@@ -216,6 +230,7 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
   const [goals, setGoals] = useState({});
+  const [onboardingAnswers, setOnboardingAnswers] = useState({});
   const [interested, setInterested] = useState(false);
   const [showTriage, setShowTriage] = useState(false);
   const [triageContacts, setTriageContacts] = useState(null);
@@ -257,11 +272,17 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
-  // Opened from Settings -> "Set your goals": auto-open the goals dialog once data is ready.
+  useEffect(() => { api.getOnboarding().then(o => setOnboardingAnswers(o || {})).catch(() => {}); }, []);
+  // Opened from Settings -> "Set your goals" / "Update your setup": auto-open the
+  // matching dialog once data is ready.
   useEffect(() => {
     if (data && sessionStorage.getItem('pc_open_goals')) {
       sessionStorage.removeItem('pc_open_goals');
       if (data.personalized) setShowGoals(true); else setShowOnboarding(true);
+    }
+    if (data && sessionStorage.getItem('pc_open_onboarding')) {
+      sessionStorage.removeItem('pc_open_onboarding');
+      setShowOnboarding(true);
     }
   }, [data]);
 
@@ -540,11 +561,12 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
       {/* Marketing vs Sales funnel cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
         <FunnelCard title="Marketing" subtitle="Leads captured -> qualified" grade={marketing.grade} dimensions={marketing.dimensions}
-          locked={marketing.locked} unlockHint="You told us you run Sales Hub only. Add Marketing Hub (or update your setup) to grade lead generation and qualification."
-          comparisons={marketingComparisons} goals={marketingGoals} showGa4Cta={!marketing.locked} onTabChange={onTabChange} />
+          locked={marketing.locked} unlockHint="Connect your marketing tools, or update your setup if you run Marketing Hub, to grade lead generation and qualification."
+          comparisons={marketingComparisons} goals={marketingGoals} showGa4Cta={!marketing.locked} onTabChange={onTabChange}
+          onConnectMarketing={() => onTabChange?.('integrations')} onEditSetup={() => setShowOnboarding(true)} />
         <FunnelCard title="Sales" subtitle="Qualified lead -> closed deal" grade={sales.grade} dimensions={sales.dimensions}
-          locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub to grade deal conversion and win rate."
-          comparisons={salesComparisons} goals={goals} />
+          locked={sales.locked} unlockHint="You told us you run Marketing Hub only. Add Sales Hub, or update your setup, to grade deal conversion and win rate."
+          comparisons={salesComparisons} goals={goals} onEditSetup={() => setShowOnboarding(true)} />
       </div>
 
       {/* Gaps in your plan */}
@@ -636,8 +658,9 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
       {showOnboarding && (
         <Onboarding
+          initial={onboardingAnswers}
           onClose={() => { localStorage.setItem('pipechamp_onboard_dismissed', '1'); setShowOnboarding(false); }}
-          onComplete={() => { setShowOnboarding(false); setData(null); load(); setShowGoals(true); }}
+          onComplete={(a) => { setShowOnboarding(false); if (a) setOnboardingAnswers(a); setData(null); load(); }}
         />
       )}
       {showGoals && data && (
