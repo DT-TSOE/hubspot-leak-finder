@@ -5,6 +5,7 @@ import TrialGate from './pages/TrialGate';
 import FunnelLoader from './components/FunnelLoader';
 import { api } from './utils/api';
 import { REQUIRE_TRIAL } from './utils/plan';
+import { track, identifyPortal, resetAnalytics } from './utils/analytics';
 
 const ENTITLED = ['trialing', 'active', 'past_due'];
 const Loader = () => <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><FunnelLoader variant="seq" size="lg" /></div>;
@@ -15,10 +16,18 @@ export default function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('connected')) { window.history.replaceState({},''  ,'/'); setConnected(true); return; }
+    if (params.get('connected')) { track('hubspot_connected'); window.history.replaceState({},''  ,'/'); setConnected(true); return; }
     if (params.get('error')) window.history.replaceState({},'','/');
     api.authStatus().then(d => setConnected(d.connected)).catch(() => setConnected(false));
   }, []);
+
+  // Once connected, tie analytics + replays to the active HubSpot portal.
+  useEffect(() => {
+    if (!connected) return;
+    api.getConnections()
+      .then(d => { const a = d.connections?.find(c => c.active) || d.connections?.[0]; if (a?.portalId) identifyPortal(a.portalId, a.userEmail ? { email: a.userEmail } : {}); })
+      .catch(() => {});
+  }, [connected]);
 
   // Trial gate: once connected, require an active/trialing subscription to enter.
   useEffect(() => {
@@ -40,7 +49,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, [connected]);
 
-  const signOut = () => { api.disconnect(); setConnected(false); setEntitled(null); };
+  const signOut = () => { api.disconnect(); resetAnalytics(); setConnected(false); setEntitled(null); };
 
   if (connected === null) return <Loader />;
   if (!connected) return <ConnectPage />;

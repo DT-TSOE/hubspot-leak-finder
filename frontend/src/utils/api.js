@@ -1,3 +1,5 @@
+import { track } from './analytics';
+
 const BASE = process.env.REACT_APP_API_URL || '';
 
 // Convert a dateFilter value (null | number | {start,end}) to query params
@@ -37,7 +39,7 @@ export const api = {
   setActiveConnection: (portalId) => apiFetch('/auth/connections/active', {method:'POST', body:JSON.stringify({portalId})}),
   disconnectConnection: (portalId) => apiFetch(`/auth/connections/${encodeURIComponent(portalId)}/disconnect`, {method:'POST'}),
   billingStatus:    () => apiFetch('/billing/status'),
-  billingStartTrial:() => apiFetch('/billing/start-trial', {method:'POST'}),
+  billingStartTrial:() => apiFetch('/billing/start-trial', {method:'POST'}).then(r => { track('trial_started'); return r; }),
   billingCheckout:  () => apiFetch('/billing/checkout', {method:'POST'}),
   billingPortal:    () => apiFetch('/billing/portal', {method:'POST'}),
   getFunnel:       (f) => apiFetch(`/api/funnel${qs(dateParams(f))}`),
