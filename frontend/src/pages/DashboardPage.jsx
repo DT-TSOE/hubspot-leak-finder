@@ -122,7 +122,7 @@ function Sidebar({ section, onSection, plan, onUpgrade, onDisconnect, ga4Connect
         <button onClick={() => onSection('account')}
           style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px', border: 'none', background: section === 'account' ? 'rgba(0,145,174,0.18)' : 'transparent', cursor: 'pointer', borderRadius: 7, marginBottom: 8, textAlign: 'left' }}>
           <span style={{ fontSize: 14 }}>⚙</span>
-          <span style={{ fontSize: 12, color: section === 'account' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'account' ? 600 : 400 }}>Account</span>
+          <span style={{ fontSize: 12, color: section === 'account' ? '#FFFFFF' : 'rgba(255,255,255,0.72)', fontWeight: section === 'account' ? 600 : 400 }}>Settings</span>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
@@ -394,7 +394,7 @@ export default function DashboardPage({ onDisconnect }) {
           {/* DASHBOARD */}
           {section === 'dashboard' && <GmDashboard funnelData={funnelData} insightsData={insightsData} onTabChange={navigateTo} onScoreLoad={setHealthScore} days={days} />}
 
-          {section === 'account' && <Account onDisconnect={handleDisconnect} />}
+          {section === 'account' && <Account onDisconnect={handleDisconnect} onNavigate={navigateTo} />}
 
           {!loading && !error && funnelData && (
 

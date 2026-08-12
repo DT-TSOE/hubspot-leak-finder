@@ -257,6 +257,13 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { api.getGoals().then(g => setGoals(g || {})).catch(() => {}); }, []);
+  // Opened from Settings -> "Set your goals": auto-open the goals dialog once data is ready.
+  useEffect(() => {
+    if (data && sessionStorage.getItem('pc_open_goals')) {
+      sessionStorage.removeItem('pc_open_goals');
+      if (data.personalized) setShowGoals(true); else setShowOnboarding(true);
+    }
+  }, [data]);
 
   if (error) return <div style={{ background:'#F7F8FA', border:'1px solid #E2E5EA', borderRadius:10, padding:'14px 18px', color:'#555', marginBottom:14 }}>Couldn't build scorecard: {error}</div>;
   if (!data) return <div style={{ textAlign:'center', padding:'2.5rem', color:'#888', fontSize:14 }}>Calculating your pipeline health...</div>;

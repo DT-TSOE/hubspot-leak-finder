@@ -7,7 +7,7 @@ const label = { fontSize: 12, fontWeight: 700, color: '#6B7280', textTransform: 
 const primaryBtn = (bg) => ({ background: bg, color: '#fff', border: 'none', borderRadius: 9, padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer' });
 const ghostBtn = { background: 'transparent', border: '1px solid #E2E5EA', borderRadius: 9, padding: '11px 18px', fontSize: 14, fontWeight: 600, color: '#374151', cursor: 'pointer' };
 
-export default function Account({ onDisconnect }) {
+export default function Account({ onDisconnect, onNavigate }) {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
@@ -26,6 +26,11 @@ export default function Account({ onDisconnect }) {
     } catch { setBusy(''); alert('Something went wrong. Please try again in a moment.'); }
   };
 
+  const goToGoals = () => {
+    try { sessionStorage.setItem('pc_open_goals', '1'); } catch { /* ignore */ }
+    if (onNavigate) onNavigate('dashboard');
+  };
+
   const statusLine = () => {
     if (!status || status.status === 'none') return 'No active subscription';
     if (status.status === 'trialing' && status.trialEnd) return `Free trial — ends ${fmt(status.trialEnd)}`;
@@ -37,7 +42,7 @@ export default function Account({ onDisconnect }) {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <div style={{ fontSize: 22, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', marginBottom: 20 }}>Account</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', marginBottom: 20 }}>Settings</div>
 
       <div style={card}>
         <div style={label}>Plan &amp; Billing</div>
@@ -68,6 +73,14 @@ export default function Account({ onDisconnect }) {
             <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 14 }}>Secure checkout by Stripe &middot; Cancel anytime</div>
           </>
         )}
+      </div>
+
+      <div style={card}>
+        <div style={label}>Goals &amp; targets</div>
+        <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, marginBottom: 16 }}>
+          Set your business targets so PipeChamp tunes your scorecard to what matters for your pipeline.
+        </div>
+        <button onClick={goToGoals} style={primaryBtn('#111827')}>Set your goals</button>
       </div>
 
       <div style={card}>
