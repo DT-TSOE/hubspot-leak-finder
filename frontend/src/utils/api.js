@@ -28,9 +28,14 @@ async function apiDownload(path) {
   const a = document.createElement('a'); a.href=url; a.download=match?match[1]:'export'; a.click(); URL.revokeObjectURL(url);
 }
 
+export const connectUrl = () => `${BASE}/auth/connect`;
+
 export const api = {
   authStatus: () => apiFetch('/auth/status'),
   disconnect: () => apiFetch('/auth/disconnect', {method:'POST'}),
+  getConnections: () => apiFetch('/auth/connections'),
+  setActiveConnection: (portalId) => apiFetch('/auth/connections/active', {method:'POST', body:JSON.stringify({portalId})}),
+  disconnectConnection: (portalId) => apiFetch(`/auth/connections/${encodeURIComponent(portalId)}/disconnect`, {method:'POST'}),
   billingStatus:    () => apiFetch('/billing/status'),
   billingStartTrial:() => apiFetch('/billing/start-trial', {method:'POST'}),
   billingCheckout:  () => apiFetch('/billing/checkout', {method:'POST'}),

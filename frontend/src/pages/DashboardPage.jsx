@@ -18,6 +18,7 @@ import TourOverlay from '../components/TourOverlay';
 import IntegrationHint from '../components/IntegrationHint';
 import DateRangePicker from '../components/DateRangePicker';
 import PipelineInsights from '../components/PipelineInsights';
+import PortalSwitcher from '../components/PortalSwitcher';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 import Account from '../components/Account';
@@ -151,6 +152,7 @@ function TopBar({ section, loading, onRefresh, insightsData }) {
         {insightsData?.insights && <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 4 }}>{insightsData.insights.length} insights</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <PortalSwitcher />
         <NotificationBell />
         <button onClick={onRefresh} disabled={loading}
           style={{ padding: '5px 12px', borderRadius: 'var(--r-btn)', border: '1px solid var(--line)', background: 'var(--card)', fontSize: 11, cursor: 'pointer', color: 'var(--slate)' }}>
@@ -254,6 +256,11 @@ export default function DashboardPage({ onDisconnect }) {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     if (p.get('billing')) { setSection('account'); window.history.replaceState({}, '', '/account'); }
+    // Blocked from adding a 2nd HubSpot account on Free -> nudge to upgrade.
+    if (p.get('error') === 'upgrade_required') {
+      setShowUpgrade(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   const loadMain = useCallback(async (d) => {

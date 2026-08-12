@@ -1,5 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../utils/api';
+import { api, connectUrl } from '../utils/api';
+
+const portalLabel = (c) => c.portalName || (c.portalId ? `Portal ${c.portalId}` : 'HubSpot');
+
+// Manage all connected HubSpot portals: switch active, disconnect one, add another.
+function HubSpotAccounts({ onDisconnect }) {
+  const [data, setData] = useState(null);
+  const [busy, setBusy] = useState('');
+
+  const load = () => api.getConnections().then(setData).catch(() => setData(null));
+  useEffect(() => { load(); }, []);
+
+  const makeActive = async (portalId) => {
+    setBusy('active:' + portalId);
+    try { await api.setActiveConnection(portalId); window.location.reload(); }
+    catch { setBusy(''); alert('Could not switch account. Please try again.'); }
+  };
+
+  const removeOne = async (portalId, name) => {
+    if (!window.confirm(`Disconnect ${name}? PipeChamp will lose access to that portal.`)) return;
+    setBusy('remove:' + portalId);
+    try {
+      const r = await api.disconnectConnection(portalId);
+      if (r.remaining === 0) { onDisconnect(); return; } // last one removed -> full sign-out
+      if (data?.connections?.find(c => c.portalId === portalId)?.active) { window.location.reload(); return; }
+      await load(); setBusy('');
+    } catch { setBusy(''); alert('Could not disconnect. Please try again.'); }
+  };
+
+  const conns = data?.connections || [];
+
+  return (
+    <div style={card}>
+      <div style={label}>HubSpot accounts</div>
+      <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, marginBottom: 16 }}>
+        PipeChamp has <strong>read-only</strong> access and never writes to your CRM.
+      </div>
+
+      {conns.map(c => (
+        <div key={c.portalId} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderTop: '1px solid #F1F5F9' }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.active ? '#2EBF9A' : '#CBD5E1', flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {portalLabel(c)} {c.active && <span style={{ fontSize: 11, fontWeight: 700, color: '#2EBF9A', marginLeft: 4 }}>· Active</span>}
+            </div>
+            {c.userEmail && <div style={{ fontSize: 12, color: '#9CA3AF' }}>{c.userEmail}</div>}
+          </div>
+          {!c.active && <button onClick={() => makeActive(c.portalId)} disabled={!!busy} style={{ ...ghostBtn, padding: '7px 12px', fontSize: 13 }}>{busy === 'active:' + c.portalId ? '…' : 'Switch'}</button>}
+          <button onClick={() => removeOne(c.portalId, portalLabel(c))} disabled={!!busy} style={{ ...ghostBtn, padding: '7px 12px', fontSize: 13, color: '#B91C1C' }}>{busy === 'remove:' + c.portalId ? '…' : 'Disconnect'}</button>
+        </div>
+      ))}
+
+      <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 16, marginTop: 4 }}>
+        {data?.canAddMore ? (
+          <button onClick={() => { window.location.href = connectUrl(); }} style={primaryBtn('#E8562A')}>+ Add HubSpot account</button>
+        ) : (
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E', marginBottom: 3 }}>🔒 Connect multiple HubSpot accounts with Pro</div>
+            <div style={{ fontSize: 12.5, color: '#B45309', lineHeight: 1.5 }}>Free includes one connected portal. Upgrade to manage unlimited portals from one dashboard.</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const fmt = (d) => d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : null;
 const card = { background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '22px 24px', marginBottom: 16 };
@@ -91,13 +155,7 @@ export default function Account({ onDisconnect, onNavigate }) {
         <button onClick={goToGoals} style={primaryBtn('#111827')}>Set your goals</button>
       </div>
 
-      <div style={card}>
-        <div style={label}>HubSpot connection</div>
-        <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, marginBottom: 16 }}>
-          Your HubSpot account is connected. PipeChamp has <strong>read-only</strong> access and never writes to your CRM.
-        </div>
-        <button onClick={onDisconnect} style={{ ...ghostBtn, color: '#B91C1C' }}>Disconnect HubSpot</button>
-      </div>
+      <HubSpotAccounts onDisconnect={onDisconnect} />
     </div>
   );
 }

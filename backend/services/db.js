@@ -37,6 +37,23 @@ async function init() {
       updated_at TIMESTAMPTZ DEFAULT now()
     );
   `);
+  // Multiple HubSpot connections per browser session (sid). The ACTIVE portal's
+  // tokens also live in the cookie for the hot path; this table is the source of
+  // truth for the full list and the non-active portals' tokens.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS connections (
+      sid TEXT NOT NULL,
+      portal_id TEXT NOT NULL,
+      portal_name TEXT,
+      user_email TEXT,
+      access_token TEXT NOT NULL,
+      refresh_token TEXT NOT NULL,
+      expires_at BIGINT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (sid, portal_id)
+    );
+  `);
   ready = true;
 }
 
@@ -127,4 +144,88 @@ async function getSubscription(portalId) {
   } catch (e) { console.error('getSubscription error:', e.message); return null; }
 }
 
-module.exports = { enabled, saveSnapshot, getPreviousSnapshot, getSnapshotHistory, currentPeriod, deletePortal, upsertSubscription, getSubscription };
+// ---- HubSpot connections (multi-instance) ----
+
+// All connections for a browser session, oldest first (first-connected = primary).
+async function listConnections(sid) {
+  if (!pool || !sid) return [];
+  try {
+    await init();
+    const r = await pool.query(
+      `SELECT sid, portal_id, portal_name, user_email, access_token, refresh_token, expires_at, created_at
+       FROM connections WHERE sid = $1 ORDER BY created_at ASC`,
+      [String(sid)]
+    );
+    return r.rows;
+  } catch (e) { console.error('listConnections error:', e.message); return []; }
+}
+
+async function getConnection(sid, portalId) {
+  if (!pool || !sid || !portalId) return null;
+  try {
+    await init();
+    const r = await pool.query(
+      `SELECT sid, portal_id, portal_name, user_email, access_token, refresh_token, expires_at, created_at
+       FROM connections WHERE sid = $1 AND portal_id = $2`,
+      [String(sid), String(portalId)]
+    );
+    return r.rows[0] || null;
+  } catch (e) { console.error('getConnection error:', e.message); return null; }
+}
+
+async function countConnections(sid) {
+  if (!pool || !sid) return 0;
+  try {
+    await init();
+    const r = await pool.query(`SELECT COUNT(*)::int AS n FROM connections WHERE sid = $1`, [String(sid)]);
+    return r.rows[0]?.n || 0;
+  } catch (e) { console.error('countConnections error:', e.message); return 0; }
+}
+
+// Insert or refresh a connection (tokens + name). created_at is preserved on update.
+async function upsertConnection(sid, c) {
+  if (!pool || !sid || !c?.portalId) return;
+  try {
+    await init();
+    await pool.query(
+      `INSERT INTO connections (sid, portal_id, portal_name, user_email, access_token, refresh_token, expires_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7, now())
+       ON CONFLICT (sid, portal_id) DO UPDATE SET
+         portal_name = COALESCE(EXCLUDED.portal_name, connections.portal_name),
+         user_email = COALESCE(EXCLUDED.user_email, connections.user_email),
+         access_token = EXCLUDED.access_token,
+         refresh_token = EXCLUDED.refresh_token,
+         expires_at = EXCLUDED.expires_at,
+         updated_at = now()`,
+      [String(sid), String(c.portalId), c.portalName || null, c.userEmail || null,
+       c.accessToken, c.refreshToken, c.expiresAt || null]
+    );
+  } catch (e) { console.error('upsertConnection error:', e.message); }
+}
+
+// Write refreshed tokens back for the active portal (called after a token refresh).
+async function updateConnectionTokens(sid, portalId, t) {
+  if (!pool || !sid || !portalId) return;
+  try {
+    await init();
+    await pool.query(
+      `UPDATE connections SET access_token = $3, refresh_token = $4, expires_at = $5, updated_at = now()
+       WHERE sid = $1 AND portal_id = $2`,
+      [String(sid), String(portalId), t.accessToken, t.refreshToken, t.expiresAt || null]
+    );
+  } catch (e) { console.error('updateConnectionTokens error:', e.message); }
+}
+
+async function deleteConnection(sid, portalId) {
+  if (!pool || !sid || !portalId) return;
+  try {
+    await init();
+    await pool.query(`DELETE FROM connections WHERE sid = $1 AND portal_id = $2`, [String(sid), String(portalId)]);
+  } catch (e) { console.error('deleteConnection error:', e.message); }
+}
+
+module.exports = {
+  enabled, saveSnapshot, getPreviousSnapshot, getSnapshotHistory, currentPeriod, deletePortal,
+  upsertSubscription, getSubscription,
+  listConnections, getConnection, countConnections, upsertConnection, updateConnectionTokens, deleteConnection,
+};
