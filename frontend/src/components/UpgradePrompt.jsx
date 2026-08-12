@@ -12,12 +12,11 @@ export default function UpgradePrompt({ feature, requiredPlan = 'starter', inlin
     if (loading) return;
     setLoading(true);
     try {
-      const { url } = await api.billingCheckout();
-      if (url) window.location.href = url;
-      else throw new Error('no url');
+      await api.billingStartTrial();
+      window.location.reload();
     } catch (e) {
       setLoading(false);
-      alert('Could not start checkout. Please try again in a moment.');
+      alert('Could not start your trial. Please try again in a moment.');
     }
   };
 

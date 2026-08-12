@@ -13,6 +13,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_placeholde
 const PRICE_PRO = process.env.STRIPE_PRICE_PRO || 'price_1U2kKJ7a4D8UVT0JPu2KfRpn';
 const APP_URL = (process.env.FRONTEND_URL || 'https://www.pipechamp.app').replace(/\/$/, '');
 const ACTIVE = ['trialing', 'active', 'past_due'];
+const TRIAL_DAYS = 7;
+const axios = require('axios');
 
 // Resolve the HubSpot portal id for the current session (used as our account key).
 async function getPortal(req) {
@@ -21,6 +23,22 @@ async function getPortal(req) {
   const pid = await hs.getPortalId();
   req.session.portalId = pid;
   return pid;
+}
+
+// Portal id + the connecting user's email, from the OAuth token-info endpoint.
+async function getAccount(req) {
+  if (req.session.portalId && req.session.userEmail !== undefined) {
+    return { portalId: req.session.portalId, email: req.session.userEmail || undefined };
+  }
+  try {
+    const ti = await axios.get(`https://api.hubapi.com/oauth/v1/access-tokens/${req.session.tokens.access_token}`);
+    req.session.portalId = String(ti.data.hub_id);
+    req.session.userEmail = ti.data.user || null;
+  } catch {
+    if (!req.session.portalId) req.session.portalId = await getPortal(req);
+    if (req.session.userEmail === undefined) req.session.userEmail = null;
+  }
+  return { portalId: req.session.portalId, email: req.session.userEmail || undefined };
 }
 
 // Persist a Stripe subscription against a portal.
@@ -35,7 +53,37 @@ async function saveSub(portalId, customerId, sub) {
   });
 }
 
-// Start a Pro subscription: Checkout Session, 14-day trial, no card required to start.
+// Start the trial with NO card and NO checkout page: create the trialing
+// subscription directly. Instant access; a card is added later via the portal.
+router.post('/start-trial', requireAuth, async (req, res) => {
+  if (!CONFIGURED) return res.status(503).json({ error: 'Billing is not configured yet.' });
+  try {
+    const { portalId, email } = await getAccount(req);
+    const existing = await db.getSubscription(portalId);
+    if (existing && ACTIVE.includes(existing.status)) {
+      return res.json({ status: existing.status, already: true });
+    }
+    let customerId = existing?.stripe_customer_id;
+    if (!customerId) {
+      const c = await stripe.customers.create({ email, metadata: { portalId: String(portalId) } });
+      customerId = c.id;
+    }
+    const sub = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: PRICE_PRO }],
+      trial_period_days: TRIAL_DAYS,
+      trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
+      metadata: { portalId: String(portalId) },
+    });
+    await saveSub(portalId, customerId, sub);
+    res.json({ status: sub.status, trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null });
+  } catch (e) {
+    console.error('billing/start-trial error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Card-required / hosted Checkout path (kept for later card collection & upgrades).
 router.post('/checkout', requireAuth, async (req, res) => {
   if (!CONFIGURED) return res.status(503).json({ error: 'Billing is not configured yet.' });
   try {
@@ -45,7 +93,7 @@ router.post('/checkout', requireAuth, async (req, res) => {
       mode: 'subscription',
       line_items: [{ price: PRICE_PRO, quantity: 1 }],
       subscription_data: {
-        trial_period_days: 14,
+        trial_period_days: TRIAL_DAYS,
         trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
         metadata: { portalId: String(portalId) },
       },

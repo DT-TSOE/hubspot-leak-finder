@@ -31,9 +31,10 @@ async function apiDownload(path) {
 export const api = {
   authStatus: () => apiFetch('/auth/status'),
   disconnect: () => apiFetch('/auth/disconnect', {method:'POST'}),
-  billingStatus:   () => apiFetch('/billing/status'),
-  billingCheckout: () => apiFetch('/billing/checkout', {method:'POST'}),
-  billingPortal:   () => apiFetch('/billing/portal', {method:'POST'}),
+  billingStatus:    () => apiFetch('/billing/status'),
+  billingStartTrial:() => apiFetch('/billing/start-trial', {method:'POST'}),
+  billingCheckout:  () => apiFetch('/billing/checkout', {method:'POST'}),
+  billingPortal:    () => apiFetch('/billing/portal', {method:'POST'}),
   getFunnel:       (f) => apiFetch(`/api/funnel${qs(dateParams(f))}`),
   getInsights:     (f) => apiFetch(`/api/insights${qs(dateParams(f))}`),
   getLeadScores:   (f) => apiFetch(`/api/leads/scores${qs(dateParams(f))}`),

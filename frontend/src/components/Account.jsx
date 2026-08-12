@@ -21,8 +21,16 @@ export default function Account({ onDisconnect, onNavigate }) {
   const go = async (which) => {
     setBusy(which);
     try {
-      const { url } = which === 'checkout' ? await api.billingCheckout() : await api.billingPortal();
-      if (url) window.location.href = url; else throw new Error('no url');
+      if (which === 'checkout') {
+        // No-card, no-page: start the trial directly, then refresh status in place.
+        await api.billingStartTrial();
+        const s = await api.billingStatus();
+        setStatus(s);
+        setBusy('');
+      } else {
+        const { url } = await api.billingPortal();
+        if (url) window.location.href = url; else throw new Error('no url');
+      }
     } catch { setBusy(''); alert('Something went wrong. Please try again in a moment.'); }
   };
 
@@ -63,7 +71,7 @@ export default function Account({ onDisconnect, onNavigate }) {
                   <span style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>PipeChamp Pro</span>
                   <span style={{ fontSize: 14, color: '#6B7280' }}> — $99/month</span>
                 </div>
-                <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>14-day free trial. No credit card to start.</div>
+                <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>7-day free trial. No credit card to start.</div>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   <button onClick={() => go('checkout')} disabled={busy === 'checkout'} style={primaryBtn('#E8562A')}>{busy === 'checkout' ? 'Starting…' : 'Start free trial'}</button>
                   {status?.hasCustomer && <button onClick={() => go('portal')} disabled={busy === 'portal'} style={ghostBtn}>Manage billing</button>}

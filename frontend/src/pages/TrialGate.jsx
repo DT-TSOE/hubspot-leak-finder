@@ -8,8 +8,8 @@ export default function TrialGate({ onDisconnect }) {
     if (loading) return;
     setLoading(true);
     try {
-      const { url } = await api.billingCheckout();
-      if (url) window.location.href = url; else throw new Error('no url');
+      await api.billingStartTrial();
+      window.location.reload(); // App re-checks entitlement and lets them in
     } catch { setLoading(false); alert('Could not start your trial. Please try again in a moment.'); }
   };
 
@@ -20,7 +20,7 @@ export default function TrialGate({ onDisconnect }) {
           <img src="/pipechamp-icon.png" alt="PipeChamp" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} onError={e=>{e.target.style.display='none';}} />
         </div>
         <h1 style={{ margin:'0 0 6px', fontSize:28, fontWeight:800, color:'#111', letterSpacing:'-0.5px' }}>Start your free trial</h1>
-        <p style={{ margin:'0 0 22px', fontSize:14, color:'#6B7280', lineHeight:1.6 }}>Get full access to PipeChamp for 14 days. No credit card required.</p>
+        <p style={{ margin:'0 0 22px', fontSize:14, color:'#6B7280', lineHeight:1.6 }}>Get full access to PipeChamp for 7 days. No credit card required.</p>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:14, padding:'28px 24px' }}>
           <div style={{ display:'flex', alignItems:'baseline', justifyContent:'center', gap:6, marginBottom:2 }}>
             <span style={{ fontSize:34, fontWeight:900, color:'#111', letterSpacing:'-0.03em' }}>$99</span>
