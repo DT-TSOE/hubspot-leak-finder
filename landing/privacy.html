@@ -45,11 +45,11 @@
   <div class="page-header">
     <div class="page-label">Legal</div>
     <h1>Privacy Policy</h1>
-    <p class="page-meta">Effective date: July 25, 2026 &nbsp;·&nbsp; Last updated: July 25, 2026</p>
+    <p class="page-meta">Effective date: August 12, 2026 &nbsp;·&nbsp; Last updated: August 12, 2026</p>
   </div>
 
   <div class="highlight">
-    <p><strong>The short version:</strong> PipeChamp reads your HubSpot CRM data to generate pipeline analytics. We display it to you, we do not sell it, and we do not store your contact or deal records. Monthly aggregate scores (not individual records) are stored to show you trends over time.</p>
+    <p><strong>The short version:</strong> PipeChamp reads your HubSpot CRM data — read-only — to generate pipeline analytics. We display it to you, we do not sell it, and we do not store your contact or deal records. Only monthly aggregate scores (not individual records) are stored, to show you trends over time. We use a few trusted services (like Stripe for billing and PostHog for product analytics), listed below.</p>
   </div>
 
   <h2>1. Who we are</h2>
@@ -57,14 +57,13 @@
   <p>For privacy questions, contact us at: <a href="mailto:support@pipechamp.app">support@pipechamp.app</a></p>
 
   <h2>2. Data we access from HubSpot</h2>
-  <p>When you authorise PipeChamp via HubSpot OAuth, we request the following permissions:</p>
+  <p>When you authorise PipeChamp via HubSpot OAuth, we request the following <strong>read-only</strong> permissions:</p>
   <ul>
     <li><strong>crm.objects.contacts.read</strong> — to count and analyse lead volume, lifecycle stages, and speed-to-lead timing</li>
-    <li><strong>crm.objects.contacts.write</strong> — reserved for future features; we do not currently write to your contacts</li>
     <li><strong>crm.objects.deals.read</strong> — to analyse deal stage conversion, win rates, deal values, and pipeline health</li>
     <li><strong>crm.objects.owners.read</strong> — to associate deals with reps for per-owner analytics</li>
   </ul>
-  <p>We access only what is necessary for the analytics features you use. We do not access email content, notes, attachments, or any data not listed above.</p>
+  <p>Every scope we request is read-only: PipeChamp <strong>cannot create, edit, or delete</strong> anything in your HubSpot account. We access only what is necessary for the analytics features you use, and we do not access email content, notes, attachments, or any data not listed above.</p>
 
   <h2>3. How we use your data</h2>
   <h3>Analytics and scoring</h3>
@@ -77,45 +76,67 @@
   <p>We store one aggregate record per HubSpot portal per month in a secure database. This record contains only computed scores (e.g. overall grade, win rate percentage, speed-to-lead average) — never individual contact names, email addresses, deal names, or other personally identifiable information from your CRM.</p>
   <p>These snapshots power the month-over-month trend feature. They can be deleted upon request.</p>
 
-  <h2>4. Optional integrations</h2>
-  <p>If you choose to connect Google Analytics 4 or Google Search Console, we access those APIs under separate Google OAuth authorisation. The same principles apply: data is processed in memory, displayed to you, and not stored or sold.</p>
+  <h2>4. PipeCoach AI</h2>
+  <p>PipeChamp includes an AI assistant ("PipeCoach"). When you ask PipeCoach a question, the question you type along with relevant pipeline context (such as aggregate funnel metrics) is sent to our AI provider, Anthropic, to generate a response. This data is used only to answer you — it is <strong>not used to train AI models</strong>. Please avoid pasting sensitive personal information into PipeCoach.</p>
 
-  <h2>5. What we do not do</h2>
+  <h2>5. Optional data integrations</h2>
+  <p>If you choose to connect Google Analytics 4 or Google Search Console, we access those APIs under separate Google OAuth authorisation. The same principles apply: data is processed in memory, displayed to you, and not stored or sold. These integrations are optional and can be disconnected at any time.</p>
+
+  <h2>6. Third-party services we use</h2>
+  <p>We rely on a small number of trusted providers ("subprocessors") to operate PipeChamp. Each receives only the data needed for its function:</p>
   <ul>
-    <li>We do not sell, rent, or share your HubSpot data with any third party</li>
-    <li>We do not use your CRM data to train machine learning models</li>
-    <li>We do not store contact names, email addresses, deal names, company names, or other CRM record content</li>
-    <li>We do not write to your HubSpot account (we do not create, update, or delete records)</li>
+    <li><strong>HubSpot</strong> — the CRM you connect; the source of the pipeline data we analyse.</li>
+    <li><strong>Railway</strong> — backend hosting and our database (US region).</li>
+    <li><strong>Vercel</strong> — hosting for our website and application front-end.</li>
+    <li><strong>Stripe</strong> — payment processing for paid plans. Card details are entered directly with Stripe; we never see or store your full card number.</li>
+    <li><strong>PostHog</strong> — product analytics and session replay (see below).</li>
+    <li><strong>Google Analytics</strong> — website traffic analytics.</li>
+    <li><strong>Anthropic</strong> — the AI provider that powers PipeCoach.</li>
+  </ul>
+
+  <h2>7. Cookies and analytics</h2>
+  <p>We use one essential cookie to keep you signed in (it stores your PipeChamp session). We also use analytics to understand how the product and website are used:</p>
+  <ul>
+    <li><strong>Google Analytics</strong> — measures website visits and traffic sources.</li>
+    <li><strong>PostHog</strong> — measures in-app usage and records session replays to help us improve the product. <strong>Session replays are masked</strong>: all on-screen text and form inputs are hidden, so your HubSpot records — deal names, values, and contacts — are never captured in a recording.</li>
+  </ul>
+
+  <h2>8. What we do not do</h2>
+  <ul>
+    <li>We do not sell, rent, or share your HubSpot data with any third party for their own use</li>
+    <li>We do not use your CRM data to train machine learning or AI models</li>
+    <li>We do not store contact names, email addresses, deal names, company names, or other CRM record content in our database</li>
+    <li>We do not write to your HubSpot account (we cannot create, update, or delete records)</li>
     <li>We do not send marketing communications without your consent</li>
   </ul>
 
-  <h2>6. Data retention</h2>
+  <h2>9. Data retention</h2>
   <ul>
     <li><strong>Session data</strong> — discarded within 5 minutes or on session end</li>
     <li><strong>Monthly score snapshots</strong> — retained until you disconnect or request deletion</li>
-    <li><strong>OAuth tokens</strong> — stored in your browser's signed session cookie; revoked when you disconnect from PipeChamp or revoke access in HubSpot</li>
+    <li><strong>OAuth tokens</strong> — the active connection's token is held in your browser's signed session cookie; when you connect additional HubSpot accounts, their tokens are stored in our access-controlled database. All are revoked when you disconnect from PipeChamp or revoke access in HubSpot.</li>
   </ul>
 
-  <h2>7. Your rights</h2>
+  <h2>10. Your rights</h2>
   <p>Depending on where you are located, you may have the following rights:</p>
   <ul>
     <li><strong>Access</strong> — request a copy of any data we hold about you</li>
     <li><strong>Deletion</strong> — request deletion of your aggregate score history</li>
-    <li><strong>Disconnection</strong> — revoke PipeChamp's access to your HubSpot account at any time via HubSpot Settings → Connected Apps</li>
+    <li><strong>Disconnection</strong> — revoke PipeChamp's access at any time from within PipeChamp (Settings → HubSpot accounts) or via HubSpot Settings → Connected Apps. Disconnecting purges that portal's stored snapshots.</li>
     <li><strong>Portability</strong> — request your score data in a structured format</li>
   </ul>
   <p>To exercise any of these rights, email <a href="mailto:support@pipechamp.app">support@pipechamp.app</a>.</p>
 
-  <h2>8. Security</h2>
-  <p>OAuth tokens are stored in a server-signed, encrypted session cookie and never exposed in URLs or logs. Server infrastructure is hosted on Railway (US region) with TLS encryption in transit. We do not log HubSpot record content.</p>
+  <h2>11. Security</h2>
+  <p>OAuth tokens are stored in a server-signed session cookie and, where applicable, in our access-controlled database; they are never exposed in URLs. Infrastructure is hosted on Railway and Vercel with TLS encryption in transit. We do not log HubSpot record content.</p>
 
-  <h2>9. Children</h2>
+  <h2>12. Children</h2>
   <p>PipeChamp is a B2B business tool and is not directed at children under 16. We do not knowingly collect data from anyone under 16.</p>
 
-  <h2>10. Changes to this policy</h2>
+  <h2>13. Changes to this policy</h2>
   <p>If we make material changes to how we handle your data, we will update the effective date at the top of this page and, where appropriate, notify connected users by email.</p>
 
-  <h2>11. Contact</h2>
+  <h2>14. Contact</h2>
   <p>For any privacy questions or to exercise your rights: <a href="mailto:support@pipechamp.app">support@pipechamp.app</a></p>
 </div>
 
