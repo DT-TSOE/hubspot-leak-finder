@@ -76,6 +76,11 @@ export const PLANS = {
 // once billing is live.
 export const BETA_ALL_ACCESS = true;
 
+// Trial gate: when true, a connected user must start a free trial (or already
+// have an active/trialing subscription) before entering the app. Default OFF so
+// current behavior is unchanged; flip to true at launch to require the trial.
+export const REQUIRE_TRIAL = false;
+
 export function getCurrentPlan() {
   if (BETA_ALL_ACCESS) return 'pro';
   const stored = localStorage.getItem('pipechamp_plan');
