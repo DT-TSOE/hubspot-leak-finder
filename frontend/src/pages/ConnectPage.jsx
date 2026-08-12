@@ -3,11 +3,11 @@ export default function ConnectPage() {
   return (
     <div style={{ minHeight:'100vh', background:'#F7F8FA', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
       <div style={{ maxWidth:420, width:'100%', textAlign:'center' }}>
-        <div style={{ width:72, height:72, borderRadius:16, background:'#F0FBF0', border:'2px solid #C8E6C9', margin:'0 auto 20px', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <img src="/el-pipeador.png" alt="PipeChamp" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }} onError={e=>{e.target.style.display='none'; e.target.parentElement.innerHTML='🤼';}} />
+        <div style={{ width:72, height:72, borderRadius:16, margin:'0 auto 20px', overflow:'hidden', boxShadow:'0 8px 20px -8px rgba(36,58,82,0.4)' }}>
+          <img src="/pipechamp-icon.png" alt="PipeChamp" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} onError={e=>{e.target.style.display='none';}} />
         </div>
         <h1 style={{ margin:'0 0 6px', fontSize:28, fontWeight:800, color:'#111', letterSpacing:'-0.5px' }}>PipeChamp</h1>
-        <p style={{ margin:'0 0 20px', fontSize:11, color:'#43A047', letterSpacing:4, textTransform:'uppercase' }}>Find the leaks. Fix them fast.</p>
+        <p style={{ margin:'0 0 20px', fontSize:11, color:'#0091AE', letterSpacing:4, textTransform:'uppercase' }}>Find the leaks. Fix them fast.</p>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:14, padding:'28px 24px' }}>
           <p style={{ margin:'0 0 20px', fontSize:14, color:'#666', lineHeight:1.65 }}>Connect your HubSpot account and PipeChamp will identify exactly where your pipeline is leaking revenue - and tell you exactly how to fix it.</p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:6, justifyContent:'center', marginBottom:22 }}>
