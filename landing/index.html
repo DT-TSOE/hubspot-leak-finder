@@ -294,7 +294,7 @@
   .pricing { background: var(--bg2); }
   .pricing .inner { text-align: center; }
   .pricing .sub { margin-left: auto; margin-right: auto; }
-  .pricing-grid { display: grid; grid-template-columns: minmax(0, 380px); justify-content: center; gap: 24px; margin: 48px auto 0; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 340px)); justify-content: center; align-items: start; gap: 24px; margin: 48px auto 0; }
   .pricing .price-card { text-align: left; }
   .price-card { background: var(--card); border: 2px solid var(--border); border-radius: 18px; padding: 34px; }
   .price-card.pro { border-color: var(--blue); position: relative; box-shadow: 0 28px 64px -30px rgba(27,114,199,.45); }
@@ -382,7 +382,7 @@
     <h1>HubSpot shows you what's in your pipeline<span class="hl-dot">.</span><br><em>We tell you where it's broken<span class="hl-dot">.</span></em></h1>
     <p>Connect HubSpot and get pipeline insights in 30 seconds. Instantly see why your deals aren't closing and how to fix them.</p>
     <a href="https://pipechamp.app/connect" class="btn-primary">Start free trial</a>
-    <div class="hero-sub">No credit card required. 7 days free. Read-only access.</div>
+    <div class="hero-sub">No credit card. Full access free for 14 days, then keep a free plan. Read-only.</div>
   </div>
 
   <!-- HERO VISUAL: real product screenshot in a browser frame -->
@@ -597,21 +597,33 @@
   <div class="inner">
     <div class="label">Pricing</div>
     <div class="title">Simple<span class="hl-dot">.</span> No surprises<span class="hl-dot">.</span></div>
-    <p class="sub">One plan, everything included. Start with a 7-day free trial, cancel anytime.</p>
+    <p class="sub">Start with <strong>14 days of full Pro</strong> — no credit card. When the trial ends, keep going on a free plan for as long as you like.</p>
     <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Free</div>
+        <div class="price-row"><span class="price-num">$0</span><span class="price-mo">/forever</span></div>
+        <div class="price-note">No credit card. Ever.</div>
+        <a href="https://pipechamp.app/connect" class="price-btn" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);">Start free</a>
+        <div class="price-features">
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Pipeline health score</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Funnel drop-off analysis</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Won vs lost breakdown</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>1 HubSpot account</strong></span></div>
+        </div>
+      </div>
       <div class="price-card pro">
         <div class="price-tier">PipeChamp Pro</div>
         <div class="price-row"><span class="price-num">$99</span><span class="price-mo">/month</span></div>
-        <div class="price-note">7-day free trial. No credit card to start.</div>
+        <div class="price-note">14-day free trial. No credit card to start.</div>
         <a href="https://pipechamp.app/connect" class="price-btn pro">Start free trial</a>
         <div class="price-features">
-          <div class="pf"><span class="pf-yes">+</span><span><strong>Pipeline health score</strong></span></div>
-          <div class="pf"><span class="pf-yes">+</span><span><strong>Full funnel analysis</strong></span></div>
-          <div class="pf"><span class="pf-yes">+</span><span><strong>Unlimited insights</strong></span></div>
-          <div class="pf"><span class="pf-yes">+</span><span><strong>Lead risk scoring</strong></span></div>
-          <div class="pf"><span class="pf-yes">+</span><span><strong>PipeCoach AI</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Everything in Free</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Unlimited insights + PipeCoach AI</strong></span></div>
           <div class="pf"><span class="pf-yes">+</span><span><strong>Revenue intelligence</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Lead risk scoring</strong></span></div>
           <div class="pf"><span class="pf-yes">+</span><span><strong>Stage aging and speed to lead</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Unlimited HubSpot accounts</strong></span></div>
+          <div class="pf"><span class="pf-yes">+</span><span><strong>Google Analytics + Search Console</strong></span></div>
           <div class="pf"><span class="pf-yes">+</span><span><strong>Exports</strong></span></div>
         </div>
       </div>
