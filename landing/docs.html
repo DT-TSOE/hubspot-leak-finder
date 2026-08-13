@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup Guide — PipeChamp</title>
+  <meta name="description" content="How to connect PipeChamp to HubSpot, what it accesses, how to use it, and how to disconnect." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --navy:#243A52; --blue:#1B72C7; --orange:#E8562A; --light:#F7F8FA; --border:#E5E7EB; --text:#111827; --sub:#4B5563; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.7; background: #fff; }
+    a { color: var(--blue); }
+    nav { background: var(--navy); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-size: 17px; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .nav-back { font-size: 14px; color: rgba(255,255,255,.6); text-decoration: none; }
+    .nav-back:hover { color: #fff; }
+    .page { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+    .page-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .page-label { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; }
+    h1 { font-size: 36px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+    .page-meta { font-size: 14px; color: var(--sub); }
+    h2 { font-size: 22px; font-weight: 700; margin: 40px 0 14px; }
+    h3 { font-size: 17px; font-weight: 700; margin: 28px 0 10px; }
+    p { font-size: 16px; color: #374151; margin-bottom: 16px; }
+    ul, ol { padding-left: 24px; margin-bottom: 16px; }
+    li { font-size: 16px; color: #374151; margin-bottom: 8px; }
+    ol.steps li { margin-bottom: 14px; }
+    .highlight { background: var(--light); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 24px 0; }
+    .highlight p { margin: 0; }
+    code { background: var(--light); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 14px; }
+    .toc { background: var(--light); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; margin-bottom: 32px; }
+    .toc a { display: block; font-size: 15px; margin: 6px 0; text-decoration: none; }
+    footer { background: #111827; padding: 32px 24px; text-align: center; }
+    footer p { font-size: 13px; color: rgba(255,255,255,.3); }
+    footer a { color: rgba(255,255,255,.5); margin: 0 12px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="24" height="24" viewBox="0 0 100 98" fill="none"><polygon points="6,2 94,2 82,20 18,20" fill="#1B72C7"/><polygon points="18,23 82,23 72,39 28,39" fill="#0091AE"/><polygon points="28,42 72,42 63,57 37,57" fill="#2EBF9A"/><polygon points="37,60 63,60 56,74 44,74" fill="#2EBF9A" opacity=".7"/><circle cx="50" cy="87" r="7" fill="#E8562A"/></svg>
+    PipeChamp
+  </a>
+  <a href="/" class="nav-back">← Back to home</a>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-label">Setup Guide</div>
+    <h1>Getting started with PipeChamp</h1>
+    <p class="page-meta">How to connect, what PipeChamp accesses, how to use it, and how to disconnect.</p>
+  </div>
+
+  <div class="toc">
+    <a href="#what">1. What PipeChamp does</a>
+    <a href="#requirements">2. Requirements</a>
+    <a href="#connect">3. Connecting your HubSpot account</a>
+    <a href="#permissions">4. Permissions we request</a>
+    <a href="#using">5. Using PipeChamp</a>
+    <a href="#accounts">6. Connecting multiple HubSpot accounts</a>
+    <a href="#integrations">7. Optional integrations</a>
+    <a href="#disconnect">8. Disconnecting &amp; uninstalling</a>
+    <a href="#data">9. Your data</a>
+    <a href="#support">10. Support</a>
+  </div>
+
+  <h2 id="what">1. What PipeChamp does</h2>
+  <p>PipeChamp is a pipeline analytics app for HubSpot. It reads your CRM data and turns it into a pipeline health score and a set of insights — funnel drop-off, win vs lost, stage aging, speed to lead, and revenue analysis — so you can see exactly where deals leak and how to fix them. PipeChamp is <strong>read-only</strong>: it never changes anything in your HubSpot account.</p>
+
+  <h2 id="requirements">2. Requirements</h2>
+  <ul>
+    <li>A HubSpot account with <strong>Sales Hub</strong> and/or <strong>Marketing Hub</strong> (any tier, including free).</li>
+    <li>Permission to authorize third-party apps for that account.</li>
+    <li>A modern web browser. There is nothing to install — PipeChamp runs in the browser.</li>
+  </ul>
+
+  <h2 id="connect">3. Connecting your HubSpot account</h2>
+  <ol class="steps">
+    <li>Go to <a href="https://get.pipechamp.app">get.pipechamp.app</a> and click <strong>Start for free</strong> (or go straight to <a href="https://pipechamp.app/connect">pipechamp.app/connect</a>).</li>
+    <li>Click <strong>Connect HubSpot</strong>. You'll be taken to HubSpot's secure authorization screen.</li>
+    <li>Choose the HubSpot account you want to analyze, then review the read-only permissions PipeChamp requests (listed below) and click <strong>Connect app</strong>.</li>
+    <li>You'll be returned to PipeChamp, which analyzes your pipeline and shows your scorecard in about 30 seconds.</li>
+  </ol>
+  <div class="highlight">
+    <p>No credit card is required to start. Every new account begins with a 14-day free trial of PipeChamp Pro, then continues on a free plan.</p>
+  </div>
+
+  <h2 id="permissions">4. Permissions we request</h2>
+  <p>During connection, PipeChamp asks for three <strong>read-only</strong> scopes:</p>
+  <ul>
+    <li><code>crm.objects.contacts.read</code> — to analyze lead volume, lifecycle stages, and speed-to-lead timing.</li>
+    <li><code>crm.objects.deals.read</code> — to analyze deal-stage conversion, win rates, deal values, and pipeline health.</li>
+    <li><code>crm.objects.owners.read</code> — to attribute deals to reps for per-owner analytics.</li>
+  </ul>
+  <p>That's all. PipeChamp cannot create, edit, or delete anything in your HubSpot account, and it does not access email content, notes, or attachments.</p>
+
+  <h2 id="using">5. Using PipeChamp</h2>
+  <ul>
+    <li><strong>Scorecard</strong> — your overall pipeline health grade, plus Marketing and Sales sub-grades. Tune it with a few quick questions (Settings → Business setup) and set targets (Set your goals).</li>
+    <li><strong>Analyze</strong> — Growth Funnel, At Risk, Lead Sources, Lead Response, and Revenue.</li>
+    <li><strong>Playbook</strong> — prioritized Insights and <strong>PipeCoach</strong>, an AI assistant that answers questions about your pipeline.</li>
+    <li><strong>Report</strong> — a shareable pipeline report you can export.</li>
+  </ul>
+
+  <h2 id="accounts">6. Connecting multiple HubSpot accounts</h2>
+  <p>If your HubSpot login has access to more than one account, you can connect several and switch between them from the account picker in the top-right of the dashboard, or in <strong>Settings → HubSpot accounts</strong>. The free plan includes one account; Pro supports multiple. Each connection is a separate authorization, so you can also connect accounts that belong to a different HubSpot login.</p>
+
+  <h2 id="integrations">7. Optional integrations</h2>
+  <p>Under <strong>Integrations</strong> you can optionally connect <strong>Google Analytics 4</strong> and <strong>Google Search Console</strong> to layer marketing traffic data onto your funnel. These use a separate Google authorization and can be disconnected at any time.</p>
+
+  <h2 id="disconnect">8. Disconnecting &amp; uninstalling</h2>
+  <p>You can remove PipeChamp's access at any time, in two ways:</p>
+  <ul>
+    <li><strong>From PipeChamp:</strong> Settings → HubSpot accounts → <strong>Disconnect</strong> next to an account (or Disconnect to sign out of all).</li>
+    <li><strong>From HubSpot:</strong> Settings → Integrations → <strong>Connected Apps</strong> → PipeChamp → <strong>Uninstall</strong>.</li>
+  </ul>
+  <p>Either action revokes PipeChamp's access token for that account and permanently deletes that account's stored aggregate snapshots. Nothing in your HubSpot data is affected — PipeChamp only ever read it.</p>
+
+  <h2 id="data">9. Your data</h2>
+  <p>PipeChamp processes your HubSpot data to produce analytics and displays them to you. We store only monthly <strong>aggregate</strong> scores per account (for month-over-month trends) — never contact names, email addresses, deal names, or other record content. See our <a href="/privacy">Privacy Policy</a> for full detail on what we access, how long we keep it, and the services we use.</p>
+
+  <h2 id="support">10. Support</h2>
+  <p>Questions, issues, or feedback? Email <a href="mailto:support@pipechamp.app">support@pipechamp.app</a> and we'll help.</p>
+</div>
+
+<footer>
+  <p>
+    <a href="/">Home</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="/support">Support</a>
+  </p>
+  <p style="margin-top:12px">© 2026 PipeChamp. Not affiliated with HubSpot, Inc.</p>
+</footer>
+
+</body>
+</html>
