@@ -1,15 +1,41 @@
 const MIN = 3;
 
-function analyzeLTV(contacts, deals) {
-  const wonDeals = deals.filter(d => d.properties.dealstage === 'closedwon');
+// Which dealstage IDs count as closed-won / closed-lost, read from the portal's
+// actual pipeline definitions. Custom pipelines use numeric stage IDs — not the
+// literal 'closedwon'/'closedlost' of HubSpot's default pipeline — so matching on
+// the string misses every deal in a custom pipeline. Falls back to the default
+// IDs when pipeline metadata isn't available.
+function closedStageSets(pipelines) {
+  const won = new Set(), lost = new Set();
+  for (const p of (pipelines || [])) {
+    for (const s of (p.stages || [])) {
+      if (s.isClosedWon) won.add(String(s.id));
+      else if (s.isClosed) lost.add(String(s.id));
+    }
+  }
+  if (!won.size) won.add('closedwon');
+  if (!lost.size) lost.add('closedlost');
+  return { won, lost };
+}
+
+// `deals` is the FULL deal set (used for stage/revenue/rep/trend counting).
+// `assocDeals` is the subset that has contact associations attached
+// (`_contactIds`), used only for the by-source / by-customer breakdowns. Counting
+// closed-won over the full set — not just the associated sample — is what keeps
+// the tab from falsely reporting "not enough closed deals".
+function analyzeLTV(contacts, deals, pipelines, assocDeals) {
+  const { won: WON, lost: LOST } = closedStageSets(pipelines);
+  assocDeals = assocDeals || deals;
+  const wonDeals = deals.filter(d => WON.has(d.properties.dealstage));
   if (wonDeals.length < MIN) return { insufficient: true, sampleSize: wonDeals.length };
+  const wonAssoc = assocDeals.filter(d => WON.has(d.properties.dealstage));
 
   const amounts = wonDeals.map(d => parseFloat(d.properties.amount||'0')).filter(a => a > 0);
   const totalRevenue = amounts.reduce((a,b) => a+b, 0);
   const avgDealSize = amounts.length ? totalRevenue / amounts.length : 0;
 
   const sourceMap = {};
-  for (const deal of wonDeals) {
+  for (const deal of wonAssoc) {
     const cId = deal._contactIds?.[0];
     const contact = contacts.find(c => c.id === cId);
     const source = contact?.properties?.hs_analytics_source || 'Unknown';
@@ -25,7 +51,7 @@ function analyzeLTV(contacts, deals) {
     .sort((a,b) => b.avgDealSize - a.avgDealSize);
 
   const cycleMap = {};
-  for (const deal of wonDeals) {
+  for (const deal of wonAssoc) {
     const cId = deal._contactIds?.[0];
     const contact = contacts.find(c => c.id === cId);
     const source = contact?.properties?.hs_analytics_source || 'Unknown';
@@ -47,11 +73,12 @@ function analyzeLTV(contacts, deals) {
 
   const repMap = {};
   for (const deal of deals) {
-    const isClosed = deal.properties.dealstage === 'closedwon' || deal.properties.dealstage === 'closedlost';
-    if (!isClosed) continue;
+    const stage = deal.properties.dealstage;
+    const isWon = WON.has(stage), isLost = LOST.has(stage);
+    if (!isWon && !isLost) continue;
     const owner = deal.properties.hubspot_owner_id || 'Unassigned';
     if (!repMap[owner]) repMap[owner] = { won:0, lost:0, totalValue:0 };
-    if (deal.properties.dealstage === 'closedwon') { repMap[owner].won++; repMap[owner].totalValue += parseFloat(deal.properties.amount||'0'); }
+    if (isWon) { repMap[owner].won++; repMap[owner].totalValue += parseFloat(deal.properties.amount||'0'); }
     else repMap[owner].lost++;
   }
 
@@ -64,7 +91,7 @@ function analyzeLTV(contacts, deals) {
   const monthMap = {};
   for (const deal of deals) {
     const stage = deal.properties.dealstage;
-    const isWon = stage === 'closedwon', isLost = stage === 'closedlost';
+    const isWon = WON.has(stage), isLost = LOST.has(stage);
     if (!isWon && !isLost) continue;
     const closed = new Date(deal.properties.closedate);
     if (isNaN(closed.getTime())) continue;
@@ -84,7 +111,7 @@ function analyzeLTV(contacts, deals) {
   // group won deals by company (falls back to contact when company is blank).
   const contactById = {}; contacts.forEach(c => { contactById[c.id] = c; });
   const byCustomer = {};
-  for (const deal of wonDeals) {
+  for (const deal of wonAssoc) {
     const cId = deal._contactIds?.[0];
     const contact = cId ? contactById[cId] : null;
     const company = (contact?.properties?.company || '').trim();
