@@ -25,9 +25,10 @@ _Requirements below are from HubSpot's official docs (Aug 2026) — see Sources 
 - New scopes: `crm.objects.contacts.read`, `crm.objects.deals.read`, `crm.objects.owners.read`.
 - Must be mirrored in the HubSpot app config (see Your To-Dos #3).
 
-### 2. App-uninstall webhook endpoint  ⬅ required
-- Add a webhook route (e.g. `POST /webhooks/hubspot`) subscribed to the **app.uninstall** event; on uninstall, invalidate that portal's cache and delete its stored data (snapshot rows in Postgres keyed by portal id).
-- Register the webhook URL + subscription in the HubSpot app settings.
+### 2. Uninstall handling  ✅ DONE — via token failure (HubSpot has NO uninstall webhook)
+- HubSpot does **not** send an app-uninstall webhook. On uninstall it revokes the OAuth tokens; the documented best practice is to detect the uninstall via a **failed token refresh** (401 / invalid_grant).
+- `backend/middleware/requireAuth.js` now does this: when a refresh fails, it invalidates that account's cache and deletes its stored data (snapshot rows + connection row in Postgres, keyed by portal id), falling back to another connected account if one exists.
+- Nothing to register in HubSpot for this — there is no webhook to subscribe to.
 
 ### 3. Stripe billing (the paid product)  ⬅ biggest piece; needs your Stripe account first
 - Stripe Checkout for **Pro $99/mo + 14-day trial**; subscription webhooks → set plan.
@@ -50,7 +51,7 @@ _Requirements below are from HubSpot's official docs (Aug 2026) — see Sources 
 1. **Verify the domain** `pipechamp.app` in your HubSpot developer account (required to list).
 2. **Confirm/finish the public app** in the HubSpot developer account: name = PipeChamp, upload the **logo** (assets ready), and set the **production redirect URI** to the deployed backend.
 3. **Update the app's required scopes** to match the read-only set above (remove contacts write).
-4. **Register the uninstall webhook** URL + `app.uninstall` subscription (once Claude ships the endpoint).
+4. ~~Register the uninstall webhook~~ — not needed. HubSpot has no uninstall webhook; the app already detects uninstalls via token-refresh failure and purges data.
 5. **Create a Stripe account** (business + bank details) and a **Product/Price** for Pro $99/mo with a 14-day trial. Give Claude the price ID + set the API keys as backend env vars. _(Entering bank/financial credentials is yours to do, not Claude's.)_
 6. **Write/approve the listing content**: description, category, pricing (must match the website), support email/URL, screenshots (anonymized ones exist), and the setup-doc URL. Claude can draft the copy.
 7. **Record a short demo/walkthrough** video of core flows (for listing visuals now; a disconnect+uninstall demo is required for certification later).
@@ -60,7 +61,7 @@ _Requirements below are from HubSpot's official docs (Aug 2026) — see Sources 
 
 ## Recommended sequence
 1. Scope cleanup (code) + mirror in HubSpot config (you)
-2. Uninstall webhook (code) + register it (you)
+2. Uninstall handling (code) ✅ done — detected via token failure, nothing to register
 3. Verify domain + finish app listing content (you) — can start in parallel
 4. Stripe billing (code) — after you set up the Stripe account/product
 5. Setup docs page (code) + your review
