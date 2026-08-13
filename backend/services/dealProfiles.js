@@ -9,6 +9,8 @@
  * deal), medians + IQR ranges (not means), modes for categories, sample gates.
  */
 
+const { closedStageSets } = require('./dealStages');
+
 const MIN_WON = 12;      // don't profile below this many won deals
 const MIN_SEGMENT = 5;   // don't describe a segment below this
 
@@ -54,13 +56,14 @@ function profileOf(subset) {
   };
 }
 
-function buildDealProfiles(dealsWithContacts, contacts, stageHistoryById = {}) {
+function buildDealProfiles(dealsWithContacts, contacts, stageHistoryById = {}, pipelines) {
   const contactMap = {};
   (contacts || []).forEach(c => { contactMap[c.id] = c; });
+  const { won: WON } = closedStageSets(pipelines);
 
   const won = [];
   for (const d of (dealsWithContacts || [])) {
-    if (d.properties.dealstage !== 'closedwon') continue;
+    if (!WON.has(d.properties.dealstage)) continue;
     const amount = parseFloat(d.properties.amount || '0');
     if (!(amount > 0)) continue;
     const created = new Date(d.properties.createdate).getTime();

@@ -1,22 +1,6 @@
-const MIN = 3;
+const { closedStageSets } = require('./dealStages');
 
-// Which dealstage IDs count as closed-won / closed-lost, read from the portal's
-// actual pipeline definitions. Custom pipelines use numeric stage IDs — not the
-// literal 'closedwon'/'closedlost' of HubSpot's default pipeline — so matching on
-// the string misses every deal in a custom pipeline. Falls back to the default
-// IDs when pipeline metadata isn't available.
-function closedStageSets(pipelines) {
-  const won = new Set(), lost = new Set();
-  for (const p of (pipelines || [])) {
-    for (const s of (p.stages || [])) {
-      if (s.isClosedWon) won.add(String(s.id));
-      else if (s.isClosed) lost.add(String(s.id));
-    }
-  }
-  if (!won.size) won.add('closedwon');
-  if (!lost.size) lost.add('closedlost');
-  return { won, lost };
-}
+const MIN = 3;
 
 // `deals` is the FULL deal set (used for stage/revenue/rep/trend counting).
 // `assocDeals` is the subset that has contact associations attached

@@ -91,7 +91,7 @@ router.get('/scorecard', requireAuth, async (req, res) => {
 
     // Winning-deal profiles (behavioral). Stage discipline needs history keyed by deal id.
     const stageHistoryById = Object.fromEntries((dealsWithHistory || []).map(d => [d.id, d._stagesEntered || []]));
-    scorecard.dealProfiles = buildDealProfiles(dealsWithContacts, contacts, stageHistoryById);
+    scorecard.dealProfiles = buildDealProfiles(dealsWithContacts, contacts, stageHistoryById, pipelines);
 
     // Monthly snapshot + "vs last month" trend -- only on unfiltered (all-time) view.
     let trend = null;
