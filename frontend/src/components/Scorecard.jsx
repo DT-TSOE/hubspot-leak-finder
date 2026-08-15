@@ -603,13 +603,14 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
         </div>
       )}
 
-      {/* Best customers — subtle teaser -> "coming soon" (fake-door; captures demand) */}
-      {dealProfiles && !dealProfiles.insufficient && (
+      {/* Best customers — subtle teaser -> "coming soon" (fake-door; captures demand).
+          Shown to anyone with at least one won deal. */}
+      {dealProfiles && dealProfiles.wonCount > 0 && (
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '14px 18px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best customers</div>
             <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.5 }}>
-              See who actually buys — job titles, company profiles, and lookalike targeting from your {dealProfiles.wonCount} won deals.
+              See who actually buys — job titles, company profiles, and lookalike targeting from your {dealProfiles.wonCount} won deal{dealProfiles.wonCount === 1 ? '' : 's'}.
             </div>
           </div>
           {interested ? (
