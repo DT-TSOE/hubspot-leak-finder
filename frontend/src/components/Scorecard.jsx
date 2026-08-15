@@ -9,16 +9,6 @@ const fmt$k = n => n >= 1000 ? '$' + Math.round(n / 1000) + 'k' : '$' + Math.rou
 const fmtH = h => h == null ? '-' : h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`;
 const fmtDays = d => d < 7 ? `${d}d` : d < 60 ? `${Math.round(d / 7)}w` : `${Math.round(d / 30)}mo`;
 
-function profileRows(p) {
-  return [
-    p.valueRange?.median != null && { l: 'Avg deal size', v: fmt$k(p.valueRange.median) },
-    p.cycleRange?.median != null && { l: 'Avg time to close', v: fmtDays(p.cycleRange.median) },
-    p.touches?.median != null && { l: 'Avg touches', v: `${p.touches.median} touches` },
-    p.speedHours?.median != null && { l: 'First response', v: fmtH(p.speedHours.median) },
-    p.source && { l: 'Top source', v: `${p.source.pct}% ${p.source.label}` },
-  ].filter(Boolean);
-}
-
 const GRADE_COLOR = { A: '#2EBF9A', B: '#0091AE', C: '#1B72C7', D: '#243A52', F: '#243A52' };
 const scoreColor = s => s === null || s === undefined ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 50 ? '#1B72C7' : '#243A52';
 const meterColor = s => s == null ? '#ccc' : s >= 70 ? '#2EBF9A' : s >= 40 ? '#1B72C7' : '#243A52';
@@ -613,43 +603,25 @@ export default function Scorecard({ onScoreLoad, onTabChange, days }) {
         </div>
       )}
 
-      {/* Best deals profile */}
+      {/* Best customers — subtle teaser -> "coming soon" (fake-door; captures demand) */}
       {dealProfiles && !dealProfiles.insufficient && (
-        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-          <div style={{ marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid #F0F1F4' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best deals look like this</div>
-            <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>Behavioral patterns from {dealProfiles.wonCount} won deals</div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: dealProfiles.fastestClose ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 14 }}>
-            {[
-              { title: 'Highest-value customers', tag: 'top 25% by deal size', p: dealProfiles.highestValue, accent: '#0091AE' },
-              dealProfiles.fastestClose && { title: 'Fastest closes', tag: 'fastest 25% by cycle', p: dealProfiles.fastestClose, accent: '#1B72C7' },
-            ].filter(Boolean).map(card => (
-              <div key={card.title} style={{ background: '#F7F8FA', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: card.accent, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{card.title}</div>
-                <div style={{ fontSize: 10.5, color: '#999', marginBottom: 10 }}>{card.tag} · {card.p.sample} deals</div>
-                {profileRows(card.p).map(r => (
-                  <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #EDEEF1', fontSize: 12.5 }}>
-                    <span style={{ color: '#888' }}>{r.l}</span>
-                    <span style={{ color: '#111', fontWeight: 600, textAlign: 'right' }}>{r.v}</span>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-          <div style={{ background: 'rgba(27,114,199,0.05)', border: '1px solid rgba(27,114,199,0.15)', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ flex: 1, fontSize: 12.5, color: '#243A52', lineHeight: 1.5 }}>
-              <strong style={{ color: '#111' }}>Want to know who these buyers actually are?</strong> Job titles, company profiles, and lookalike targeting.
+        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '14px 18px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>Your best customers</div>
+            <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.5 }}>
+              See who actually buys — job titles, company profiles, and lookalike targeting from your {dealProfiles.wonCount} won deals.
             </div>
-            {interested ? (
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#0091AE', flexShrink: 0 }}>✓ We'll be in touch</span>
-            ) : (
-              <button onClick={() => { api.recordInterest('customer-profiles').catch(() => {}); setInterested(true); }}
-                style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#fff', background: '#1B72C7', border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}>
-                I want this →
-              </button>
-            )}
           </div>
+          {interested ? (
+            <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#0091AE', background: 'rgba(0,145,174,0.08)', border: '1px solid rgba(0,145,174,0.22)', borderRadius: 8, padding: '7px 12px' }}>
+              Coming soon · you're on the list ✓
+            </span>
+          ) : (
+            <button onClick={() => { api.recordInterest('customer-profiles').catch(() => {}); setInterested(true); }}
+              style={{ flexShrink: 0, fontSize: 12.5, fontWeight: 600, color: '#1B72C7', background: 'transparent', border: '1px solid #C7D2FE', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' }}>
+              See your best customers →
+            </button>
+          )}
         </div>
       )}
 
