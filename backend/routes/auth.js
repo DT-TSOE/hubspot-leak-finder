@@ -28,6 +28,19 @@ function makeTokens(data) {
   return { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: Date.now() + (data.expires_in * 1000) };
 }
 
+// Fire-and-forget: push a signup/connect event to our internal CRM (a Google
+// Apps Script → Sheet). No-op unless CRM_WEBHOOK_URL is set, and never blocks or
+// fails the connect flow.
+function notifyCrm(fields) {
+  const url = process.env.CRM_WEBHOOK_URL;
+  if (!url) return;
+  const body = new URLSearchParams();
+  Object.entries(fields).forEach(([k, v]) => { if (v != null && v !== '') body.append(k, String(v)); });
+  axios.post(url, body.toString(), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 8000,
+  }).catch(() => { /* best-effort */ });
+}
+
 // Cache key for HubSpotService is derived from the ACTIVE token tail, so switching
 // portals switches cache buckets automatically.
 function setActive(req, tokens, portalId) {
@@ -111,6 +124,11 @@ router.get('/callback', async (req, res) => {
     await db.upsertConnection(sid, {
       portalId: info.portalId, portalName: info.portalName, userEmail: info.userEmail,
       accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresAt: tokens.expires_at,
+    });
+    // Log the signup/connect to our internal CRM (the Sheet decides new vs returning).
+    notifyCrm({
+      action: 'lead', portalId: info.portalId, company: info.portalName,
+      email: info.userEmail, source: 'HubSpot connect', connected_at: new Date().toISOString(),
     });
     setActive(req, tokens, info.portalId);
     res.redirect(`${FRONTEND_URL}?connected=true`);
