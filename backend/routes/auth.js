@@ -29,14 +29,16 @@ function makeTokens(data) {
 }
 
 // Fire-and-forget: push a signup/connect event to our internal CRM (a Google
-// Apps Script → Sheet). No-op unless CRM_WEBHOOK_URL is set, and never blocks or
-// fails the connect flow.
+// Apps Script → Sheet). Never blocks or fails the connect flow. The Apps Script
+// runs doPost and 302-redirects to a result URL; the row is written before the
+// redirect, so we don't need to read the response. Override with CRM_WEBHOOK_URL.
+const CRM_WEBHOOK_URL = process.env.CRM_WEBHOOK_URL ||
+  'https://script.google.com/macros/s/AKfycbz2r1LQAGw2WZ_AmN_q7UBZGrTGbNWTWxTT6lk8pRtAt3nsl6q4k8_R9R2wv0qbTAo/exec';
 function notifyCrm(fields) {
-  const url = process.env.CRM_WEBHOOK_URL;
-  if (!url) return;
+  if (!CRM_WEBHOOK_URL) return;
   const body = new URLSearchParams();
   Object.entries(fields).forEach(([k, v]) => { if (v != null && v !== '') body.append(k, String(v)); });
-  axios.post(url, body.toString(), {
+  axios.post(CRM_WEBHOOK_URL, body.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 8000,
   }).catch(() => { /* best-effort */ });
 }
