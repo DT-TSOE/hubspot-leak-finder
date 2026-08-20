@@ -19,6 +19,7 @@ import IntegrationHint from '../components/IntegrationHint';
 import DateRangePicker from '../components/DateRangePicker';
 import PipelineInsights from '../components/PipelineInsights';
 import PortalSwitcher from '../components/PortalSwitcher';
+import { CollapsibleCard, DistributionBars } from '../components/CollapsibleCard';
 import { api } from '../utils/api';
 import { getPlanFeatures, getCurrentPlan, setPlan, PLANS } from '../utils/plan';
 import Account from '../components/Account';
@@ -417,8 +418,7 @@ export default function DashboardPage({ onDisconnect }) {
                 return <>
                   <StageAging days={days} />
                   {features.leadRisk && (
-                    <div style={{ marginTop: 16 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>Lead Risk Scores</div>
+                    <div style={{ marginTop: 4 }}>
                       {leadsLoading
                         ? <div style={{ padding:'16px 0', display:'flex', flexDirection:'column', gap:10 }}>
                             {[...Array(5)].map((_,i) => (
@@ -432,7 +432,25 @@ export default function DashboardPage({ onDisconnect }) {
                               </div>
                             ))}
                           </div>
-                        : leadsData && <Card title={`${leadsData.total} active leads scored`} action={features.exports && <button onClick={() => handleExport('leads')} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#555' }}>{exporting === 'leads' ? '…' : 'Export CSV'}</button>}><LeadScoreTable leads={leadsData.leads} /></Card>
+                        : leadsData && (
+                            <CollapsibleCard
+                              title="Lead Risk Scores"
+                              count={leadsData.total}
+                              subtitle="Active leads scored by how likely they are to go cold."
+                              summary={<DistributionBars items={[
+                                { label: 'Needs attention', count: (leadsData.leads||[]).filter(l=>l.risk==='high').length,   color: '#E8562A' },
+                                { label: 'Watch',           count: (leadsData.leads||[]).filter(l=>l.risk==='medium').length, color: '#1B72C7' },
+                                { label: 'On track',        count: (leadsData.leads||[]).filter(l=>l.risk==='low').length,    color: '#2EBF9A' },
+                              ]} />}
+                            >
+                              {features.exports && (
+                                <div style={{ textAlign: 'right', marginBottom: 8 }}>
+                                  <button onClick={() => handleExport('leads')} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid #E2E5EA', background: '#fff', fontSize: 11, cursor: 'pointer', color: '#555' }}>{exporting === 'leads' ? '…' : 'Export CSV'}</button>
+                                </div>
+                              )}
+                              <LeadScoreTable leads={leadsData.leads} />
+                            </CollapsibleCard>
+                          )
                       }
                     </div>
                   )}

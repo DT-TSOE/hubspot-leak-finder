@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 const RISK = { high:{bg:'rgba(232,86,42,0.08)',text:'#C2410C',border:'rgba(232,86,42,0.3)',label:'Needs attention'}, medium:{bg:'rgba(27,114,199,0.08)',text:'#1B72C7',border:'rgba(27,114,199,0.25)',label:'Watch'}, low:{bg:'rgba(46,191,154,0.08)',text:'#0E7C6D',border:'rgba(46,191,154,0.3)',label:'On track'} };
 
+const PREVIEW = 6;
+
 export default function LeadScoreTable({ leads }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [showAll, setShowAll] = useState(false);
   if (!leads?.length) return <p style={{ fontSize:13, color:'#999', fontStyle:'italic' }}>No active leads to score.</p>;
   const counts = { high:leads.filter(l=>l.risk==='high').length, medium:leads.filter(l=>l.risk==='medium').length, low:leads.filter(l=>l.risk==='low').length };
   const filtered = leads.filter(l => {
@@ -18,7 +21,7 @@ export default function LeadScoreTable({ leads }) {
         {['all','high','medium','low'].map(f => {
           const s = f==='all' ? null : RISK[f];
           return (
-            <button key={f} onClick={()=>setFilter(f)} style={{ padding:'4px 12px', borderRadius:20, border:`1px solid ${filter===f?(s?.border||'#333'):'#E2E5EA'}`, background:filter===f?(s?.bg||'#F3F4F6'):'transparent', color:filter===f?(s?.text||'#111'):'#888', fontSize:11, fontWeight:500, cursor:'pointer' }}>
+            <button key={f} onClick={()=>{setFilter(f); setShowAll(false);}} style={{ padding:'4px 12px', borderRadius:20, border:`1px solid ${filter===f?(s?.border||'#333'):'#E2E5EA'}`, background:filter===f?(s?.bg||'#F3F4F6'):'transparent', color:filter===f?(s?.text||'#111'):'#888', fontSize:11, fontWeight:500, cursor:'pointer' }}>
               {f==='all'?`All (${leads.length})`:`${RISK[f].label} (${counts[f]})`}
             </button>
           );
@@ -29,7 +32,7 @@ export default function LeadScoreTable({ leads }) {
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
           <thead><tr style={{ borderBottom:'1px solid #F3F4F6' }}>{['Contact','Owner','Stage','Score','Days in Stage','Touches','Flags'].map(h=><th key={h} style={{ textAlign:'left', padding:'7px 8px', fontSize:10, fontWeight:600, color:'#999', textTransform:'uppercase', letterSpacing:'.04em', whiteSpace:'nowrap' }}>{h}</th>)}</tr></thead>
           <tbody>
-            {filtered.slice(0,50).map(l => {
+            {filtered.slice(0, showAll ? 50 : PREVIEW).map(l => {
               const s = RISK[l.risk];
               return (
                 <tr key={l.id} style={{ borderBottom:'0.5px solid #F9FAFB' }}>
@@ -54,7 +57,17 @@ export default function LeadScoreTable({ leads }) {
             })}
           </tbody>
         </table>
-        {filtered.length>50 && <p style={{ fontSize:11, color:'#999', textAlign:'center', marginTop:8 }}>Showing 50 of {filtered.length}. Export CSV to see all.</p>}
+        {!showAll && filtered.length > PREVIEW && (
+          <button onClick={()=>setShowAll(true)} style={{ display:'block', width:'100%', marginTop:10, padding:'9px', borderRadius:8, border:'1px solid #E2E5EA', background:'#F7F8FA', fontSize:12, fontWeight:700, color:'#1B72C7', cursor:'pointer' }}>
+            See all {filtered.length.toLocaleString()} leads →
+          </button>
+        )}
+        {showAll && (
+          <p style={{ fontSize:11, color:'#999', textAlign:'center', marginTop:8 }}>
+            {filtered.length>50 ? `Showing 50 of ${filtered.length.toLocaleString()}. Export CSV to see all.` : `Showing all ${filtered.length}.`}
+            {' · '}<button onClick={()=>setShowAll(false)} style={{ color:'#1B72C7', background:'none', border:'none', cursor:'pointer', fontSize:11, fontWeight:600 }}>Show less</button>
+          </p>
+        )}
       </div>
     </div>
   );

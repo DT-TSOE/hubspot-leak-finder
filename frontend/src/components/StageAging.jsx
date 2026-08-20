@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, LabelList, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../utils/api';
 import FunnelLoader from './FunnelLoader';
+import { CollapsibleCard, DistributionBars } from './CollapsibleCard';
+
+const RECORDS_PREVIEW = 6;
 
 const URGENCY = {
   critical: { bg:'rgba(36,58,82,0.07)',   border:'rgba(36,58,82,0.15)',   text:'#243A52', label:'Critical' },
@@ -72,12 +75,36 @@ function RevenueAtRiskChart({ stageBreakdown, selectedStage, onSelectStage }) {
   );
 }
 
+function RecordRow({ r, last }) {
+  const u = URGENCY[r.urgency] || URGENCY.medium;
+  return (
+    <div style={{ display:'flex', gap:12, padding:'12px 0', borderBottom: last ? 'none' : '1px solid #F5F6F8', alignItems:'flex-start' }}>
+      <span style={{ fontSize:9, fontWeight:700, padding:'3px 7px', borderRadius:10, background:u.bg, color:u.text, border:`1px solid ${u.border}`, textTransform:'uppercase', letterSpacing:'.04em', flexShrink:0, minWidth:60, textAlign:'center', marginTop:2 }}>{u.label}</span>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>{r.name}</div>
+        <div style={{ fontSize:11, color:'#666' }}>
+          {fmtStage(r.stage)} · {r.daysInStage}d in stage · target {r.threshold}d
+          {r.revenueAtRisk ? <span style={{ color:'#1B72C7', fontWeight:600 }}> · {fmt(r.revenueAtRisk)} at risk</span> : null}
+        </div>
+        <div style={{ fontSize:11, color:u.text, marginTop:3, lineHeight:1.5 }}>{r.action}</div>
+      </div>
+      <a href={r.hubspotUrl} target="_blank" rel="noopener noreferrer"
+        style={{ fontSize:11, fontWeight:600, color:'#F77333', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap', marginTop:2 }}>
+        Open →
+      </a>
+    </div>
+  );
+}
+
+const seeMoreBtn = { display:'block', width:'100%', marginTop:10, padding:'9px', borderRadius:8, border:'1px solid #E2E5EA', background:'#F7F8FA', fontSize:12, fontWeight:700, color:'#1B72C7', cursor:'pointer' };
+
 export default function StageAging({ days }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [selectedStage, setSelectedStage] = useState(null);
+  const [showAllRecords, setShowAllRecords] = useState(false);
 
   useEffect(() => {
     api.getStageAging(days)
@@ -100,11 +127,14 @@ export default function StageAging({ days }) {
   const filtered = selectedStage
     ? byUrgency.filter(r => (r.stageRaw || r.stage?.toLowerCase().replace(/\s/g, '')) === selectedStage)
     : byUrgency;
+  const records = showAllRecords ? filtered.slice(0, 50) : filtered.slice(0, RECORDS_PREVIEW);
+
+  const chip = (active) => ({ fontSize:11, padding:'4px 11px', borderRadius:14, border:`1px solid ${active?'#111':'#E2E5EA'}`, background:active?'#111':'#fff', color:active?'#fff':'#666', cursor:'pointer', fontWeight:500 });
 
   return (
     <div>
-      {/* Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+      {/* Summary stat cards — always visible */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 12 }}>
         <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, padding:'12px 14px' }}>
           <div style={{ fontSize:10, color:'#999', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Total Stuck</div>
           <div style={{ fontSize:22, fontWeight:700, color:'#111' }}>{data.total}</div>
@@ -123,11 +153,56 @@ export default function StageAging({ days }) {
         </div>
       </div>
 
-      {/* By owner - who's on top of theirs, who's letting deals rot */}
+      {/* Stuck records — urgency chart (quick insight) + collapsible list */}
+      <CollapsibleCard
+        title="Stuck records"
+        count={data.total}
+        subtitle="Deals & contacts sitting in one stage too long — by urgency."
+        defaultOpen
+        summary={
+          <DistributionBars items={[
+            { label: 'Critical', count: data.critical, color: '#243A52' },
+            { label: 'High',     count: data.high,     color: '#1B72C7' },
+            { label: 'Medium',   count: data.medium,   color: '#0091AE' },
+          ]} />
+        }
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+          {[{k:'all',l:`All (${data.total})`},{k:'critical',l:`Critical (${data.critical})`},{k:'high',l:`High (${data.high})`},{k:'medium',l:`Medium (${data.medium})`}].map(f => (
+            <button key={f.k} onClick={() => { setFilter(f.k); setShowAllRecords(false); }} style={chip(filter===f.k)}>{f.l}</button>
+          ))}
+          {selectedStage && (
+            <span style={{ fontSize: 11, color: '#3B82F6', marginLeft: 4 }}>
+              Filtered to: <strong>{fmtStage(selectedStage)}</strong>
+              <button onClick={() => setSelectedStage(null)} style={{ marginLeft: 6, fontSize: 10, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+            </span>
+          )}
+        </div>
+        {filtered.length === 0 ? (
+          <div style={{ padding: '20px', textAlign: 'center', fontSize: 13, color: '#888' }}>
+            No records for this filter. {selectedStage && <button onClick={() => setSelectedStage(null)} style={{ color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>Clear stage filter</button>}
+          </div>
+        ) : (
+          <>
+            {records.map((r, i) => <RecordRow key={r.id} r={r} last={i === records.length - 1} />)}
+            {!showAllRecords && filtered.length > RECORDS_PREVIEW && (
+              <button onClick={() => setShowAllRecords(true)} style={seeMoreBtn}>
+                See all {filtered.length.toLocaleString()} records →
+              </button>
+            )}
+            {showAllRecords && (
+              <div style={{ marginTop: 10, textAlign: 'center', fontSize: 11, color: '#999' }}>
+                {filtered.length > 50 ? `Showing 50 of ${filtered.length.toLocaleString()}` : `Showing all ${filtered.length}`}
+                {' · '}<button onClick={() => setShowAllRecords(false)} style={{ color: '#1B72C7', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600 }}>Show less</button>
+              </div>
+            )}
+          </>
+        )}
+      </CollapsibleCard>
+
+      {/* At-risk by owner — collapsible */}
       {data.byOwner?.length > 1 && (
-        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 2 }}>At-risk by owner</div>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 12 }}>Who's staying on top of their pipeline - and who needs a nudge.</div>
+        <CollapsibleCard title="At-risk by owner" subtitle="Who's staying on top of their pipeline — and who needs a nudge.">
           {data.byOwner.map((o, i) => {
             const maxCount = data.byOwner[0].count || 1;
             return (
@@ -142,101 +217,46 @@ export default function StageAging({ days }) {
               </div>
             );
           })}
-        </div>
+        </CollapsibleCard>
       )}
 
-      {/* Stage breakdown table + Revenue at Risk chart side by side */}
+      {/* Stuck by stage — collapsible */}
       {data.stageBreakdown?.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '55% 1fr', gap: 12, marginBottom: 12 }}>
-          {/* Left: table */}
-          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Stuck by stage</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, paddingBottom: 8, borderBottom: '1px solid #F3F4F6', marginBottom: 4 }}>
-              {['Stage', 'Records', 'Avg Days', 'Revenue at Risk'].map(h => (
-                <span key={h} style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: h === 'Stage' ? 'left' : 'right' }}>{h}</span>
+        <CollapsibleCard title="Stuck by stage" subtitle="Where records pile up, and how much revenue is exposed. Click a stage to filter the records above.">
+          <div style={{ display: 'grid', gridTemplateColumns: '55% 1fr', gap: 12 }}>
+            {/* Left: table */}
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, paddingBottom: 8, borderBottom: '1px solid #F3F4F6', marginBottom: 4 }}>
+                {['Stage', 'Records', 'Avg Days', 'Revenue at Risk'].map(h => (
+                  <span key={h} style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: h === 'Stage' ? 'left' : 'right' }}>{h}</span>
+                ))}
+              </div>
+              {data.stageBreakdown.map((s, i) => (
+                <div key={s.stage}
+                  onClick={() => { setSelectedStage(selectedStage === s.stage ? null : s.stage); setShowAllRecords(false); }}
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '8px 6px', borderBottom: i < data.stageBreakdown.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center', cursor: 'pointer', borderRadius: 6, background: selectedStage === s.stage ? '#F7F8FA' : 'transparent' }}>
+                  <span style={{ fontSize: 13, color: '#111', fontWeight: selectedStage === s.stage ? 700 : 500 }}>{fmtStage(s.stage)}</span>
+                  <span style={{ fontSize: 13, color: '#333', textAlign: 'right', fontWeight: 500 }}>{s.count}</span>
+                  <span style={{ fontSize: 13, color: s.avgDays > 30 ? '#1B72C7' : '#666', textAlign: 'right', fontWeight: s.avgDays > 30 ? 600 : 400 }}>{s.avgDays}d</span>
+                  <span style={{ fontSize: 13, color: s.revenueAtRisk > 0 ? '#0091AE' : '#999', textAlign: 'right', fontWeight: s.revenueAtRisk > 0 ? 700 : 400 }}>{fmt(s.revenueAtRisk)}</span>
+                </div>
               ))}
             </div>
-            {data.stageBreakdown.map((s, i) => (
-              <div key={s.stage}
-                onClick={() => setSelectedStage(selectedStage === s.stage ? null : s.stage)}
-                style={{ display: 'grid', gridTemplateColumns: '1fr 72px 72px 90px', gap: 8, padding: '8px 6px', borderBottom: i < data.stageBreakdown.length - 1 ? '1px solid #F9FAFB' : 'none', alignItems: 'center', cursor: 'pointer', borderRadius: 6, background: selectedStage === s.stage ? '#F7F8FA' : 'transparent' }}>
-                <span style={{ fontSize: 13, color: '#111', fontWeight: selectedStage === s.stage ? 700 : 500 }}>{fmtStage(s.stage)}</span>
-                <span style={{ fontSize: 13, color: '#333', textAlign: 'right', fontWeight: 500 }}>{s.count}</span>
-                <span style={{ fontSize: 13, color: s.avgDays > 30 ? '#1B72C7' : '#666', textAlign: 'right', fontWeight: s.avgDays > 30 ? 600 : 400 }}>{s.avgDays}d</span>
-                <span style={{ fontSize: 13, color: s.revenueAtRisk > 0 ? '#0091AE' : '#999', textAlign: 'right', fontWeight: s.revenueAtRisk > 0 ? 700 : 400 }}>{fmt(s.revenueAtRisk)}</span>
+            {/* Right: chart */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>Revenue at risk by stage</div>
+                {selectedStage && (
+                  <button onClick={() => setSelectedStage(null)} style={{ fontSize: 10, color: '#3B82F6', background: '#EFF6FF', border: 'none', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }}>
+                    Clear ✕
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
-
-          {/* Right: chart */}
-          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>Revenue at risk by stage</div>
-              {selectedStage && (
-                <button onClick={() => setSelectedStage(null)} style={{ fontSize: 10, color: '#3B82F6', background: '#EFF6FF', border: 'none', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }}>
-                  Clear filter ✕
-                </button>
-              )}
+              <RevenueAtRiskChart stageBreakdown={data.stageBreakdown} selectedStage={selectedStage} onSelectStage={setSelectedStage} />
             </div>
-            <RevenueAtRiskChart stageBreakdown={data.stageBreakdown} selectedStage={selectedStage} onSelectStage={setSelectedStage} />
           </div>
-        </div>
+        </CollapsibleCard>
       )}
-
-      {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        {[{k:'all',l:`All (${data.total})`},{k:'critical',l:`Critical (${data.critical})`},{k:'high',l:`High (${data.high})`},{k:'medium',l:`Medium (${data.medium})`}].map(f => (
-          <button key={f.k} onClick={() => setFilter(f.k)}
-            style={{ fontSize:11, padding:'4px 11px', borderRadius:14, border:`1px solid ${filter===f.k?'#111':'#E2E5EA'}`, background:filter===f.k?'#111':'#fff', color:filter===f.k?'#fff':'#666', cursor:'pointer', fontWeight:500 }}>
-            {f.l}
-          </button>
-        ))}
-        {selectedStage && (
-          <span style={{ fontSize: 11, color: '#3B82F6', marginLeft: 4 }}>
-            Filtered to: <strong>{fmtStage(selectedStage)}</strong>
-            <button onClick={() => setSelectedStage(null)} style={{ marginLeft: 6, fontSize: 10, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✕</button>
-          </span>
-        )}
-      </div>
-
-      {/* Records list */}
-      <div style={{ background:'#fff', border:'1px solid #E2E5EA', borderRadius:10, overflow:'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr auto', gap: 12, padding: '8px 14px', background: '#F7F8FA', borderBottom: '1px solid #F3F4F6' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Priority</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Contact / Deal</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.06em' }}>HubSpot</span>
-        </div>
-        {filtered.slice(0, 50).map((r, i) => {
-          const u = URGENCY[r.urgency] || URGENCY.medium;
-          return (
-            <div key={r.id} style={{ display:'flex', gap:12, padding:'12px 14px', borderBottom: i < Math.min(filtered.length, 50) - 1 ? '1px solid #F9FAFB' : 'none', alignItems:'flex-start' }}>
-              <span style={{ fontSize:9, fontWeight:700, padding:'3px 7px', borderRadius:10, background:u.bg, color:u.text, border:`1px solid ${u.border}`, textTransform:'uppercase', letterSpacing:'.04em', flexShrink:0, minWidth:60, textAlign:'center', marginTop:2 }}>{u.label}</span>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#111', marginBottom:2 }}>{r.name}</div>
-                <div style={{ fontSize:11, color:'#666' }}>
-                  {fmtStage(r.stage)} · {r.daysInStage}d in stage · target {r.threshold}d
-                  {r.revenueAtRisk ? <span style={{ color:'#1B72C7', fontWeight:600 }}> · {fmt(r.revenueAtRisk)} at risk</span> : null}
-                </div>
-                <div style={{ fontSize:11, color:u.text, marginTop:3, lineHeight:1.5 }}>{r.action}</div>
-              </div>
-              <a href={r.hubspotUrl} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize:11, fontWeight:600, color:'#F77333', textDecoration:'none', flexShrink:0, whiteSpace:'nowrap', marginTop:2 }}>
-                Open →
-              </a>
-            </div>
-          );
-        })}
-        {filtered.length === 0 && (
-          <div style={{ padding: '24px', textAlign: 'center', fontSize: 13, color: '#888' }}>
-            No records for this filter. {selectedStage && <button onClick={() => setSelectedStage(null)} style={{ color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>Clear stage filter</button>}
-          </div>
-        )}
-        {filtered.length > 50 && (
-          <div style={{ padding:'10px 14px', textAlign:'center', fontSize:11, color:'#999', borderTop:'1px solid #F3F4F6' }}>
-            Showing 50 of {filtered.length} records
-          </div>
-        )}
-      </div>
     </div>
   );
 }
